@@ -1,0 +1,8 @@
+{
+  "name": "Celosia",
+  "app_id": "64908d3b",
+  "type": "ionic-angular",
+  "integrations": {
+    "cordova": {}
+  }
+}
