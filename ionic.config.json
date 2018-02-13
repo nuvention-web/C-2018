@@ -1,8 +1,6 @@
 {
-  "name": "Celosia",
-  "app_id": "64908d3b",
-  "type": "ionic-angular",
-  "integrations": {
-    "cordova": {}
-  }
+  "name": "",
+  "app_id": "da7599b5",
+  "integrations": {},
+  "type": "ionic-angular"
 }
