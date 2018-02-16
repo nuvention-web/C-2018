@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "618786705474",
+    "firebase_url": "https://celosia-teamc.firebaseio.com",
+    "project_id": "celosia-teamc",
+    "storage_bucket": "celosia-teamc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:618786705474:android:85e5fcf843e645f7",
+        "android_client_info": {
+          "package_name": "com.nuvention.coinscious"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "618786705474-3jf5i58cjeke43l8dl7ntmel8b01mi48.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCuk7LoiLy4gojldw2DiCjCC_RuaOdYcWY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
