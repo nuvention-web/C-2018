@@ -6,6 +6,7 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { Push } from '@ionic-native/push';
 import { LocalNotifications } from '@ionic-native/local-notifications'
 import { AngularFireModule } from 'angularfire2';
+import { AngularFirestoreModule } from 'angularfire2/firestore';
 import { environment } from '../environments/environment';
 
 import { MyApp } from './app.component';
@@ -17,7 +18,8 @@ import { MyApp } from './app.component';
   imports: [
     BrowserModule,
     IonicModule.forRoot(MyApp),
-    AngularFireModule.initializeApp(environment.firebase)
+    AngularFireModule.initializeApp(environment.firebase),
+    AngularFirestoreModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [

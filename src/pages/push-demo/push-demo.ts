@@ -1,7 +1,11 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage } from 'ionic-angular';
 import { Push, PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
 import { LocalNotifications } from '@ionic-native/local-notifications';
+import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
+// import { Observable } from 'rxjs/Observable';
+
+import { Notification } from '../../models/notification';
 
 /**
  * Generated class for the PushDemoPage page.
@@ -17,12 +21,17 @@ import { LocalNotifications } from '@ionic-native/local-notifications';
 })
 export class PushDemoPage {
 
+  private notificationCollections: AngularFirestoreCollection<Notification>;
+  // private notifications: Observable<Notification[]>;
+
   constructor(
-    private navCtrl: NavController,
-    private navParams: NavParams,
     private push: Push,
-    private localNotifications: LocalNotifications
-  ) { }
+    private localNotifications: LocalNotifications,
+    private firestore: AngularFirestore
+  ) {
+    this.notificationCollections = this.firestore.collection<Notification>('notifications');
+    // this.notifications = this.notificationCollections.valueChanges();
+  }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad PushDemoPage');
@@ -65,8 +74,12 @@ export class PushDemoPage {
     pushObject.on('error').subscribe(error => console.error('Error with Push plugin', error));
   }
 
-  private pushNotification() {
-
+  pushNotification() {
+    const newMessage: Notification = {
+      message: `Test Notification`,
+      title: `Test Notification Title`
+    };
+    this.notificationCollections.add(newMessage);
   }
 
 }
