@@ -47,7 +47,10 @@ export class PushDemoPage {
 
     const options: PushOptions = {
       android: {
-        senderID: `618786705474`
+        senderID: `618786705474`,
+        topics: [
+          `coincious.general`
+        ]
       },
       ios: {
         alert: 'true',
