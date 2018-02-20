@@ -33,7 +33,7 @@ exports.sendDemoNotification = functions.firestore
 
     console.log("New Notification. Title: ", newNotification.title, " message: ", newNotification.message)
 
-    return admin.messaging().send(payload);
+    return admin.messaging().sendToTopic('coincious.general', payload);
   });
 
 // /**

@@ -6,6 +6,7 @@ import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/fires
 // import { Observable } from 'rxjs/Observable';
 
 import { Notification } from '../../models/notification';
+declare var cordova;
 
 /**
  * Generated class for the PushDemoPage page.
@@ -20,6 +21,8 @@ import { Notification } from '../../models/notification';
   templateUrl: 'push-demo.html',
 })
 export class PushDemoPage {
+
+  demoText: string = `Waiting for actions`;
 
   private notificationCollections: AngularFirestoreCollection<Notification>;
   // private notifications: Observable<Notification[]>;
@@ -67,10 +70,34 @@ export class PushDemoPage {
 
     pushObject.on('notification').subscribe((notification: NotificationEventResponse) => {
       console.log('Received a notification', notification);
-      this.localNotifications.schedule({
-        id: 1,
-        text: notification.message,
-        title: notification.title
+      // this.localNotifications.schedule({
+      //   id: 1,
+      //   text: notification.message,
+      //   title: notification.title,
+      //   // actions: [
+      //   //   { id: 'yes', title: 'Yes' }
+      //   // ]
+      // });
+      cordova.plugins.notification.local.schedule([
+        {
+          id: 1,
+          title: notification.title,
+          text: notification.message,
+          actions: [
+            { id: 'yes', title: 'Yes' },
+            { id: 'no', title: 'No' },
+            { id: 'edit', title: 'Edit' }
+          ]
+        }
+      ]);
+      cordova.plugins.notification.local.on('yes', () => {
+        this.demoText = `You clicked Yes!`;
+      });
+      cordova.plugins.notification.local.on('no', () => {
+        this.demoText = `You clicked No!`;
+      });
+      cordova.plugins.notification.local.on('edit', () => {
+        this.demoText = `You clicked Edit!`;
       });
     });
     pushObject.on('registration').subscribe((registration: any) => console.log('Device registered', registration));
@@ -79,8 +106,8 @@ export class PushDemoPage {
 
   pushNotification() {
     const newMessage: Notification = {
-      message: `Test Notification`,
-      title: `Test Notification Title`
+      message: `Did you buy anything for $7.99?`,
+      title: `New Purchase`
     };
     this.notificationCollections.add(newMessage);
   }
