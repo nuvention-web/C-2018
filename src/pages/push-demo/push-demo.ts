@@ -1,9 +1,7 @@
 import { Component } from '@angular/core';
 import { IonicPage } from 'ionic-angular';
 import { Push, PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
-import { LocalNotifications } from '@ionic-native/local-notifications';
 import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
-// import { Observable } from 'rxjs/Observable';
 
 import { Notification } from '../../models/notification';
 declare var cordova;
@@ -25,15 +23,12 @@ export class PushDemoPage {
   demoText: string = `Waiting for actions`;
 
   private notificationCollections: AngularFirestoreCollection<Notification>;
-  // private notifications: Observable<Notification[]>;
 
   constructor(
     private push: Push,
-    private localNotifications: LocalNotifications,
     private firestore: AngularFirestore
   ) {
     this.notificationCollections = this.firestore.collection<Notification>('notifications');
-    // this.notifications = this.notificationCollections.valueChanges();
   }
 
   ionViewDidLoad() {
@@ -70,14 +65,6 @@ export class PushDemoPage {
 
     pushObject.on('notification').subscribe((notification: NotificationEventResponse) => {
       console.log('Received a notification', notification);
-      // this.localNotifications.schedule({
-      //   id: 1,
-      //   text: notification.message,
-      //   title: notification.title,
-      //   // actions: [
-      //   //   { id: 'yes', title: 'Yes' }
-      //   // ]
-      // });
       cordova.plugins.notification.local.schedule([
         {
           id: 1,
@@ -111,5 +98,4 @@ export class PushDemoPage {
     };
     this.notificationCollections.add(newMessage);
   }
-
 }
