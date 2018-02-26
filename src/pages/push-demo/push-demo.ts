@@ -6,6 +6,9 @@ import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/fires
 // import { Observable } from 'rxjs/Observable';
 
 import { Notification } from '../../models/notification';
+
+import plaid from 'plaid';
+
 declare var cordova;
 
 /**
@@ -23,6 +26,7 @@ declare var cordova;
 export class PushDemoPage {
 
   demoText: string = `Waiting for actions`;
+  private plaidClient;
 
   private notificationCollections: AngularFirestoreCollection<Notification>;
   // private notifications: Observable<Notification[]>;
@@ -34,6 +38,12 @@ export class PushDemoPage {
   ) {
     this.notificationCollections = this.firestore.collection<Notification>('notifications');
     // this.notifications = this.notificationCollections.valueChanges();
+    this.plaidClient = new plaid.Client(
+      `5a8c91dc8d9239244b805dec`,              // client id
+      `befea17a6a5e505a4e979c3915d746`,        // secret
+      `5bd60517b0147259e73119216811f7`,        // public key
+      `sandbox`                                // env
+    );
   }
 
   ionViewDidLoad() {
@@ -105,6 +115,8 @@ export class PushDemoPage {
   }
 
   pushNotification() {
+
+
     const newMessage: Notification = {
       message: `Did you buy anything for $7.99?`,
       title: `New Purchase`
