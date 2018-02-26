@@ -88,4 +88,5 @@
     <plugin name="cordova-plugin-local-notification" spec="^0.9.0-beta.2" />
     <allow-navigation href="http://192.168.1.108:8100" />
     <engine name="android" spec="7.0.0" />
+    <allow-navigation href="http://10.105.138.119:8100" />
 </widget>
