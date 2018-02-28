@@ -27,4 +27,10 @@
   <div>
     {{demoText}}
   </div>
+  <br />
+  <div *ngFor="let t of transactions">
+    <div>{{t.date}} {{t.name}}</div>
+    <div>${{t.amount}}</div>
+    <br />
+  </div>
 </ion-content>
