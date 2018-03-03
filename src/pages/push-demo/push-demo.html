@@ -10,7 +10,7 @@
     <ion-title>Coinscious</ion-title>
 
      <ion-buttons end>
-      <button ion-button icon-only (click)="clickRefresh()">
+      <button ion-button icon-only (click)="clickRefresh()" *ngIf="linkSuccessfully">
         <ion-icon name="repeat"></ion-icon>
       </button>
     </ion-buttons>
