@@ -13,16 +13,12 @@
 </ion-header>
 
 
-<ion-content padding>
-  <button ion-button block (click)="pushNotification()">Link account</button>
-  <div>
-    Click button above to access dummy bank account.
-  </div>
-  <div>
-    Use "user_good" for user name,
-  </div>
-  <div>Use "pass_good" for password.</div>
-  <div>You will receive a notification right after linked the correct account.</div>
+<ion-content padding text-center>
+  <ion-img src="assets/imgs/logo.png" style="width: 500px; height: 500px;"></ion-img>
+  <br />
+  <br />
+  <br />
+  <button ion-button block (click)="pushNotification()" *ngIf="linkSuccessfully == false">Link account</button>
   <br/>
   <div>
     {{demoText}}
@@ -33,4 +29,5 @@
     <div>${{t.amount}}</div>
     <br />
   </div>
+
 </ion-content>

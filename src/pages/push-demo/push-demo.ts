@@ -27,8 +27,10 @@ declare var Plaid;
 })
 export class PushDemoPage {
 
-  demoText: string = `Waiting for actions`;
+  demoText: string = ``;
   transactions;
+  linkSuccessfully = false;
+  testData;
 
   private linkHandler;
   // public plaidClient;
@@ -133,6 +135,11 @@ export class PushDemoPage {
   pushNotification() {
     this.linkHandler.open();
   }
+
+  updateLinkStatus() {
+    this.linkSuccessfully = true;
+  }
+
 }
 
 class LinkConfig {
@@ -156,6 +163,8 @@ class LinkConfig {
   }
 
   public onSuccess(public_token, metadata) {
+    this.page.updateLinkStatus();
+    console.log("onSuccess 1 : linkSuccessfully is " + this.page.linkSuccessfully);
     this.http.post<any>(
       'https://sandbox.plaid.com/item/public_token/exchange',
       JSON.stringify({
@@ -171,6 +180,7 @@ class LinkConfig {
     ).toPromise().then(res => {
       this.accessTokenHandler(res);
     }).catch(err => {
+      console.log("onSuccess 2 : linkSuccessfully is " + this.page.linkSuccessfully);
       // console.log(`error: ${err.message}`);
       // self.demoText = err.message;
     });
@@ -194,7 +204,9 @@ class LinkConfig {
         }
       }
     ).toPromise().then(r => {
+      this.page.updateLinkStatus();
       this.page.updateTransactions(r.transactions);
+      console.log("accessTokenHandler 2 : linkSuccessfully is " + this.page.linkSuccessfully);
     });
   }
 }
