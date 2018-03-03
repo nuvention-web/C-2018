@@ -31,6 +31,24 @@ export class PushDemoPage {
   transactions;
   linkSuccessfully = false;
   testData;
+  isRefresh = false;
+
+  Date: string = "Date";
+  Amount: string = "Amount";
+  Flag: string = "Flag";
+  Approve: string = "Approve";
+  Location: string ="Loation";
+
+  demoString1: string = "You spend ";
+  demoString2: string = " at ";
+  demoString3: string = " on ";
+
+  demoDate1: string = "2017-01-01";
+  demoAmount1: string = "$100";
+  demoLocation1: string = "KFC";
+  demoDate2: string = "2017-05-6";
+  demoAmount2: string = "$200";
+  demoLocation2: string = "Wholefoods";
 
   private linkHandler;
   // public plaidClient;
@@ -138,6 +156,10 @@ export class PushDemoPage {
 
   updateLinkStatus() {
     this.linkSuccessfully = true;
+  }
+
+  clickRefresh() {
+    this.isRefresh = true;
   }
 
 }
