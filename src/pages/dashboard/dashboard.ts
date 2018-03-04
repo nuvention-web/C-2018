@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { Push, PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
 import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
@@ -24,9 +24,11 @@ declare var cordova;
 export class DashboardPage {
 
   private notificationCollections: AngularFirestoreCollection<Notification>;
-  public demoText: string = ``;
-  transactions: any[];
+  public _demoText: string = ``;
+  private _transactions: any;
+  private _flaggedTransactions: any = [];
   private public_token: string;
+  private _point: number = 100;
 
 
   constructor(
@@ -34,27 +36,13 @@ export class DashboardPage {
     private firestore: AngularFirestore,
     public navCtrl: NavController,
     public navParams: NavParams,
-    private plaidService: PlaidService
+    private plaidService: PlaidService,
+    private zone: NgZone
   ) {
     this.notificationCollections = this.firestore.collection<Notification>('notifications');
     this.public_token = this.navParams.get(`public_token`);
-    this.demoText = this.public_token;
-  }
-
-  ngOnInit() {
-    this.plaidService.transactions$.subscribe(transactions => {
-      // this.demoText = `refreshed, ${transactions}`;
-      this.transactions = transactions;
-
-      if (this.transactions != null) {
-        const newMessage: Notification = {
-          // message: `Did you spend $${transactions[0].amount} for ${transactions[0].name} on ${transactions[0].date}?`,
-          message: `Tap to view`,
-          title: `Time to check your weekly finance summary!`
-        };
-        this.notificationCollections.add(newMessage);
-      }
-    });
+    // this._demoText = this.public_token;
+    // this._transactions = this.plaidService.transactions$;
   }
 
   ionViewDidLoad() {
@@ -89,7 +77,6 @@ export class DashboardPage {
     const pushObject: PushObject = this.push.init(options);
 
     pushObject.on('notification').subscribe((notification: NotificationEventResponse) => {
-      // console.log('Received a notification', notification);
       cordova.plugins.notification.local.schedule([
         {
           id: 1,
@@ -114,20 +101,33 @@ export class DashboardPage {
     });
     pushObject.on('registration').subscribe((registration: any) => console.log('Device registered', registration));
     pushObject.on('error').subscribe(error => console.error('Error with Push plugin', error));
+
+    this.plaidService.transactions$.subscribe(transactions => {
+      if (transactions) {
+        this.zone.run(() => {
+          this._transactions = transactions;
+          this.pushNotification();
+        })
+      }
+    });
   }
 
-  updateTransactions() {
-    // this.transactions = transactions;
-    console.log("Clicked update transactions");
+  private pushNotification() {
+    const newMessage: Notification = {
+      message: `Tap to view`,
+      title: `Time to check your weekly finance summary!`
+    };
+    this.notificationCollections.add(newMessage);
+  }
 
+  private updateTransactions() {
     this.plaidService.refreshTransaction(this.public_token);
   }
 
-  // refreshTransactions(res) {
-  //   const access_token = res.access_token;
-  // }
-  //
-  // getAccessToken() {
-  // }
+  private onApprove(ev) {
+    this._point += ev.point;
+    this._transactions.splice(this._transactions.indexOf(ev.transaction), 1);
+    this._flaggedTransactions.unshift(ev.transaction);
+  }
 
 }

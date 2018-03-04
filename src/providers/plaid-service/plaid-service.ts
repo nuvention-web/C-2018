@@ -1,9 +1,7 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from "rxjs/Observable";
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
-import { TransactionResponse } from '../../models/transactionResponse';
 import { Transaction } from '../../models/transaction';
 
 import plaid from 'plaid';
@@ -16,12 +14,12 @@ import plaid from 'plaid';
 */
 @Injectable()
 export class PlaidService {
-  private _transactions: any[];
-  private transactionSource: BehaviorSubject<any> = new BehaviorSubject<any>(null);
-  transactions$: Observable<any> = this.transactionSource.asObservable();
+  private _transactions: any;
+  private transactionSource: BehaviorSubject<any[]> = new BehaviorSubject<any[]>(null);
+  transactions$: Observable<any[]> = this.transactionSource.asObservable();
   private plaidClient;
 
-  constructor(private http: HttpClient) {
+  constructor() {
     console.log('Hello PlaidService Provider');
     this.plaidClient = new plaid.Client(
       `5a8c91dc8d9239244b805dec`,              // client id
@@ -34,67 +32,26 @@ export class PlaidService {
   private getAccessToken(public_token: string): Promise<string> {
     return new Promise<string>((resolve) => {
       console.log(`getting access token`);
-      this.transactionSource.next(`Getting access token`);
 
       this.plaidClient.exchangePublicToken(public_token, (err, res) => {
         this.transactionSource.next(res.access_token);
         resolve(res.access_token);
       });
-
-      // this.http.post<any>(
-      //   'https://sandbox.plaid.com/item/public_token/exchange',
-      //   JSON.stringify({
-      //     "client_id": "5a8c91dc8d9239244b805dec",
-      //     "secret": "befea17a6a5e505a4e979c3915d746",
-      //     "public_token": public_token
-      //   }),
-      //   {
-      //     headers: {
-      //       'Content-Type': 'application/json'
-      //     }
-      //   }
-      // ).toPromise().then(res => {
-      //   console.log(`got access token`);
-      //   resolve(res.access_token);
-      // }).catch(err => {
-      //   console.log(`err, ${err.message}`);
-      // });
     });
   }
 
   public refreshTransaction(public_token: string) {
-    // console.log(`refreshing transaction, public token: ${public_token}`);
     this.getAccessToken(public_token).then(access_token => {
-      // console.log(`got access token`);
-      // this.http.post<any>(
-      //   `https://sandbox.plaid.com/transactions/get`,
-      //   JSON.stringify({
-      //     "client_id": "5a8c91dc8d9239244b805dec",
-      //     "secret": "befea17a6a5e505a4e979c3915d746",
-      //     "access_token": access_token,
-      //     "start_date": "2017-01-01",
-      //     "end_date": "2017-02-01"
-      //   }),
-      //   {
-      //     headers: {
-      //       'Content-Type': 'application/json'
-      //     }
-      //   }
-      // ).toPromise().then(r => {
-      //   // this.page.updateLinkStatus();
-      //   // this.page.updateTransactions(r.transactions);
-      //   // this._transactions = r.transactions;
-      //   this._transactions = access_token;
-      //   this.transactionSource.next(this._transactions);
-      // });
-
+      const today = new Date();
+      const daysAgo = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 30);
       this.plaidClient.getTransactions(
         access_token,
+        // `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`,
+        // `${daysAgo.getFullYear()}-${daysAgo.getMonth()}-${daysAgo.getDate()}`,
         `2017-01-01`,
         `2017-02-01`,
         (err, res) => {
           this._transactions = res.transactions;
-          // this.transactionSource.next(this._transactions);
           this.transactionSource.next(this._transactions);
         });
     });
