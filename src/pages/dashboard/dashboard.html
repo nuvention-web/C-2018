@@ -1,0 +1,61 @@
+<!--
+  Generated template for the DashboardPage page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>Centsei</ion-title>
+
+     <ion-buttons end>
+      <button ion-button icon-only (click)="updateTransactions()">
+        <ion-icon name="repeat"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+
+
+  <div>
+    {{demoText}}
+  </div>
+  <br />
+  <div *ngFor="let t of transactions">
+    <div>{{t.date}} {{t.name}}</div>
+    <div>${{t.amount}}</div>
+    <br />
+  </div>
+
+  <!-- <div *ngIf="linkSuccessfully == true">
+
+    <h2 ion-text text-right>Points: 100</h2>
+
+    <h1 ion-text class="newPurchase">New Purchase</h1>
+
+    <ion-row class="align-items-flex-end">
+      <h5 ion-text>
+        <div class="oneTranscation"> {{demoString1}} {{demoAmount1}} {{demoString2}} {{demoLocation1}} {{demoString3}} {{demoDate1}}</div>
+        <ion-checkbox class="flag" ></ion-checkbox>
+        <ion-checkbox class="apporve" ></ion-checkbox>
+      </h5>
+    </ion-row>
+
+
+
+    <h1 ion-text class="Flag">Flag</h1>
+
+  <ion-row class="align-items-flex-end">
+      <h5 ion-text>
+        <div class="oneTranscation"> {{demoString1}} {{demoAmount2}} {{demoString2}} {{demoLocation2}} {{demoString3}} {{demoDate2}}</div>
+      </h5>
+    </ion-row>
+
+  </div> -->
+
+</ion-content>
