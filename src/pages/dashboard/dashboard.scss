@@ -1,35 +1,10 @@
 page-dashboard {
+  .points {
+    font-size: 18pt;
+    text-align: right;
+  }
 
-.points {
-	font-size: 25px;
-	float: right;
-}
-
-.empty-msg {
-	font-size: 22px;
-}
-
-.trans-item {
-	width: 100%;
-	float: left;
-}
-
-.trans-item-content {
-	width: 80%;
-	float: left;
-}
-
-.trans-item-title {
-	font-size: 22px;
-}
-
-.trans-item-content {
-	font-size: 19px;
-}
-
-trans-item-buttons {
-	width: 20%;
-	float: left;
-}
-
+  .empty-msg {
+    font-size: 14pt;
+  }
 }

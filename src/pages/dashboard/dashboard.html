@@ -25,18 +25,11 @@
     Your Points: {{_point}}
   </div>
 
-  <br>
-  <br>
-  <br>
-
   <h2>New Purchases</h2>
   <div class="empty-msg" *ngIf="!_transactions || _transactions.length == 0">
     No transactions.
   </div>
   <transaction-item *ngFor="let t of _transactions" [data]=t [isFlag]=false (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-item>
-
-  <br>
-  <br>
 
   <h2>Flagged Expenses</h2>
   <div class="empty-msg" *ngIf="!_flaggedTransactions || _flaggedTransactions.length == 0">
