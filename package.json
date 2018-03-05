@@ -56,7 +56,9 @@
     "description": "An Ionic project",
     "cordova": {
         "plugins": {
-            "phonegap-plugin-push": {},
+            "phonegap-plugin-push": {
+                "FCM_VERSION": "11.6.2"
+            },
             "cordova-plugin-whitelist": {},
             "cordova-plugin-device": {},
             "cordova-plugin-splashscreen": {},

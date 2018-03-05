@@ -1,3 +1,28 @@
 transaction-item {
 
+
+.trans-item {
+	width: 100%;
+	float: left;
+}
+
+.trans-item-content {
+	width: 80%;
+	float: left;
+}
+
+.trans-item-title {
+	font-size: 22px;
+}
+
+.trans-item-content {
+	font-size: 17px;
+}
+
+trans-item-buttons {
+	width: 20%;
+	float: left;
+}
+
+
 }

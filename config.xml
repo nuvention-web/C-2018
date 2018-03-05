@@ -90,7 +90,7 @@
     <plugin name="cordova-plugin-ionic-keyboard" spec="^2.0.5" />
     <plugin name="cordova-plugin-statusbar" spec="~2.4.1" />
     <plugin name="cordova-plugin-local-notification" spec="~0.9.0-beta.2" />
+    <allow-navigation href="http://10.105.14.102:8100" />
     <engine name="android" spec="7.0.0" />
     <engine name="browser" spec="5.0.3" />
-    <allow-navigation href="http://10.105.14.102:8100" />
 </widget>
