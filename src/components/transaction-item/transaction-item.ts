@@ -15,6 +15,7 @@ export class TransactionItemComponent {
   @Input(`data`) _transaction: any;
   @Input(`isFlag`) _isFlag: boolean;
   @Output() onApprove: EventEmitter<any> = new EventEmitter();
+  @Output() onFlag: EventEmitter<any> = new EventEmitter();
 
   constructor() {
 
@@ -28,7 +29,9 @@ export class TransactionItemComponent {
   }
 
   private flag() {
-
+    this.onFlag.emit({
+      transaction: this._transaction
+    });
   }
 
 }

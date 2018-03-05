@@ -127,6 +127,10 @@ export class DashboardPage {
   private onApprove(ev) {
     this._point += ev.point;
     this._transactions.splice(this._transactions.indexOf(ev.transaction), 1);
+  }
+
+  private onFlag(ev) {
+    this._transactions.splice(this._transactions.indexOf(ev.transaction), 1);
     this._flaggedTransactions.unshift(ev.transaction);
   }
 

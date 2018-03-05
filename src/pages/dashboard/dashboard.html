@@ -27,13 +27,13 @@
 
   <br>
   <br>
-  <br> 
+  <br>
 
   <h2>New Purchases</h2>
   <div class="empty-msg" *ngIf="!_transactions || _transactions.length == 0">
     No transactions.
   </div>
-  <transaction-item *ngFor="let t of _transactions" [data]=t [isFlag]=false (onApprove)="onApprove($event)"></transaction-item>
+  <transaction-item *ngFor="let t of _transactions" [data]=t [isFlag]=false (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-item>
 
   <br>
   <br>
