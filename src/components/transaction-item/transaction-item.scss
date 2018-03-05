@@ -12,6 +12,7 @@ transaction-item {
 
       .trans-item-text {
         font-size: 11pt;
+        margin-bottom: 1em;
         margin-top: .3em;
       }
     }
@@ -19,8 +20,8 @@ transaction-item {
     .trans-item-buttons {
       display: inline-block;
       position: relative;
-      top: -16px;
       right: -10px;
+      top: -16px;
     }
   }
 }
