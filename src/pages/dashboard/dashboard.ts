@@ -25,7 +25,15 @@ export class DashboardPage {
 
   private notificationCollections: AngularFirestoreCollection<Notification>;
   public _demoText: string = ``;
-  private _transactions: any;
+  private _transactions: any = [{
+    name: `123`,
+    amount: `123.00`,
+    date: `00-00-00`
+  }, {
+    name: `123`,
+    amount: `123.00`,
+    date: `00-00-00`
+  }];
   private _flaggedTransactions: any = [];
   private public_token: string;
   private _point: number = 100;
@@ -145,6 +153,11 @@ export class DashboardPage {
   private onApprove(ev) {
     this._point += ev.point;
     this._transactions.splice(this._transactions.indexOf(ev.transaction), 1);
+  }
+
+  private onApproveFlag(ev) {
+    this._point += ev.point;
+    this._flaggedTransactions.splice(this._flaggedTransactions.indexOf(ev.transaction), 1);
   }
 
   private onFlag(ev) {

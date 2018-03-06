@@ -1,6 +1,9 @@
 transaction-item {
   .trans-item {
-    margin: 0;
+    border-radius: 2px;
+    box-shadow: 0 2px 2px 2px rgba(0, 0, 0, 0.08);
+    margin: 10px 0;
+    padding: 10px 0 10px 16px;
 
     .trans-item-content {
       display: inline-block;
@@ -12,7 +15,8 @@ transaction-item {
 
       .trans-item-text {
         font-size: 11pt;
-        margin-bottom: 1em;
+
+        // margin-bottom: 1em;
         margin-top: .3em;
       }
     }
@@ -22,6 +26,7 @@ transaction-item {
       position: relative;
       right: -10px;
       top: -16px;
+      margin-bottom: -16px;
     }
   }
 }
