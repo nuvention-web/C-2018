@@ -1,5 +1,5 @@
 import { Component, NgZone } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, Platform } from 'ionic-angular';
 import { Push, PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
 import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
 
@@ -29,6 +29,8 @@ export class DashboardPage {
   private _flaggedTransactions: any = [];
   private public_token: string;
   private _point: number = 100;
+  private _platformSubscriber;
+  private _count = 0;
 
 
   constructor(
@@ -37,12 +39,23 @@ export class DashboardPage {
     public navCtrl: NavController,
     public navParams: NavParams,
     private plaidService: PlaidService,
-    private zone: NgZone
+    private zone: NgZone,
+    public platform: Platform
   ) {
     this.notificationCollections = this.firestore.collection<Notification>('notifications');
     this.public_token = this.navParams.get(`public_token`);
     // this._demoText = this.public_token;
     // this._transactions = this.plaidService.transactions$;
+  }
+
+  ionViewWillEnter() {
+    this._platformSubscriber = this.platform.pause.subscribe(() => {
+      this.updateTransactions();
+    });
+  }
+
+  ionViewWillLeave() {
+    this._platformSubscriber.unsubscribe();
   }
 
   ionViewDidLoad() {
@@ -105,8 +118,13 @@ export class DashboardPage {
     this.plaidService.transactions$.subscribe(transactions => {
       if (transactions) {
         this.zone.run(() => {
+          if (this._count == 0) {
+            this._count += 1;
+            return;
+          }
           this._transactions = transactions;
           this.pushNotification();
+          this._count = 0;
         })
       }
     });
