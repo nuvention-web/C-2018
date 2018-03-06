@@ -25,15 +25,7 @@ export class DashboardPage {
 
   private notificationCollections: AngularFirestoreCollection<Notification>;
   public _demoText: string = ``;
-  private _transactions: any = [{
-    name: `123`,
-    amount: `123.00`,
-    date: `00-00-00`
-  }, {
-    name: `123`,
-    amount: `123.00`,
-    date: `00-00-00`
-  }];
+  private _transactions: any = [];
   private _flaggedTransactions: any = [];
   private public_token: string;
   private _point: number = 100;
