@@ -11,6 +11,7 @@ import { environment } from '../environments/environment';
 import { HttpClientModule } from '@angular/common/http';
 
 import { MyApp } from './app.component';
+import { PlaidService } from '../providers/plaid-service/plaid-service';
 
 @NgModule({
   declarations: [
@@ -32,7 +33,8 @@ import { MyApp } from './app.component';
     SplashScreen,
     Push,
     LocalNotifications,
-    { provide: ErrorHandler, useClass: IonicErrorHandler }
+    { provide: ErrorHandler, useClass: IonicErrorHandler },
+    PlaidService
   ]
 })
 export class AppModule { }

@@ -1,0 +1,15 @@
+<!-- Generated template for the TransactionItemComponent component -->
+<div class="trans-item">
+  <div class="trans-item-content">
+    <div class="trans-item-title">{{_transaction.name}}</div>
+    <div class="trans-item-text">${{_transaction.amount}} on {{_transaction.date}}</div>
+  </div>
+  <div class="trans-item-buttons" *ngIf="!_isFlag">
+    <button ion-button icon-only clear (click)="approve()">
+      <ion-icon name="thumbs-up"></ion-icon>
+    </button>
+    <button ion-button icon-only clear (click)="flag()">
+      <ion-icon name="flag"></ion-icon>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,27 @@
+transaction-item {
+  .trans-item {
+    margin: 0;
+
+    .trans-item-content {
+      display: inline-block;
+      width: calc(100% - 120px);
+
+      .trans-item-title {
+        font-size: 14pt;
+      }
+
+      .trans-item-text {
+        font-size: 11pt;
+        margin-bottom: 1em;
+        margin-top: .3em;
+      }
+    }
+
+    .trans-item-buttons {
+      display: inline-block;
+      position: relative;
+      right: -10px;
+      top: -16px;
+    }
+  }
+}
