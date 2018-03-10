@@ -157,4 +157,8 @@ export class DashboardPage {
     this._flaggedTransactions.unshift(ev.transaction);
   }
 
+  private goToDetail() {
+    this.navCtrl.push(`TransDetailPage`);
+  }
+
 }

@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { Chart } from 'chart.js';
 import * as pattern from 'patternomaly';
+
+import { PlaidService } from '../../providers/plaid-service/plaid-service';
 
 /**
  * Generated class for the TransDetailPage page.
@@ -24,18 +26,18 @@ export class TransDetailPage {
       datasets: [{
         data: [450, 250, 200, 100, 110, 250, 650, 430, 570, 120, 120, 640],
         backgroundColor: [
-          pattern.draw('dot-dash', '#ff976366'),
-          pattern.draw('dot-dash', '#ff976366'),
-          pattern.draw('dot-dash', '#ff976366'),
-          pattern.draw('dot-dash', '#ff976366'),
-          pattern.draw('dot-dash', '#ff976366'),
-          pattern.draw('dot-dash', '#ff976366'),
-          pattern.draw('dot-dash', '#ff976366'),
-          pattern.draw('dot-dash', '#ff976366'),
-          pattern.draw('dot-dash', '#ff976366'),
-          pattern.draw('dot-dash', '#ff976366'),
-          pattern.draw('dot-dash', '#ff976366'),
-          pattern.draw('dot-dash', '#ff976366'),
+          pattern.draw('dot-dash', '#ff9763'),
+          pattern.draw('dot-dash', '#ff9763'),
+          pattern.draw('dot-dash', '#ff9763'),
+          pattern.draw('dot-dash', '#ff9763'),
+          pattern.draw('dot-dash', '#ff9763'),
+          pattern.draw('dot-dash', '#ff9763'),
+          pattern.draw('dot-dash', '#ff9763'),
+          pattern.draw('dot-dash', '#ff9763'),
+          pattern.draw('dot-dash', '#ff9763'),
+          pattern.draw('dot-dash', '#ff9763'),
+          pattern.draw('dot-dash', '#ff9763'),
+          pattern.draw('dot-dash', '#ff9763'),
           // pattern.draw('circle', '#36a2eb'),
           // pattern.draw('diamond', '#cc65fe'),
           // pattern.draw('triangle', '#ffce56'),
@@ -116,10 +118,20 @@ export class TransDetailPage {
 
           /* other stuff that requires slice's label and value */
           this._month = `${label} 2018`;
+          this.generateNewTransactions();
         }
       }
     }
   };
+
+  private _ts: any = [[
+    { name: `McDonald's`, amount: `10.74`, date: `17-02-08`, love: true },
+    { name: `Starbucks`, amount: `7.32`, date: `17-02-08`, love: false },
+    { name: `Uber 063015 SF**POOL**`, amount: `5.40`, date: `17-02-08`, love: true },
+    { name: `United Airlines`, amount: `500.00`, date: `17-02-08`, love: true }
+  ]];
+
+  private _tSource = [];
 
   private _transactions: any = [{
     name: `Name`,
@@ -154,13 +166,32 @@ export class TransDetailPage {
 
   private _month = `Jan 2018`;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams) {
+  constructor(
+    public navCtrl: NavController,
+    public navParams: NavParams,
+    private plaidService: PlaidService) {
   }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad TransDetailPage');
 
     this.chart = new Chart(`chart-canvas`, this.chartOptions);
+    this._transactions = this._ts[0];
+
+    this.plaidService.transactions$.subscribe(transactions => {
+      this._tSource = transactions;
+      this.generateNewTransactions();
+    });
+  }
+
+  private generateNewTransactions() {
+    const l = this._tSource.length;
+    this._transactions = [];
+    for (let i = 0; i < 4 + Math.floor((Math.random() * 5)); i++) {
+      let item = this._tSource[Math.floor((Math.random() * l))];
+      item.love = Math.random() > 0.3;
+      this._transactions.push(item);
+    }
   }
 
 

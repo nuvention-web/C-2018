@@ -5,13 +5,15 @@
     <div class="trans-item-text">${{_transaction.amount}} on {{_transaction.date}}</div>
   </div>
   <div class="trans-item-buttons">
-    <button ion-button icon-only clear (click)="approve()" *ngIf="_isInDetail"></button>
-    <button ion-button icon-only clear (click)="approve()" *ngIf="!_isInDetail">
+    <!-- <button ion-button icon-only clear (click)="approve()">
       <ion-icon name="thumbs-up"></ion-icon>
+    </button> -->
+    <button ion-button icon-only clear (click)="flag()" *ngIf=_transaction.love>
+      <ion-icon name="heart"></ion-icon>
     </button>
-    <button ion-button icon-only clear (click)="flag()" *ngIf="!_isFlag && _isInDetail"></button>
-    <button ion-button icon-only clear (click)="flag()" *ngIf="!_isFlag && !_isInDetail">
-      <ion-icon name="flag"></ion-icon>
+    <button ion-button icon-only clear (click)="flag()" *ngIf=!_transaction.love>
+      <ion-icon name="heart" class="break"></ion-icon>
+      <ion-icon name="flash" class="flash"></ion-icon>
     </button>
   </div>
 </div>
