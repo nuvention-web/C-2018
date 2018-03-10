@@ -7,12 +7,14 @@
 <ion-header>
 
   <ion-navbar>
-    <ion-title>trans-detail</ion-title>
+    <ion-title>Transactions</ion-title>
   </ion-navbar>
 
 </ion-header>
 
 
 <ion-content padding>
-
+  <canvas id="chart-canvas"></canvas>
+  <h2>{{_month}}</h2>
+  <transaction-item *ngFor="let t of _transactions" [data]=t [isFlag]=false [isInDetail]=true></transaction-item>
 </ion-content>

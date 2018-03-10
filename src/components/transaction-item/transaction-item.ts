@@ -13,6 +13,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 export class TransactionItemComponent {
 
   @Input(`data`) _transaction: any;
+  @Input(`isInDetail`) _isInDetail: boolean;
   @Input(`isFlag`) _isFlag: boolean;
   @Output() onApprove: EventEmitter<any> = new EventEmitter();
   @Output() onApproveFlag: EventEmitter<any> = new EventEmitter();
