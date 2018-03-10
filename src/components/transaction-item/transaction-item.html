@@ -2,7 +2,7 @@
 <div class="trans-item">
   <div class="trans-item-content">
     <div class="trans-item-title">{{_transaction.name}}</div>
-    <div class="trans-item-text">${{_transaction.amount}} on {{_transaction.date}}</div>
+    <div class="trans-item-text">${{_transaction.amount}} on {{_transaction.date.substr(5, 5)}}</div>
   </div>
   <div class="trans-item-buttons">
     <!-- <button ion-button icon-only clear (click)="approve()">
