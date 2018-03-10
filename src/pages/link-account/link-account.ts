@@ -2,7 +2,7 @@ import { Component, ChangeDetectorRef } from '@angular/core';
 import { IonicPage, NavController } from 'ionic-angular';
 
 import { HttpClient } from '@angular/common/http';
-
+import { NgProgress } from '@ngx-progressbar/core';
 import plaid from 'plaid';
 
 

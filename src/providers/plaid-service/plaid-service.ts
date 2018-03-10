@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from "rxjs/Observable";
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-
 import { Transaction } from '../../models/transaction';
-
 import plaid from 'plaid';
 
 /*
@@ -18,6 +16,9 @@ export class PlaidService {
   private transactionSource: BehaviorSubject<any[]> = new BehaviorSubject<any[]>(null);
   transactions$: Observable<any[]> = this.transactionSource.asObservable();
   private plaidClient;
+
+ 
+  
 
   constructor() {
     console.log('Hello PlaidService Provider');
@@ -48,13 +49,50 @@ export class PlaidService {
         access_token,
         // `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`,
         // `${daysAgo.getFullYear()}-${daysAgo.getMonth()}-${daysAgo.getDate()}`,
-        `2017-01-01`,
-        `2017-02-01`,
+        `2017-03-01`,
+        `2017-04-01`,
         (err, res) => {
           this._transactions = res.transactions;
           this.transactionSource.next(this._transactions);
         });
     });
   }
+
+  public refreshThisMonthTransaction(public_token: string) {
+    this.getAccessToken(public_token).then(access_token => {
+      const today = new Date();
+      const daysAgo = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 30);
+      this.plaidClient.getTransactions(
+        access_token,
+        // `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`,
+        // `${daysAgo.getFullYear()}-${daysAgo.getMonth()}-${daysAgo.getDate()}`,
+        `2017-04-01`,
+        `2017-05-01`,
+        (err, res) => {
+          this._transactions = res.transactions;
+          this.transactionSource.next(this._transactions);
+        });
+    });
+  }
+
+
+
+  public refreshLastMonthTransaction(public_token: string) {
+    this.getAccessToken(public_token).then(access_token => {
+      const today = new Date();
+      const daysAgo = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 30);
+      this.plaidClient.getTransactions(
+        access_token,
+        // `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`,
+        // `${daysAgo.getFullYear()}-${daysAgo.getMonth()}-${daysAgo.getDate()}`,
+        `2017-03-01`,
+        `2017-04-01`,
+        (err, res) => {
+          this._transactions = res.transactions;
+          this.transactionSource.next(this._transactions);
+        });
+    });
+  }
+
 
 }
