@@ -24,7 +24,7 @@ export class TransDetailPage {
     type: `bar`,
     data: {
       datasets: [{
-        data: [450, 250, 200, 100, 110, 250, 650, 430, 570, 120, 120, 640],
+        data: [500, 480, 460, 380, 400, 370, 340, 320, 290, 270, 250, 260],
         backgroundColor: [
           pattern.draw('dot-dash', '#ff9763'),
           pattern.draw('dot-dash', '#ff9763'),
@@ -59,7 +59,7 @@ export class TransDetailPage {
         borderWidth: 1
       },
       {
-        data: [100, 200, 250, 450, 230, 640, 90, 540, 230, 410, 350, 230],
+        data: [600, 720, 700, 760, 720, 780, 800, 830, 850, 800, 920, 950],
         backgroundColor: [
           'rgba(17, 178, 69, 0.2)',
           'rgba(17, 178, 69, 0.2)',
