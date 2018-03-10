@@ -9,7 +9,7 @@ import { AngularFireModule } from 'angularfire2';
 import { AngularFirestoreModule } from 'angularfire2/firestore';
 import { environment } from '../environments/environment';
 import { HttpClientModule } from '@angular/common/http';
-
+import { NgProgressModule } from '@ngx-progressbar/core';
 import { MyApp } from './app.component';
 import { PlaidService } from '../providers/plaid-service/plaid-service';
 
@@ -22,7 +22,8 @@ import { PlaidService } from '../providers/plaid-service/plaid-service';
     IonicModule.forRoot(MyApp),
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule,
-    HttpClientModule
+    HttpClientModule,
+    NgProgressModule.forRoot()
   ],
   bootstrap: [IonicApp],
   entryComponents: [

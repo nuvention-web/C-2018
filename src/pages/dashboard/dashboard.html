@@ -30,23 +30,52 @@
   </div>
 
   <div>
-    <h2>New Purchases</h2>
+    <h2>This Month</h2>
+    <button ion-button icon-enbd (click)="allAprove()">Approve ALL</button>  
     <!-- <ion-badge *ngIf="!_transactions && _transactions.length != 0">{{_transaction.length}}</ion-badge> -->
   </div>
   <!-- <hr/> -->
   <div class="empty-msg" *ngIf="!_transactions || _transactions.length == 0">
     No transactions.
   </div>
-  <transaction-item *ngFor="let t of _transactions" [data]=t [isFlag]=false [isInDetail]=false (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-item>
+  <transaction-item *ngFor="let t of _transactions1" [data]=t [isFlag]=false [isInDetail]=false (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-item>
 
   <div class="trans_header">
-    <h2>Flagged Expenses</h2>
+    <h2>Former</h2>
     <!-- <ion-badge *ngIf="!_flaggedTransactions && _flaggedTransactions.length != 0">{{_flaggedTransactions.length}}</ion-badge> -->
   </div>
   <!-- <hr/> -->
-  <div class="empty-msg" *ngIf="!_flaggedTransactions || _flaggedTransactions.length == 0">
-    No flagged Expenses.
+  <div class="empty-msg" *ngIf="!_transactions || _transactions.length == 0">
+    No transactions.
   </div>
-  <transaction-item *ngFor="let ft of _flaggedTransactions" [data]=ft [isFlag]=true [isInDetail]=false (onApproveFlag)="onApproveFlag($event)"></transaction-item>
+  <transaction-item-2 *ngFor="let t of _transactions2" [data]=t [isFlag]=false [isInDetail]=false (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-item-2>
+
+  <button ion-button block (click)="refreshThisMonth()">Refresh This Month</button>  
+  <button ion-button block (click)="refreshLastMonth()">Refresh Last Month</button>
+
+
+  <div> 
+    thisMonthSum: {{_thisMonthSum}}
+  </div>
+
+  <div>
+    lastMonthSum: {{_lastMonthSum}}
+  </div>
+
+  <div>
+      thisMonthApproveSum: {{_thisMonthApproveSum}}
+  </div>
+
+  <div>
+      lastMonthApproveSum: {{_lastMonthApproveSum}}
+  </div>
+
+  <div>
+      thisMonthNotApproveSum: {{_thisMonthNotApproveSum}}
+  </div>
+
+  <div>
+      lastMonthNotApproveSum: {{_lastMonthNotApproveSum}}
+  </div>
 
 </ion-content>

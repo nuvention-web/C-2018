@@ -1,16 +1,16 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 
 /**
- * Generated class for the TransactionItemComponent component.
+ * Generated class for the TransactionItem_2Component component.
  *
  * See https://angular.io/api/core/Component for more info on Angular
  * Components.
  */
 @Component({
-  selector: 'transaction-item',
-  templateUrl: 'transaction-item.html'
+  selector: 'transaction-item-2',
+  templateUrl: 'transaction-item-2.html'
 })
-export class TransactionItemComponent {
+export class TransactionItem_2Component {
 
   @Input(`data`) _transaction: any;
   @Input(`isInDetail`) _isInDetail: boolean;
@@ -39,5 +39,4 @@ export class TransactionItemComponent {
       transaction: this._transaction
     });
   }
-
 }
