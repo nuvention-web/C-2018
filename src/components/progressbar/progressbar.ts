@@ -12,12 +12,12 @@ import { NgProgress } from '@ngx-progressbar/core';
 })
 export class ProgressbarComponent {
 
-  text: string;
+  // text: string;
 
   constructor(public progress: NgProgress) {
-    console.log('Hello ProgressbarComponent Component');
-    this.text = 'Hello World';
-    this.progress.start();
+    // console.log('Hello ProgressbarComponent Component');
+    // this.text = 'Hello World';
+    this.progress.set(30);
   }
 
 }

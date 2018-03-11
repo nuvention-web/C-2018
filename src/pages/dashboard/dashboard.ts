@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component, NgZone, ViewChild } from '@angular/core';
 import { IonicPage, NavController, NavParams, Platform } from 'ionic-angular';
 import { Push, PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
 import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
@@ -37,7 +37,7 @@ export class DashboardPage {
   private _lastMonthSum = 0;
   private _thisMonthApproveSum = 0;
   private _lastMonthApproveSum = 0;
-  private _thisMonthNotApproveSum = 0; 
+  private _thisMonthNotApproveSum = 0;
   private _lastMonthNotApproveSum = 0;
 
 
@@ -57,13 +57,13 @@ export class DashboardPage {
   }
 
   ionViewWillEnter() {
-    this._platformSubscriber = this.platform.pause.subscribe(() => {
-      this.updateTransactions();
-    });
+    // this._platformSubscriber = this.platform.pause.subscribe(() => {
+    //   this.updateTransactions();
+    // });
   }
 
   ionViewWillLeave() {
-    this._platformSubscriber.unsubscribe();
+    // this._platformSubscriber.unsubscribe();
   }
 
   ionViewDidLoad() {
@@ -154,7 +154,7 @@ export class DashboardPage {
     this._lastMonthSum = 0;
     this.plaidService.refreshLastMonthTransaction(this.public_token);
     this._transactions2 = this._transactions;
-    for(var i = 0; i < this._transactions2.length; i++) {
+    for (var i = 0; i < this._transactions2.length; i++) {
       this._lastMonthSum += this._transactions2[i].amount;
     }
     this._lastMonthApproveSum = 500;
@@ -166,20 +166,20 @@ export class DashboardPage {
     this._thisMonthApproveSum = 0;
     this.plaidService.refreshThisMonthTransaction(this.public_token);
     this._transactions1 = this._transactions;
-    for(var i = 0; i < this._transactions1.length; i++) {
+    for (var i = 0; i < this._transactions1.length; i++) {
       this._thisMonthSum += this._transactions1[i].amount;
     }
     this._thisMonthNotApproveSum = 0;
   }
-/*
-  private refreshThisMonthApproveSum() {
-    this._thisMonthApproveSum = 0;
-    for(var i = 0; i < this._flaggedTransactions.length; i++) {
-      this._thisMonthApproveSum += this._transactions[i].amount;
+  /*
+    private refreshThisMonthApproveSum() {
+      this._thisMonthApproveSum = 0;
+      for(var i = 0; i < this._flaggedTransactions.length; i++) {
+        this._thisMonthApproveSum += this._transactions[i].amount;
+      }
+      this._thisMonthNotApproveSum = this._thisMonthSum - this._thisMonthApproveSum;
     }
-    this._thisMonthNotApproveSum = this._thisMonthSum - this._thisMonthApproveSum;
-  }
-*/
+  */
   private onApprove(ev) {
     this._point += ev.point;
     this._transactions.splice(this._transactions.indexOf(ev.transaction), 1);
@@ -191,18 +191,18 @@ export class DashboardPage {
   }
 
   private onFlag(ev) {
-    this._transactions1.splice(this._transactions1.indexOf(ev.transaction), 1);
-    this._transactions2.unshift(ev.transaction);
-    this._thisMonthNotApproveSum += ev.transaction.amount;
+    // this._transactions1.splice(this._transactions1.indexOf(ev.transaction), 1);
+    // this._transactions2.unshift(ev.transaction);
+    // this._thisMonthNotApproveSum += ev.transaction.amount;
   }
 
   private allAprove() {
 
-    for(var i = 0; i < this._transactions1.length; i++) {
-      this._transactions2.unshift(this._transactions1[i]);
-      this._thisMonthApproveSum += this._transactions1[i].amount;
-    }
-    this._transactions1.splice(0, this._transactions1.length);
+    // for (var i = 0; i < this._transactions1.length; i++) {
+    //   this._transactions2.unshift(this._transactions1[i]);
+    //   this._thisMonthApproveSum += this._transactions1[i].amount;
+    // }
+    // this._transactions1.splice(0, this._transactions1.length);
   }
 
   /*

@@ -24,37 +24,57 @@
   <!-- <div>
     {{_demoText}}
   </div> -->
+  <div class="brief">
+    <h4>
+      This Month
+      <span>Exceeded $128.44 Total $575.42</span>
+    </h4>
+    <ng-progress id="total-this" #totalThis color="#11b245"></ng-progress>
+    <ng-progress id="exceed-this" #exceedThis color="#ff9763"></ng-progress>
+    <h4 class="last-month-label">
+      Last Month
+      <span>Exceeded $256.88 Total $1027.53</span>
+    </h4>
+    <ng-progress id="total-last" #totalLast color="#11b245" class="lastMonth"></ng-progress>
+    <ng-progress id="exceed-last" #exceedLast color="#ff9763" class="lastMonth"></ng-progress>
+    <div class="button-wrapper">
+      <button ion-button clear small (click)="goToDetail()"> View Details </button>
+    </div>
+  </div>
 
-  <div class="points" (click)="goToDetail()">
+  <div class="points">
     Your Points: {{_point}}
   </div>
 
   <div>
     <h2>This Month</h2>
-    <button ion-button icon-enbd (click)="allAprove()">Approve ALL</button>  
+    <button ion-button icon-enbd (click)="allAprove()">Approve ALL</button>
     <!-- <ion-badge *ngIf="!_transactions && _transactions.length != 0">{{_transaction.length}}</ion-badge> -->
   </div>
   <!-- <hr/> -->
   <div class="empty-msg" *ngIf="!_transactions || _transactions.length == 0">
     No transactions.
   </div>
-  <transaction-item *ngFor="let t of _transactions1" [data]=t [isFlag]=false [isInDetail]=false (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-item>
 
   <div class="trans_header">
     <h2>Former</h2>
-    <!-- <ion-badge *ngIf="!_flaggedTransactions && _flaggedTransactions.length != 0">{{_flaggedTransactions.length}}</ion-badge> -->
+    <ion-badge *ngIf="!_flaggedTransactions && _flaggedTransactions.length != 0">{{_flaggedTransactions.length}}</ion-badge>
   </div>
-  <!-- <hr/> -->
+
+  <!--
+
+  <transaction-item *ngFor="let t of _transactions1" [data]=t [isFlag]=false [isInDetail]=false (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-item>
+
   <div class="empty-msg" *ngIf="!_transactions || _transactions.length == 0">
     No transactions.
   </div>
   <transaction-item-2 *ngFor="let t of _transactions2" [data]=t [isFlag]=false [isInDetail]=false (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-item-2>
 
-  <button ion-button block (click)="refreshThisMonth()">Refresh This Month</button>  
+  <button ion-button block (click)="refreshThisMonth()">Refresh This Month</button>
   <button ion-button block (click)="refreshLastMonth()">Refresh Last Month</button>
 
 
-  <div> 
+  <div>
     thisMonthSum: {{_thisMonthSum}}
   </div>
 
@@ -63,19 +83,19 @@
   </div>
 
   <div>
-      thisMonthApproveSum: {{_thisMonthApproveSum}}
+    thisMonthApproveSum: {{_thisMonthApproveSum}}
   </div>
 
   <div>
-      lastMonthApproveSum: {{_lastMonthApproveSum}}
+    lastMonthApproveSum: {{_lastMonthApproveSum}}
   </div>
 
   <div>
-      thisMonthNotApproveSum: {{_thisMonthNotApproveSum}}
+    thisMonthNotApproveSum: {{_thisMonthNotApproveSum}}
   </div>
 
   <div>
-      lastMonthNotApproveSum: {{_lastMonthNotApproveSum}}
+    lastMonthNotApproveSum: {{_lastMonthNotApproveSum}}
   </div>
-
+ -->
 </ion-content>
