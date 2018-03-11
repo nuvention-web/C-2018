@@ -12,4 +12,85 @@ page-dashboard {
   .trans_header {
     margin-top: 1.4em;
   }
+
+
+  .date {
+    border-top-style:solid;
+    border-right-style:solid;
+    border-bottom-style:solid;
+    border-left-style:solid; 
+  }
+
+  .time {
+    font-size: 20px;
+    display: inline-block;
+    width: calc(100% - 80px);
+  }
+
+  .transactions {
+    border-top-style:solid;
+    border-right-style:solid;
+    border-bottom-style:solid;
+    border-left-style:solid; 
+  }
+
+  .approve {
+      display: inline-block;
+      position: relative;
+      right: -10px;
+      top: -16px;
+      margin-bottom: -16px;
+      text-align: right;
+  }
+
+
+  .trans-item {
+    // border-radius: 2px;
+    // box-shadow: 0 2px 2px 2px rgba(0, 0, 0, 0.08);
+    margin: -1px 10px;
+    padding: 0;
+    //border-bottom: 1px solid rgba(205, 205, 205, 1);
+    //border-top: 1px solid rgba(205, 205, 205, 1);
+    left: 20px;
+
+    .trans-item-content {
+      display: inline-block;
+      width: calc(100% - 80px);
+
+      .trans-item-title {
+        font-size: 14pt;
+      }
+
+      .trans-item-text {
+        font-size: 11pt;
+
+        // margin-bottom: 1em;
+        margin-top: .3em;
+      }
+    }
+
+    .trans-item-buttons {
+      display: inline-block;
+      position: relative;
+      right: -10px;
+      top: -16px;
+      margin-bottom: -16px;
+      text-align: right;
+    }
+
+    ion-icon {
+      color: red;
+    }
+
+    .break {
+      color: blue;
+    }
+
+    .flash {
+      position: absolute;
+      color: white;
+      font-size: 1.1em;
+      margin-top: -.2em;
+    }
+  }
 }

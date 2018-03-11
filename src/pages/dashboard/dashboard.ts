@@ -33,12 +33,49 @@ export class DashboardPage {
   private _point: number = 100;
   private _platformSubscriber;
   private _count = 0;
+  private _thisMonthNotApproveSum = 0; 
+  private _lastMonthNotApproveSum = 0;
+
+
+
+
   private _thisMonthSum = 0;
   private _lastMonthSum = 0;
   private _thisMonthApproveSum = 0;
   private _lastMonthApproveSum = 0;
-  private _thisMonthNotApproveSum = 0; 
-  private _lastMonthNotApproveSum = 0;
+
+  private _time_1: string = "Mar. 9";
+  private _transaction_11_appear = true;
+  private _transaction_12_appear = true;
+  private _transaction_13_appear = true;
+  private _transaction_11_name: string = "KFC";
+  private _transaction_12_name: string = "Uber";
+  private _transaction_13_name: string = "Tech Express";
+  private _transaction_11_amount = 7.9;
+  private _transaction_12_amount = 4.5;
+  private _transaction_13_amount = 8.3;
+
+  private _time_2: string = "Mar. 5";
+  private _transaction_21_appear = true;
+  private _transaction_22_appear = true;
+  private _transaction_23_appear = true;
+  private _transaction_21_name: string = "Lyft";
+  private _transaction_22_name: string = "Amazon";
+  private _transaction_23_name: string = "Whole foods";
+  private _transaction_21_amount = 3.7;
+  private _transaction_22_amount = 45.6;
+  private _transaction_23_amount = 15.5;
+
+  private _time_3: string = "Mar. 1";
+  private _transaction_31_appear = true;
+  private _transaction_32_appear = true;
+  private _transaction_33_appear = true;
+  private _transaction_31_name: string = "KFC";
+  private _transaction_32_name: string = "Apple store";
+  private _transaction_33_name: string = "Whole foods";
+  private _transaction_31_amount = 5.6;
+  private _transaction_32_amount = 10;
+  private _transaction_33_amount = 13.3;
 
 
   constructor(
@@ -67,6 +104,16 @@ export class DashboardPage {
   }
 
   ionViewDidLoad() {
+    this._thisMonthSum += this._transaction_11_amount;
+    this._thisMonthSum += this._transaction_12_amount;
+    this._thisMonthSum += this._transaction_13_amount;
+    this._thisMonthSum += this._transaction_21_amount;
+    this._thisMonthSum += this._transaction_22_amount;
+    this._thisMonthSum += this._transaction_23_amount;
+    this._thisMonthSum += this._transaction_31_amount;
+    this._thisMonthSum += this._transaction_32_amount;
+    this._thisMonthSum += this._transaction_33_amount;
+
     this.push.hasPermission().then(
       (res: any) => {
         if (res.isEnabled) {
@@ -214,6 +261,57 @@ export class DashboardPage {
 
   private goToDetail() {
     this.navCtrl.push(`TransDetailPage`);
+  }
+
+
+  private approve1() {
+    if(this._transaction_11_appear)
+      this._thisMonthApproveSum += this._transaction_12_amount;
+    if(this._transaction_12_appear)
+      this._thisMonthApproveSum += this._transaction_12_amount;
+    if(this._transaction_13_appear)
+      this._thisMonthApproveSum += this._transaction_13_amount;
+    this._transaction_11_appear = false;
+    this._transaction_12_appear = false;
+    this._transaction_13_appear = false;
+  }
+
+  private notApprove11() {
+    this._transaction_11_appear = false;
+  }
+
+  private notApprove12() {
+    this._transaction_12_appear = false;
+  }
+
+  private notApprove13() {
+    this._transaction_13_appear = false;
+  }
+
+   private approve2() {
+    if(this._transaction_21_appear)
+      this._thisMonthApproveSum += this._transaction_22_amount;
+    if(this._transaction_22_appear)
+      this._thisMonthApproveSum += this._transaction_22_amount;
+    if(this._transaction_23_appear)
+      this._thisMonthApproveSum += this._transaction_23_amount;
+    this._transaction_21_appear = false;
+    this._transaction_22_appear = false;
+    this._transaction_23_appear = false;
+    console.log(this._thisMonthSum);
+    console.log(this._thisMonthApproveSum);
+  }
+
+  private notApprove21() {
+    this._transaction_21_appear = false;
+  }
+
+  private notApprove22() {
+    this._transaction_22_appear = false;
+  }
+
+  private notApprove23() {
+    this._transaction_23_appear = false;
   }
 
 }

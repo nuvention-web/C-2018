@@ -20,62 +20,158 @@
 
 
 <ion-content padding>
-
-  <!-- <div>
-    {{_demoText}}
-  </div> -->
-
-  <div class="points" (click)="goToDetail()">
-    Your Points: {{_point}}
+  <div class = "transactions"> 
+      <h2>New Transcation</h2>
+      <div class="empty-msg" *ngIf="!_transactions || _transactions.length == 0">
+        No transactions.
+      </div>
+      <!-- the first -->
+      <div class="date" *ngIf="_transaction_11_appear || _transaction_12_appear || _transaction_13_appear">
+        <!-- time -->
+        <div class = "time">
+            {{_time_1}}
+        </div>
+        <button class="approve"ion-button icon-only clear (click)="approve1()">
+              <ion-icon name="heart"></ion-icon>
+        </button>
+        <!-- fake 1 -->
+        <div class="trans-item" *ngIf="_transaction_11_appear">
+          <div class="trans-item-content">
+            <div class="trans-item-title">{{_transaction_11_name}}</div>
+            <div class="trans-item-text">${{_transaction_11_amount}}</div>
+          </div>
+          <div class="trans-item-buttons">
+            <button ion-button icon-only clear (click)="notApprove11()">
+              <ion-icon name="flash"></ion-icon>
+            </button>
+          </div>
+        </div>
+        <!-- fake 2 -->
+        <div class="trans-item" *ngIf="_transaction_12_appear">
+          <div class="trans-item-content">
+            <div class="trans-item-title">{{_transaction_12_name}}</div>
+            <div class="trans-item-text">${{_transaction_12_amount}}</div>
+          </div>
+          <div class="trans-item-buttons">
+            <button ion-button icon-only clear (click)="notApprove12()">
+              <ion-icon name="flash"></ion-icon>
+            </button>
+          </div>
+        </div>
+       <!-- fake 3 -->
+        <div class="trans-item" *ngIf="_transaction_13_appear">
+          <div class="trans-item-content">
+            <div class="trans-item-title">{{_transaction_13_name}}</div>
+            <div class="trans-item-text">${{_transaction_13_amount}}</div>
+          </div>
+          <div class="trans-item-buttons">
+            <button ion-button icon-only clear (click)="notApprove13()">
+              <ion-icon name="flash"></ion-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- the second -->
+      <div class="date" *ngIf="_transaction_21_appear || _transaction_22_appear || _transaction_23_appear">
+        <!-- time -->
+        <div class = "time">
+            {{_time_2}}
+        </div>
+        <button class="approve"ion-button icon-only clear (click)="approve2()">
+              <ion-icon name="heart"></ion-icon>
+        </button>
+        <!-- fake 1 -->
+        <div class="trans-item" *ngIf="_transaction_21_appear">
+          <div class="trans-item-content">
+            <div class="trans-item-title">{{_transaction_21_name}}</div>
+            <div class="trans-item-text">${{_transaction_21_amount}}</div>
+          </div>
+          <div class="trans-item-buttons">
+            <button ion-button icon-only clear (click)="notApprove21()">
+              <ion-icon name="flash"></ion-icon>
+            </button>
+          </div>
+        </div>
+        <!-- fake 2 -->
+        <div class="trans-item" *ngIf="_transaction_22_appear">
+          <div class="trans-item-content">
+            <div class="trans-item-title">{{_transaction_22_name}}</div>
+            <div class="trans-item-text">${{_transaction_22_amount}}</div>
+          </div>
+          <div class="trans-item-buttons">
+            <button ion-button icon-only clear (click)="notApprove22()">
+              <ion-icon name="flash"></ion-icon>
+            </button>
+          </div>
+        </div>
+       <!-- fake 3 -->
+        <div class="trans-item" *ngIf="_transaction_23_appear">
+          <div class="trans-item-content">
+            <div class="trans-item-title">{{_transaction_23_name}}</div>
+            <div class="trans-item-text">${{_transaction_23_amount}}</div>
+          </div>
+          <div class="trans-item-buttons">
+            <button ion-button icon-only clear (click)="notApprove23()">
+              <ion-icon name="flash"></ion-icon>
+            </button>
+          </div>
+        </div>
+      </div>
   </div>
 
-  <div>
-    <h2>This Month</h2>
-    <button ion-button icon-enbd (click)="allAprove()">Approve ALL</button>  
-    <!-- <ion-badge *ngIf="!_transactions && _transactions.length != 0">{{_transaction.length}}</ion-badge> -->
-  </div>
-  <!-- <hr/> -->
-  <div class="empty-msg" *ngIf="!_transactions || _transactions.length == 0">
-    No transactions.
-  </div>
-  <transaction-item *ngFor="let t of _transactions1" [data]=t [isFlag]=false [isInDetail]=false (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-item>
 
-  <div class="trans_header">
-    <h2>Former</h2>
-    <!-- <ion-badge *ngIf="!_flaggedTransactions && _flaggedTransactions.length != 0">{{_flaggedTransactions.length}}</ion-badge> -->
-  </div>
-  <!-- <hr/> -->
-  <div class="empty-msg" *ngIf="!_transactions || _transactions.length == 0">
-    No transactions.
-  </div>
-  <transaction-item-2 *ngFor="let t of _transactions2" [data]=t [isFlag]=false [isInDetail]=false (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-item-2>
-
-  <button ion-button block (click)="refreshThisMonth()">Refresh This Month</button>  
-  <button ion-button block (click)="refreshLastMonth()">Refresh Last Month</button>
+  <br/>
+  <br/>
 
 
-  <div> 
-    thisMonthSum: {{_thisMonthSum}}
-  </div>
+  <div class = "transactions"> 
+    <h2>Old Transcation</h2>
+    <div class="empty-msg" *ngIf="!_transactions || _transactions.length == 0">
+      No transactions.
+    </div>
 
-  <div>
-    lastMonthSum: {{_lastMonthSum}}
-  </div>
+    <!-- the first -->
+      <div class="trans-item" *ngIf="!_transaction_11_appear">
+        <div class="trans-item-content">
+          <div class="trans-item-title">{{_transaction_11_name}}</div>
+          <div class="trans-item-text">${{_transaction_11_amount}}</div>
+        </div>
+      </div>
+      <!-- fake 2 -->
+      <div class="trans-item" *ngIf="!_transaction_12_appear">
+        <div class="trans-item-content">
+          <div class="trans-item-title">{{_transaction_12_name}}</div>
+          <div class="trans-item-text">${{_transaction_12_amount}}</div>
+        </div>
+      </div>
+     <!-- fake 3 -->
+      <div class="trans-item" *ngIf="!_transaction_13_appear">
+        <div class="trans-item-content">
+          <div class="trans-item-title">{{_transaction_13_name}}</div>
+          <div class="trans-item-text">${{_transaction_13_amount}}</div>
+        </div>
+      </div>
+      <!-- the second -->
+      <div class="trans-item" *ngIf="!_transaction_21_appear">
+        <div class="trans-item-content">
+          <div class="trans-item-title">{{_transaction_21_name}}</div>
+          <div class="trans-item-text">${{_transaction_21_amount}}</div>
+        </div>
+      </div>
+      <!-- fake 2 -->
+      <div class="trans-item" *ngIf="!_transaction_22_appear">
+        <div class="trans-item-content">
+          <div class="trans-item-title">{{_transaction_22_name}}</div>
+          <div class="trans-item-text">${{_transaction_22_amount}}</div>
+        </div>
+      </div>
+     <!-- fake 3 -->
+      <div class="trans-item" *ngIf="!_transaction_23_appear">
+        <div class="trans-item-content">
+          <div class="trans-item-title">{{_transaction_23_name}}</div>
+          <div class="trans-item-text">${{_transaction_23_amount}}</div>
+        </div>
+      </div>
 
-  <div>
-      thisMonthApproveSum: {{_thisMonthApproveSum}}
   </div>
-
-  <div>
-      lastMonthApproveSum: {{_lastMonthApproveSum}}
-  </div>
-
-  <div>
-      thisMonthNotApproveSum: {{_thisMonthNotApproveSum}}
-  </div>
-
-  <div>
-      lastMonthNotApproveSum: {{_lastMonthNotApproveSum}}
-  </div>
-
 </ion-content>
