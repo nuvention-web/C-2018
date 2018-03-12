@@ -36,7 +36,7 @@ export class LinkAccountPage {
     ///// plaid part
 
     this.linkHandler = Plaid.create({
-      clientName: `Centsei`,
+      clientName: `Coincious`,
       env: `sandbox`,
       key: `5bd60517b0147259e73119216811f7`,
       product: [`transactions`],

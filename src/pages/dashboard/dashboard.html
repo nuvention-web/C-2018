@@ -7,7 +7,7 @@
 <ion-header>
 
   <ion-navbar>
-    <ion-title>Centsei</ion-title>
+    <ion-title>Coincious</ion-title>
 
     <ion-buttons end>
       <button ion-button icon-only (click)="updateTransactions()">
@@ -26,15 +26,15 @@
   </div> -->
   <div class="brief">
     <h4>
-      This Month
-      <span>Exceeded $128.44 Total $575.42</span>
-    </h4>
+     This Month
+     <span>Exceeded $128.44 Total $575.42</span>
+   </h4>
     <ng-progress id="total-this" #totalThis color="#11b245"></ng-progress>
     <ng-progress id="exceed-this" #exceedThis color="#ff9763"></ng-progress>
     <h4 class="last-month-label">
-      Last Month
-      <span>Exceeded $256.88 Total $1027.53</span>
-    </h4>
+     Last Month
+     <span>Exceeded $256.88 Total $1027.53</span>
+   </h4>
     <ng-progress id="total-last" #totalLast color="#11b245" class="lastMonth"></ng-progress>
     <ng-progress id="exceed-last" #exceedLast color="#ff9763" class="lastMonth"></ng-progress>
     <div class="button-wrapper">
@@ -42,60 +42,28 @@
     </div>
   </div>
 
-  <div class="points">
+  <div class="points" (click)="goToDetail()">
     Your Points: {{_point}}
   </div>
 
   <div>
-    <h2>This Month</h2>
-    <button ion-button icon-enbd (click)="allAprove()">Approve ALL</button>
+    <h2>New Purchases</h2>
     <!-- <ion-badge *ngIf="!_transactions && _transactions.length != 0">{{_transaction.length}}</ion-badge> -->
   </div>
   <!-- <hr/> -->
   <div class="empty-msg" *ngIf="!_transactions || _transactions.length == 0">
     No transactions.
   </div>
+  <transaction-item *ngFor="let t of _transactions" [data]=t [isFlag]=false [isInDetail]=false (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-item>
 
   <div class="trans_header">
-    <h2>Former</h2>
-    <ion-badge *ngIf="!_flaggedTransactions && _flaggedTransactions.length != 0">{{_flaggedTransactions.length}}</ion-badge>
+    <h2>Flagged Expenses</h2>
+    <!-- <ion-badge *ngIf="!_flaggedTransactions && _flaggedTransactions.length != 0">{{_flaggedTransactions.length}}</ion-badge> -->
   </div>
-
-  <!--
-
-  <transaction-item *ngFor="let t of _transactions1" [data]=t [isFlag]=false [isInDetail]=false (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-item>
-
-  <div class="empty-msg" *ngIf="!_transactions || _transactions.length == 0">
-    No transactions.
+  <!-- <hr/> -->
+  <div class="empty-msg" *ngIf="!_flaggedTransactions || _flaggedTransactions.length == 0">
+    No flagged Expenses.
   </div>
-  <transaction-item-2 *ngFor="let t of _transactions2" [data]=t [isFlag]=false [isInDetail]=false (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-item-2>
+  <transaction-item *ngFor="let ft of _flaggedTransactions" [data]=ft [isFlag]=true [isInDetail]=false (onApproveFlag)="onApproveFlag($event)"></transaction-item>
 
-  <button ion-button block (click)="refreshThisMonth()">Refresh This Month</button>
-  <button ion-button block (click)="refreshLastMonth()">Refresh Last Month</button>
-
-
-  <div>
-    thisMonthSum: {{_thisMonthSum}}
-  </div>
-
-  <div>
-    lastMonthSum: {{_lastMonthSum}}
-  </div>
-
-  <div>
-    thisMonthApproveSum: {{_thisMonthApproveSum}}
-  </div>
-
-  <div>
-    lastMonthApproveSum: {{_lastMonthApproveSum}}
-  </div>
-
-  <div>
-    thisMonthNotApproveSum: {{_thisMonthNotApproveSum}}
-  </div>
-
-  <div>
-    lastMonthNotApproveSum: {{_lastMonthNotApproveSum}}
-  </div>
- -->
 </ion-content>

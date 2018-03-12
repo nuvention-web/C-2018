@@ -2,6 +2,7 @@ import { Component, NgZone, ViewChild } from '@angular/core';
 import { IonicPage, NavController, NavParams, Platform } from 'ionic-angular';
 import { Push, PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
 import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
+import { NgProgressComponent } from '@ngx-progressbar/core';
 
 import { Notification } from '../../models/notification';
 import { Transaction } from '../../models/transaction';
@@ -23,22 +24,19 @@ declare var cordova;
 })
 export class DashboardPage {
 
+  @ViewChild(`totalLast`) totalLast: NgProgressComponent;
+  @ViewChild(`exceedLast`) exceedLast: NgProgressComponent;
+  @ViewChild(`totalThis`) totalThis: NgProgressComponent;
+  @ViewChild(`exceedThis`) exceedThis: NgProgressComponent;
+
   private notificationCollections: AngularFirestoreCollection<Notification>;
   public _demoText: string = ``;
   private _transactions: any = [];
-  private _transactions1: any = [];
-  private _transactions2: any = [];
   private _flaggedTransactions: any = [];
   private public_token: string;
   private _point: number = 100;
   private _platformSubscriber;
   private _count = 0;
-  private _thisMonthSum = 0;
-  private _lastMonthSum = 0;
-  private _thisMonthApproveSum = 0;
-  private _lastMonthApproveSum = 0;
-  private _thisMonthNotApproveSum = 0;
-  private _lastMonthNotApproveSum = 0;
 
 
   constructor(
@@ -57,13 +55,20 @@ export class DashboardPage {
   }
 
   ionViewWillEnter() {
-    // this._platformSubscriber = this.platform.pause.subscribe(() => {
-    //   this.updateTransactions();
-    // });
+    this._platformSubscriber = this.platform.pause.subscribe(() => {
+      this.updateTransactions();
+    });
   }
 
   ionViewWillLeave() {
-    // this._platformSubscriber.unsubscribe();
+    this._platformSubscriber.unsubscribe();
+  }
+
+  ngAfterViewInit() {
+    this.totalLast.set(100);
+    this.exceedLast.set(40);
+    this.totalThis.set(56);
+    this.exceedThis.set(20);
   }
 
   ionViewDidLoad() {
@@ -150,36 +155,6 @@ export class DashboardPage {
     this.plaidService.refreshTransaction(this.public_token);
   }
 
-  private refreshLastMonth() {
-    this._lastMonthSum = 0;
-    this.plaidService.refreshLastMonthTransaction(this.public_token);
-    this._transactions2 = this._transactions;
-    for (var i = 0; i < this._transactions2.length; i++) {
-      this._lastMonthSum += this._transactions2[i].amount;
-    }
-    this._lastMonthApproveSum = 500;
-    this._lastMonthNotApproveSum = this._lastMonthSum - this._lastMonthApproveSum;
-  }
-
-  private refreshThisMonth() {
-    this._thisMonthSum = 0;
-    this._thisMonthApproveSum = 0;
-    this.plaidService.refreshThisMonthTransaction(this.public_token);
-    this._transactions1 = this._transactions;
-    for (var i = 0; i < this._transactions1.length; i++) {
-      this._thisMonthSum += this._transactions1[i].amount;
-    }
-    this._thisMonthNotApproveSum = 0;
-  }
-  /*
-    private refreshThisMonthApproveSum() {
-      this._thisMonthApproveSum = 0;
-      for(var i = 0; i < this._flaggedTransactions.length; i++) {
-        this._thisMonthApproveSum += this._transactions[i].amount;
-      }
-      this._thisMonthNotApproveSum = this._thisMonthSum - this._thisMonthApproveSum;
-    }
-  */
   private onApprove(ev) {
     this._point += ev.point;
     this._transactions.splice(this._transactions.indexOf(ev.transaction), 1);
@@ -191,26 +166,9 @@ export class DashboardPage {
   }
 
   private onFlag(ev) {
-    // this._transactions1.splice(this._transactions1.indexOf(ev.transaction), 1);
-    // this._transactions2.unshift(ev.transaction);
-    // this._thisMonthNotApproveSum += ev.transaction.amount;
+    this._transactions.splice(this._transactions.indexOf(ev.transaction), 1);
+    this._flaggedTransactions.unshift(ev.transaction);
   }
-
-  private allAprove() {
-
-    // for (var i = 0; i < this._transactions1.length; i++) {
-    //   this._transactions2.unshift(this._transactions1[i]);
-    //   this._thisMonthApproveSum += this._transactions1[i].amount;
-    // }
-    // this._transactions1.splice(0, this._transactions1.length);
-  }
-
-  /*
-  private onNotFlag(ev) {
-    this._flaggedTransactions.splice(this._flaggedTransactions.indexOf(ev.transaction), 1);
-    this._transactions.unshift(ev.transaction);
-  }
-  */
 
   private goToDetail() {
     this.navCtrl.push(`TransDetailPage`);
