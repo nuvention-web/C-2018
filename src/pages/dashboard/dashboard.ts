@@ -71,6 +71,11 @@ export class DashboardPage {
   private _platformSubscriber;
   private _count = 0;
 
+  private _totalLastV = 1211.66;
+  private _exceedLastV = 441.01;
+  private _totalThisV = 678.52;
+  private _exceedThisV = 220.5;
+
 
   constructor(
     // private push: Push,
@@ -98,10 +103,11 @@ export class DashboardPage {
   }
 
   ngAfterViewInit() {
-    this.totalLast.set(100);
-    this.exceedLast.set(40);
-    this.totalThis.set(56);
-    this.exceedThis.set(20);
+    // this.totalLast.set(100);
+    // this.exceedLast.set(40);
+    // this.totalThis.set(56);
+    // this.exceedThis.set(20);
+    this.calculateBar();
   }
 
   ionViewDidLoad() {
@@ -176,6 +182,14 @@ export class DashboardPage {
     });
   }
 
+  private calculateBar() {
+    const total = this._totalThisV > this._totalLastV ? this._totalThisV : this._totalLastV;
+    this.totalLast.set(this._totalLastV / total * 100);
+    this.totalThis.set(this._totalThisV / total * 100);
+    this.exceedLast.set(this._exceedLastV / total * 100);
+    this.exceedThis.set(this._exceedThisV / total * 100);
+  }
+
   private pushNotification() {
     const newMessage: Notification = {
       message: `Tap to view`,
@@ -190,7 +204,13 @@ export class DashboardPage {
 
   private onApprove(ev) {
     this._point += ev.point;
-    this._transactions.splice(this._transactions.indexOf(ev.transaction), 1);
+    ev.group.data.forEach(t => {
+      this._totalThisV += Number(t.amount);
+    });
+    // ev.group = [];
+    console.log(ev.group);
+    this._transactions.splice(this._transactions.indexOf(ev.group), 1);
+    this.calculateBar();
   }
 
   private onApproveFlag(ev) {
@@ -199,8 +219,14 @@ export class DashboardPage {
   }
 
   private onFlag(ev) {
-    this._transactions.splice(this._transactions.indexOf(ev.transaction), 1);
-    this._flaggedTransactions.unshift(ev.transaction);
+    ev.group.data.splice(ev.index, 1);
+    this._totalThisV += Number(ev.transaction.amount);
+    this._exceedThisV += Number(ev.transaction.amount);
+    // this._flaggedTransactions.unshift(ev.transaction);
+    if (ev.group.data.length == 0) {
+      this._transactions.splice(this._transactions.indexOf(ev.group), 1);
+    }
+    this.calculateBar();
   }
 
   private goToDetail() {
