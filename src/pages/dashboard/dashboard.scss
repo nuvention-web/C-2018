@@ -1,4 +1,10 @@
 page-dashboard {
+  ion-navbar {
+    .toolbar-content {
+      text-align: center;
+    }
+  }
+
   .points {
     font-size: 18pt;
     text-align: right;
@@ -35,9 +41,15 @@ page-dashboard {
   }
 
   .brief {
-    padding: 0 16px;
+    padding: 16px 16px 0 16px;
     border-bottom: 1px solid #cccccc;
-    margin: 0 -16px 2rem;
+    margin: -16px -16px 1.6rem;
+    position: fixed;
+    background-color: white;
+    width: 100%;
+    z-index: 100;
+    box-shadow: 0 0 3px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 6px 6px;
 
     h4 {
       font-size: 2rem;
@@ -56,6 +68,38 @@ page-dashboard {
 
     button {
       margin-top: 1rem;
+    }
+
+    .brief-heart {
+      color: #5ced87;
+      font-size: 1em;
+      margin-right: .2rem;
+    }
+
+    .brief-heart-break {
+      color: #ff9763;
+      font-size: 1em;
+      margin-right: .2rem;
+    }
+
+    .brief-heart-flash {
+      color: white;
+      font-size: .8em;
+      position: relative;
+      right: 1.45rem;
+      top: -.2rem;
+      margin-right: -.9rem;
+    }
+  }
+
+  .purchases-wrapper {
+    background-color: #f3f3f3;
+    margin: 12.6rem -16px -16px -16px;
+    padding: 16px;
+
+    h2 {
+      font-weight: 300;
+      font-size: 2.2rem;
     }
   }
 }

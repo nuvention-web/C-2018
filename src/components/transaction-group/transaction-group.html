@@ -1,0 +1,5 @@
+<!-- Generated template for the TransactionGroupComponent component -->
+<div>
+  <h4>{{_transactions.name}}</h4>
+  <transaction-item *ngFor="let t of _transactions.data" [data]=t [isFlag]=false [isInDetail]=false (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-item>
+</div>
