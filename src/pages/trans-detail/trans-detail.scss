@@ -2,7 +2,7 @@ page-trans-detail {
 	.chart {
 	    padding: 16px 16px 0 16px;
 	    border-bottom: 1px solid #cccccc;
-	    margin: -16px -16px 1.6rem;
+	    margin: -1.5rem -16px 1.6rem;
 	    position: fixed;
 	    background-color: white;
 	    width: 100%;
@@ -10,18 +10,10 @@ page-trans-detail {
 	    box-shadow: 0 0 3px 3px rgba(0, 0, 0, 0.1);
 	    border-radius: 0 0 6px 6px;
 
-	}
-
-	.month {
-	    padding: 16px 16px 0 16px;
-	    border-bottom: 1px solid #cccccc;
-	    margin: 170px -16px 1.6rem;
-	    position: fixed;
-	    background-color: white;
-	    width: 100%;
-	    z-index: 100;
-	    box-shadow: 0 0 3px 3px rgba(0, 0, 0, 0.1);
-	    border-radius: 0 0 6px 6px;
+	    .line {
+	    	width: 1000px;
+	    	margin-left: -100px;
+	    }
 	    
 	    h2 {
 	      font-size: 2rem;
@@ -58,8 +50,8 @@ page-trans-detail {
 
 
 	.purchase_wrap {
-	    background-color: #f3f3f3;
-	    margin: 17rem -16px -16px -16px;
+	    background-color: white;
+	    margin: 22rem -16px -16px -16px;
 	    padding: 16px;
 	}
 	
