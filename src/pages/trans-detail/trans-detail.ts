@@ -18,7 +18,8 @@ import { PlaidService } from '../../providers/plaid-service/plaid-service';
   templateUrl: 'trans-detail.html',
 })
 export class TransDetailPage {
-
+  private _monthUnhappy = 0;
+  private _monthHappy = 0;
   private chart: Chart = [];
   private chartOptions = {
     type: `bar`,
@@ -115,8 +116,13 @@ export class TransDetailPage {
 
           // get value by index
           var value = this.chart.data.datasets[0].data[clickedElementindex];
-
+          console.log("value", value);
+          this._monthUnhappy = this.chart.data.datasets[0].data[clickedElementindex];
+          console.log("unhappy", this._monthUnhappy);
+          this._monthHappy = this.chart.data.datasets[1].data[clickedElementindex];    
+          console.log("happy", this._monthHappy);
           /* other stuff that requires slice's label and value */
+          console.log(document.getElementById("wrap").scroll);
           this._month = `${label} 2018`;
           this.generateNewTransactions(label);
         }
@@ -194,7 +200,8 @@ export class TransDetailPage {
 
     this.chart = new Chart(`chart-canvas`, this.chartOptions);
     this._transactions = this._ts[0];
-
+    this._monthUnhappy = this.chart.data.datasets[0].data[0];
+    this._monthHappy = this.chart.data.datasets[1].data[0];
     this.plaidService.transactions$.subscribe(transactions => {
       this._tSource = transactions;
       this.generateNewTransactions("Jan");
