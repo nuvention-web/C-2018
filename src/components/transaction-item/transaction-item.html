@@ -2,14 +2,18 @@
 <div class="trans-item">
   <div class="trans-item-content">
     <div class="trans-item-title">{{_transaction.name}}</div>
-    <div class="trans-item-text">${{_transaction.amount}} on {{_transaction.date}}</div>
+    <div class="trans-item-text">${{_transaction.amount}}</div>
   </div>
-  <div class="trans-item-buttons" *ngIf="!_isFlag">
-    <button ion-button icon-only clear (click)="approve()">
+  <div class="trans-item-buttons">
+    <!-- <button ion-button icon-only clear (click)="approve()">
       <ion-icon name="thumbs-up"></ion-icon>
+    </button> -->
+    <button ion-button icon-only clear (click)="flag()" *ngIf=_transaction.love>
+      <ion-icon name="md-heart"></ion-icon>
     </button>
-    <button ion-button icon-only clear (click)="flag()">
-      <ion-icon name="flag"></ion-icon>
+    <button ion-button icon-only clear (click)="flag()" *ngIf=!_transaction.love>
+      <ion-icon name="md-heart" class="break"></ion-icon>
+      <ion-icon name="md-flash" class="flash"></ion-icon>
     </button>
   </div>
 </div>

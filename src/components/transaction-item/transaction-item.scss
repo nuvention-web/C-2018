@@ -1,10 +1,16 @@
 transaction-item {
   .trans-item {
-    margin: 0;
+    // border-radius: 2px;
+    // box-shadow: 0 2px 2px 2px rgba(0, 0, 0, 0.08);
+    margin: -1px -16px;
+    padding: 16px;
+    border-bottom: 1px solid rgba(205, 205, 205, 1);
+    border-top: 1px solid rgba(205, 205, 205, 1);
+    background-color: white;
 
     .trans-item-content {
       display: inline-block;
-      width: calc(100% - 120px);
+      width: calc(100% - 80px);
 
       .trans-item-title {
         font-size: 14pt;
@@ -12,7 +18,8 @@ transaction-item {
 
       .trans-item-text {
         font-size: 11pt;
-        margin-bottom: 1em;
+
+        // margin-bottom: 1em;
         margin-top: .3em;
       }
     }
@@ -20,8 +27,25 @@ transaction-item {
     .trans-item-buttons {
       display: inline-block;
       position: relative;
-      right: -10px;
+      right: -16px;
       top: -16px;
+      margin-bottom: -16px;
+      text-align: right;
+    }
+
+    ion-icon {
+      color: #5ced87;
+    }
+
+    .break {
+      color: #ff9763;
+    }
+
+    .flash {
+      position: absolute;
+      color: white;
+      font-size: 1.1em;
+      margin-top: -.2em;
     }
   }
 }

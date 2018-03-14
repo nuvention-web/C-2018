@@ -2,7 +2,7 @@ import { Component, ChangeDetectorRef } from '@angular/core';
 import { IonicPage, NavController } from 'ionic-angular';
 
 import { HttpClient } from '@angular/common/http';
-
+import { NgProgress } from '@ngx-progressbar/core';
 import plaid from 'plaid';
 
 
@@ -36,9 +36,9 @@ export class LinkAccountPage {
     ///// plaid part
 
     this.linkHandler = Plaid.create({
-      clientName: `Centsei`,
+      clientName: `Coincious`,
       env: `sandbox`,
-      key: `5bd60517b0147259e73119216811f7`,
+      key: `28f2e54388e2f6a1aca59e789d353b`,
       product: [`transactions`],
       forceIframe: true,
       selectAccount: false,

@@ -1,4 +1,36 @@
 page-dashboard {
+  .scroll-content {
+    padding: 0 !important;
+  }
+
+  ion-navbar {
+    min-height: 60px !important;
+
+    ion-title {
+      min-height: 60px !important;
+      left: 0;
+      top: 0;
+      padding: 0 90px 1px;
+      position: absolute;
+      width: 100%;
+    }
+
+    .toolbar-content {
+      text-align: center;
+    }
+
+    h3 {
+      font-size: 2.2rem;
+      position: absolute;
+      bottom: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
+      line-height: 40px;
+    }
+  }
+
   .points {
     font-size: 18pt;
     text-align: right;
@@ -6,5 +38,132 @@ page-dashboard {
 
   .empty-msg {
     font-size: 14pt;
+    margin-bottom: 1em;
+  }
+
+  .trans_header {
+    margin-top: 1.4em;
+  }
+
+  .last-month-label {
+    margin-top: 3rem !important;
+  }
+
+  .ng-progress-bar {
+    position: relative;
+    margin-left: 16px;
+  }
+
+  .ng-bar-placeholder {
+    height: 7px;
+
+    .ng-bar {
+      border: 1px solid #ffffff;
+    }
+  }
+
+  .ng-meteor {
+    display: none;
+  }
+
+  .brief {
+    padding: 0 16px;
+    border-bottom: 1px solid #cccccc;
+    display: block;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    background-color: white;
+    width: 100%;
+    z-index: 5;
+    box-shadow: 0 0 3px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 6px 6px;
+
+    h4 {
+      font-size: 2rem;
+
+      span {
+        font-size: 1.4rem;
+        margin-left: 0.4rem;
+        font-weight: 300;
+        color: #222222;
+      }
+    }
+
+    .button-wrapper {
+      text-align: right;
+    }
+
+    button {
+      margin-top: 1rem;
+    }
+
+    .brief-heart {
+      color: #5ced87;
+      font-size: 1em;
+      margin-right: .2rem;
+    }
+
+    .brief-heart-break {
+      color: #ff9763;
+      font-size: 1em;
+      margin-right: .2rem;
+    }
+
+    .brief-heart-flash {
+      color: white;
+      font-size: .6em;
+      position: relative;
+      right: 1.25rem;
+      top: -.3rem;
+      margin-right: -.7rem;
+    }
+  }
+
+  .purchases-wrapper {
+    background-color: #f3f3f3;
+    margin: 0;
+    padding: 16px;
+    overflowY: scroll;
+
+    h2 {
+      font-weight: 300;
+      font-size: 2.2rem;
+    }
+  }
+
+  .linked {
+    margin-top: 12.6rem;
+  }
+
+  .unlinked-wrapper {
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-box;
+    display: flex;
+    -webkit-box-align: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -moz-box-pack: center;
+    -ms-flex-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    height: 100%;
+
+    .unlinked {
+      width: auto;
+      height: auto;
+      max-width: 90%;
+      max-height: 90%;
+
+      p {
+        text-align: center;
+        font-size: 12pt;
+      }
+    }
   }
 }

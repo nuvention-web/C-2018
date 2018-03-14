@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
 import { DashboardPage } from './dashboard';
 import { ComponentsModule } from "../../components/components.module";
+import { NgProgressModule } from '@ngx-progressbar/core';
 
 @NgModule({
   declarations: [
@@ -9,7 +10,8 @@ import { ComponentsModule } from "../../components/components.module";
   ],
   imports: [
     IonicPageModule.forChild(DashboardPage),
-    ComponentsModule
+    ComponentsModule,
+    NgProgressModule.forRoot()
   ],
 })
 export class DashboardPageModule { }
