@@ -6,7 +6,7 @@
 <ion-header>
 
   <ion-navbar>
-    <ion-buttons left>
+    <ion-buttons left *ngIf="_linkedCredential">
       <button ion-button icon-only (click)="showMenuActions()">
         <ion-icon name="menu"></ion-icon>
       </button>

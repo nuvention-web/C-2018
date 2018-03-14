@@ -28,7 +28,7 @@ export class LoginPage {
       if (user) {
         // user logged in
         console.log("logged in");
-        this.navCtrl.setRoot(`DashboardPage`);
+        this.navCtrl.setRoot(`DashboardPage`, { signed_in: true, linked_credential: false });
       } else {
         // user logged out
         console.log("logged out");

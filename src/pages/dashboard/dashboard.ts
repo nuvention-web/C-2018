@@ -1,5 +1,5 @@
 import { Component, NgZone, ViewChild } from '@angular/core';
-import { IonicPage, NavController, NavParams, Platform, LoadingController, ActionSheetController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, Platform, LoadingController, ActionSheetController, ToastController } from 'ionic-angular';
 import { Push, PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
@@ -101,7 +101,8 @@ export class DashboardPage {
     public platform: Platform,
     private afAuth: AngularFireAuth,
     private actionSheetCtrl: ActionSheetController,
-    private loadingCtrl: LoadingController
+    private loadingCtrl: LoadingController,
+    private toastCtrl: ToastController
   ) {
     this.notificationCollections = this.firestore.collection<Notification>('notifications');
     this.userAccountCollections = this.firestore.collection<UserAccount>('user-accounts');
@@ -113,21 +114,18 @@ export class DashboardPage {
     console.log(`constructor`);
     // this._demoText = this.public_token;
     // this._transactions = this.plaidService.transactions$;
-  }
-
-  ionViewWillEnter() {
-    this._loading = this.loadingCtrl.create({
-      content: 'Please wait...'
-    });
-    if (this._linkedCredential || this._signedIn) {
-      this._loading.present();
-    }
-    this._platformSubscriber = this.platform.pause.subscribe(() => {
-      this.updateTransactions();
-    });
+    // this._loading = this.loadingCtrl.create({
+    //   content: 'Please wait...'
+    // });
+    // if (this._linkedCredential || this._signedIn) {
+    //   this._loading.present();
+    // }
+    // this._platformSubscriber = this.platform.pause.subscribe(() => {
+    //   this.updateTransactions();
+    // });
     if (this._linkedCredential) {
       this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${this.navParams.get(`user_doc_id`)}`);
-      this._loading.dismiss();
+      // this._loading.dismiss();
       return;
     }
 
@@ -139,21 +137,28 @@ export class DashboardPage {
             this.navCtrl.setRoot('DashboardPage', { public_token: doc.data().accountToken, user_doc_id: doc.id, signed_in: true, linked_credential: true });
           });
           console.log(`change root`);
-          this._loading.dismiss();
+          // this._loading.dismiss();
         }, err => {
-          this._loading.dismiss();
+          // this._loading.dismiss();
         });
-
-        // this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${this._user.uid}`);
-        // if (!this._linkedCredential) {
-        //   this.userAccount.valueChanges().subscribe(res => {
-        //     if (res) {
-        //       this.navCtrl.setRoot('DashboardPage', { public_token: res.accountToken, signed_in: true, linked_credential: true });
-        //     }
-        //   });
-        // }
       });
+      return;
     }
+
+    this.afAuth.auth.onAuthStateChanged(user => {
+      if (user) {
+        // user logged in
+        console.log("logged in");
+        this.navCtrl.setRoot(`DashboardPage`, { signed_in: true, linked_credential: false });
+      } else {
+        // user logged out
+        console.log("logged out");
+        this.navCtrl.setRoot(`LoginPage`);
+      }
+    });
+  }
+
+  ionViewWillEnter() {
   }
 
   ionViewWillLeave() {
@@ -224,19 +229,19 @@ export class DashboardPage {
     // pushObject.on('registration').subscribe((registration: any) => console.log('Device registered', registration));
     // pushObject.on('error').subscribe(error => console.error('Error with Push plugin', error));
 
-    this.plaidService.transactions$.subscribe(transactions => {
-      if (transactions) {
-        this.zone.run(() => {
-          if (this._count == 0) {
-            this._count += 1;
-            return;
-          }
-          this._transactions = transactions;
-          this.pushNotification();
-          this._count = 0;
-        });
-      }
-    });
+    // this.plaidService.transactions$.subscribe(transactions => {
+    //   if (transactions) {
+    //     this.zone.run(() => {
+    //       if (this._count == 0) {
+    //         this._count += 1;
+    //         return;
+    //       }
+    //       this._transactions = transactions;
+    //       this.pushNotification();
+    //       this._count = 0;
+    //     });
+    //   }
+    // });
 
 
     ///// plaid part
@@ -254,6 +259,9 @@ export class DashboardPage {
           newDoc.accountToken = public_token;
           newDoc.userId = this._user.uid;
           this.userAccountCollections.add(newDoc).then(() => {
+            // this.loadingCtrl.create({
+            //   content: 'Please wait...'
+            // }).present();
             this.navCtrl.setRoot('DashboardPage', { public_token: public_token, signed_in: true, linked_credential: true });
           });
           // console.log("Login Succeed");
