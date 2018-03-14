@@ -8,11 +8,13 @@ import { TransactionGroupComponent } from './transaction-group/transaction-group
   declarations: [TransactionItemComponent,
     ProgressbarComponent,
     TransactionItem_2Component,
-    TransactionGroupComponent],
+    TransactionGroupComponent,
+    TransactionItem_2Component],
   imports: [IonicModule],
   exports: [TransactionItemComponent,
     ProgressbarComponent,
     TransactionItem_2Component,
-    TransactionGroupComponent]
+    TransactionGroupComponent,
+    TransactionItem_2Component]
 })
 export class ComponentsModule { }
