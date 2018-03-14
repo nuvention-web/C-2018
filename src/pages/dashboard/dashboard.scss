@@ -4,8 +4,30 @@ page-dashboard {
   }
 
   ion-navbar {
+    min-height: 60px !important;
+
+    ion-title {
+      min-height: 60px !important;
+      left: 0;
+      top: 0;
+      padding: 0 90px 1px;
+      position: absolute;
+      width: 100%;
+    }
+
     .toolbar-content {
       text-align: center;
+    }
+
+    h3 {
+      font-size: 2.2rem;
+      position: absolute;
+      bottom: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
+      line-height: 40px;
     }
   }
 

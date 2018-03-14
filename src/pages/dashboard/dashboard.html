@@ -6,20 +6,26 @@
 <ion-header>
 
   <ion-navbar>
-    <!-- <ion-title>Coinscious</ion-title> -->
-    <h3>Coinscious</h3>
-
-    <!-- <ion-buttons end>
-      <button ion-button icon-only (click)="updateTransactions()">
-        <ion-icon name="repeat"></ion-icon>
+    <ion-buttons left>
+      <button ion-button icon-only (click)="showMenuActions()">
+        <ion-icon name="menu"></ion-icon>
       </button>
-    </ion-buttons> -->
+    </ion-buttons>
+
+    <ion-title>Coinscious</ion-title>
+    <!-- <h3>Coinscious</h3> -->
+
+    <ion-buttons right>
+      <button ion-button icon-only (click)="signOut()">
+        <ion-icon name="log-out"></ion-icon>
+      </button>
+    </ion-buttons>
   </ion-navbar>
 
 </ion-header>
 
 
-<div class="brief" *ngIf="_linkedCredential" (click)="goToDetail()">
+<div class="brief" *ngIf="_signedIn && _linkedCredential" (click)="goToDetail()">
   <h4>
    This Month
    <span>
@@ -57,13 +63,13 @@
   </div>
 </div>
 
-<ion-content>
+<ion-content *ngIf="_signedIn">
   <div class="unlinked-wrapper" *ngIf="!_linkedCredential">
     <div class="unlinked" *ngIf="!_linkedCredential">
       <p *ngIf="!_linkedCredential">
         Looks like Coinscious is not quite conscious about any of your account.
       </p>
-      <button ion-button block color="secondary" *ngIf="!_linkedCredential">Sync my account now</button>
+      <button ion-button block color="secondary" *ngIf="!_linkedCredential" (click)="linkAccount()">Sync my account now</button>
     </div>
   </div>
 

@@ -1,14 +1,18 @@
 import { Component, NgZone, ViewChild } from '@angular/core';
-import { IonicPage, NavController, NavParams, Platform } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, Platform, LoadingController, ActionSheetController } from 'ionic-angular';
 import { Push, PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
-import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
+import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
+import { AngularFireAuth } from 'angularfire2/auth';
 import { NgProgressComponent } from '@ngx-progressbar/core';
 
 import { Notification } from '../../models/notification';
+import { UserAccount } from '../../models/userAccount';
+import { User } from '../../models/user';
 import { Transaction } from '../../models/transaction';
 import { PlaidService } from '../../providers/plaid-service/plaid-service';
 
 declare var cordova;
+declare var Plaid;
 
 /**
  * Generated class for the DashboardPage page.
@@ -30,6 +34,8 @@ export class DashboardPage {
   @ViewChild(`exceedThis`) exceedThis: NgProgressComponent;
 
   private notificationCollections: AngularFirestoreCollection<Notification>;
+  private userAccountCollections: AngularFirestoreCollection<UserAccount>;
+  private userAccount: AngularFirestoreDocument<UserAccount>;
   public _demoText: string = ``;
   private _transactions: any = [
     {
@@ -71,11 +77,18 @@ export class DashboardPage {
   private _platformSubscriber;
   private _count = 0;
   private _linkedCredential = false;
+  private _signedIn = false;
+  private _user: User;
 
   private _totalLastV = 1211.66;
   private _exceedLastV = 441.01;
   private _totalThisV = 678.52;
   private _exceedThisV = 220.5;
+
+  private _loading;
+  private _isLoading = false;
+
+  private linkHandler;
 
 
   constructor(
@@ -85,18 +98,62 @@ export class DashboardPage {
     public navParams: NavParams,
     private plaidService: PlaidService,
     private zone: NgZone,
-    public platform: Platform
+    public platform: Platform,
+    private afAuth: AngularFireAuth,
+    private actionSheetCtrl: ActionSheetController,
+    private loadingCtrl: LoadingController
   ) {
     this.notificationCollections = this.firestore.collection<Notification>('notifications');
+    this.userAccountCollections = this.firestore.collection<UserAccount>('user-accounts');
     this.public_token = this.navParams.get(`public_token`);
+    const signedIn = this.navParams.get(`signed_in`);
+    const linkedCredential = this.navParams.get(`linked_credential`);
+    this._signedIn = signedIn ? true : false;
+    this._linkedCredential = linkedCredential ? true : false;
+    console.log(`constructor`);
     // this._demoText = this.public_token;
     // this._transactions = this.plaidService.transactions$;
   }
 
   ionViewWillEnter() {
+    this._loading = this.loadingCtrl.create({
+      content: 'Please wait...'
+    });
+    if (this._linkedCredential || this._signedIn) {
+      this._loading.present();
+    }
     this._platformSubscriber = this.platform.pause.subscribe(() => {
       this.updateTransactions();
     });
+    if (this._linkedCredential) {
+      this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${this.navParams.get(`user_doc_id`)}`);
+      this._loading.dismiss();
+      return;
+    }
+
+    if (this._signedIn) {
+      this.afAuth.authState.subscribe(data => {
+        this._user = new User(data);
+        this.userAccountCollections.ref.where(`userId`, '==', this._user.uid).get().then(res => {
+          res.forEach(doc => {
+            this.navCtrl.setRoot('DashboardPage', { public_token: doc.data().accountToken, user_doc_id: doc.id, signed_in: true, linked_credential: true });
+          });
+          console.log(`change root`);
+          this._loading.dismiss();
+        }, err => {
+          this._loading.dismiss();
+        });
+
+        // this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${this._user.uid}`);
+        // if (!this._linkedCredential) {
+        //   this.userAccount.valueChanges().subscribe(res => {
+        //     if (res) {
+        //       this.navCtrl.setRoot('DashboardPage', { public_token: res.accountToken, signed_in: true, linked_credential: true });
+        //     }
+        //   });
+        // }
+      });
+    }
   }
 
   ionViewWillLeave() {
@@ -105,6 +162,9 @@ export class DashboardPage {
 
   ngAfterViewInit() {
     this.calculateBar();
+  }
+
+  ionViewDidEnter() {
   }
 
   ionViewDidLoad() {
@@ -174,13 +234,37 @@ export class DashboardPage {
           this._transactions = transactions;
           this.pushNotification();
           this._count = 0;
-        })
+        });
       }
     });
+
+
+    ///// plaid part
+
+    if (this._signedIn && !this._linkedCredential) {
+      this.linkHandler = Plaid.create({
+        clientName: `Coinscious`,
+        env: `sandbox`,
+        key: `28f2e54388e2f6a1aca59e789d353b`,
+        product: [`transactions`],
+        forceIframe: true,
+        selectAccount: false,
+        onSuccess: (public_token, metadata) => {
+          let newDoc = {} as UserAccount;
+          newDoc.accountToken = public_token;
+          newDoc.userId = this._user.uid;
+          this.userAccountCollections.add(newDoc).then(() => {
+            this.navCtrl.setRoot('DashboardPage', { public_token: public_token, signed_in: true, linked_credential: true });
+          });
+          // console.log("Login Succeed");
+          // this._linkedCredential = true;
+        }
+      });
+    }
   }
 
   private calculateBar() {
-    if (!this._linkedCredential) return;
+    if (!this._signedIn || !this._linkedCredential) return;
 
     const total = this._totalThisV > this._totalLastV ? this._totalThisV : this._totalLastV;
     this.totalLast.set(this._totalLastV / total * 100);
@@ -230,6 +314,41 @@ export class DashboardPage {
 
   private goToDetail() {
     this.navCtrl.push(`TransDetailPage`);
+  }
+
+  private linkAccount() {
+    this.linkHandler.open();
+  }
+
+  private signOut() {
+    this.afAuth.auth.signOut().then(() => {
+      this.navCtrl.setRoot(`LoginPage`);
+    });
+  }
+
+  private showMenuActions() {
+    let actionSheet = this.actionSheetCtrl.create({
+      title: 'Unbind Account?',
+      buttons: [
+        {
+          text: 'Unbind',
+          role: 'unbind',
+          handler: () => {
+            // console.log('Destructive clicked');
+            this.userAccount.delete().then(() => {
+              this.navCtrl.setRoot('DashboardPage', { signed_in: true, linked_credential: false });
+            });
+          }
+        }, {
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => {
+            console.log('Cancel clicked');
+          }
+        }
+      ]
+    });
+    actionSheet.present();
   }
 
 }

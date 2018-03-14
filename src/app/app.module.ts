@@ -7,6 +7,7 @@ import { Push } from '@ionic-native/push';
 import { LocalNotifications } from '@ionic-native/local-notifications'
 import { AngularFireModule } from 'angularfire2';
 import { AngularFirestoreModule } from 'angularfire2/firestore';
+import { AngularFireAuthModule, AngularFireAuth } from 'angularfire2/auth';
 import { environment } from '../environments/environment';
 import { HttpClientModule } from '@angular/common/http';
 import { NgProgressModule } from '@ngx-progressbar/core';
@@ -22,6 +23,7 @@ import { PlaidService } from '../providers/plaid-service/plaid-service';
     IonicModule.forRoot(MyApp),
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule,
+    AngularFireAuthModule,
     HttpClientModule,
     NgProgressModule.forRoot()
   ],
@@ -35,7 +37,8 @@ import { PlaidService } from '../providers/plaid-service/plaid-service';
     Push,
     LocalNotifications,
     { provide: ErrorHandler, useClass: IonicErrorHandler },
-    PlaidService
+    PlaidService,
+    AngularFireAuth
   ]
 })
 export class AppModule { }
