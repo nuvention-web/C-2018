@@ -38,7 +38,7 @@ export class LinkAccountPage {
     this.linkHandler = Plaid.create({
       clientName: `Coincious`,
       env: `sandbox`,
-      key: `5bd60517b0147259e73119216811f7`,
+      key: `28f2e54388e2f6a1aca59e789d353b`,
       product: [`transactions`],
       forceIframe: true,
       selectAccount: false,

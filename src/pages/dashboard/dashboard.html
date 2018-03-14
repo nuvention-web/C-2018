@@ -20,74 +20,85 @@
 </ion-header>
 
 
-<ion-content padding>
-
-  <!-- <div>
-    {{_demoText}}
-  </div> -->
-  <div class="brief">
-    <h4>
-     This Month
+<div class="brief" *ngIf="_linkedCredential" (click)="goToDetail()">
+  <h4>
+   This Month
+   <span>
      <span>
-       <span>
-         <ion-icon class="brief-heart-break" name="md-heart"></ion-icon>
-         <ion-icon name="md-flash" class="brief-heart-flash"></ion-icon>
-       </span>
-      ${{(_exceedThisV).toFixed(2)}}
-       <span>
-         <ion-icon class="brief-heart" name="md-heart"></ion-icon>
-       </span>
-      ${{(_totalThisV - _exceedThisV).toFixed(2)}}
-    </span>
-   </h4>
-    <ng-progress id="total-this" #totalThis color="#11b245"></ng-progress>
-    <ng-progress id="exceed-this" #exceedThis color="#ff9763"></ng-progress>
-    <h4 class="last-month-label">
-     Last Month
-     <span>
-       <span>
-         <ion-icon class="brief-heart-break" name="md-heart"></ion-icon>
-         <ion-icon name="md-flash" class="brief-heart-flash"></ion-icon>
-       </span>
-      ${{(_exceedLastV).toFixed(2)}}
-       <span>
-         <ion-icon class="brief-heart" name="md-heart"></ion-icon>
-       </span>
-      ${{(_totalLastV - _exceedLastV).toFixed(2)}}
+       <ion-icon class="brief-heart-break" name="md-heart"></ion-icon>
+       <ion-icon name="md-flash" class="brief-heart-flash"></ion-icon>
      </span>
-   </h4>
-    <ng-progress id="total-last" #totalLast color="#11b245" class="lastMonth"></ng-progress>
-    <ng-progress id="exceed-last" #exceedLast color="#ff9763" class="lastMonth"></ng-progress>
-    <div class="button-wrapper">
-      <button ion-button clear small (click)="goToDetail()"> View Details </button>
+    ${{(_exceedThisV).toFixed(2)}}
+     <span>
+       <ion-icon class="brief-heart" name="md-heart"></ion-icon>
+     </span>
+    ${{(_totalThisV - _exceedThisV).toFixed(2)}}
+  </span>
+ </h4>
+  <ng-progress id="total-this" #totalThis color="#11b245"></ng-progress>
+  <ng-progress id="exceed-this" #exceedThis color="#ff9763"></ng-progress>
+  <h4 class="last-month-label">
+   Last Month
+   <span>
+     <span>
+       <ion-icon class="brief-heart-break" name="md-heart"></ion-icon>
+       <ion-icon name="md-flash" class="brief-heart-flash"></ion-icon>
+     </span>
+    ${{(_exceedLastV).toFixed(2)}}
+     <span>
+       <ion-icon class="brief-heart" name="md-heart"></ion-icon>
+     </span>
+    ${{(_totalLastV - _exceedLastV).toFixed(2)}}
+   </span>
+ </h4>
+  <ng-progress id="total-last" #totalLast color="#11b245" class="lastMonth"></ng-progress>
+  <ng-progress id="exceed-last" #exceedLast color="#ff9763" class="lastMonth"></ng-progress>
+  <div class="button-wrapper">
+    <button ion-button clear small> View Details </button>
+  </div>
+</div>
+
+<ion-content>
+  <div class="unlinked-wrapper" *ngIf="!_linkedCredential">
+    <div class="unlinked" *ngIf="!_linkedCredential">
+      <p *ngIf="!_linkedCredential">
+        Looks like Coinscious is not quite conscious about any of your account.
+      </p>
+      <button ion-button block color="secondary" *ngIf="!_linkedCredential">Sync my account now</button>
     </div>
   </div>
 
-  <!-- <div class="points" (click)="goToDetail()">
-    Your Points: {{_point}}
-  </div> -->
+  <div class="linked" *ngIf="_linkedCredential">
+    <!-- <div>
+        {{_demoText}}
+      </div> -->
 
-  <div class="purchases-wrapper">
-    <div>
-      <h2>New Purchases</h2>
-      <!-- <ion-badge *ngIf="!_transactions && _transactions.length != 0">{{_transaction.length}}</ion-badge> -->
-    </div>
-    <!-- <hr/> -->
-    <div class="empty-msg" *ngIf="!_transactions || _transactions.length == 0">
-      No transactions.
-    </div>
-    <transaction-group *ngFor="let t of _transactions" [transactions]=t (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-group>
-    <!-- <transaction-item *ngFor="let t of _transactions" [data]=t [isFlag]=false [isInDetail]=false (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-item> -->
+    <!-- <div class="points" (click)="goToDetail()">
+        Your Points: {{_point}}
+      </div> -->
 
-    <!--
-    <div class="trans_header">
-      <h2>Flagged Expenses</h2>
+    <div class="purchases-wrapper">
+      <div>
+        <h2>New Purchases</h2>
+        <!-- <ion-badge *ngIf="!_transactions && _transactions.length != 0">{{_transaction.length}}</ion-badge> -->
+      </div>
+      <!-- <hr/> -->
+      <div class="empty-msg" *ngIf="!_transactions || _transactions.length == 0">
+        No transactions.
+      </div>
+      <transaction-group *ngFor="let t of _transactions" [transactions]=t (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-group>
+      <!-- <transaction-item *ngFor="let t of _transactions" [data]=t [isFlag]=false [isInDetail]=false (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-item> -->
+
+      <!--
+        <div class="trans_header">
+          <h2>Flagged Expenses</h2>
+        </div>
+        <div class="empty-msg" *ngIf="!_flaggedTransactions || _flaggedTransactions.length == 0">
+          No flagged Expenses.
+        </div>
+        <transaction-item *ngFor="let ft of _flaggedTransactions" [data]=ft [isFlag]=true [isInDetail]=false (onApproveFlag)="onApproveFlag($event)"></transaction-item>
+        -->
     </div>
-    <div class="empty-msg" *ngIf="!_flaggedTransactions || _flaggedTransactions.length == 0">
-      No flagged Expenses.
-    </div>
-    <transaction-item *ngFor="let ft of _flaggedTransactions" [data]=ft [isFlag]=true [isInDetail]=false (onApproveFlag)="onApproveFlag($event)"></transaction-item>
-    -->
   </div>
 
 </ion-content>

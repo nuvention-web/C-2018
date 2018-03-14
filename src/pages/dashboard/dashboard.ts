@@ -70,6 +70,7 @@ export class DashboardPage {
   private _point: number = 100;
   private _platformSubscriber;
   private _count = 0;
+  private _linkedCredential = false;
 
   private _totalLastV = 1211.66;
   private _exceedLastV = 441.01;
@@ -103,10 +104,6 @@ export class DashboardPage {
   }
 
   ngAfterViewInit() {
-    // this.totalLast.set(100);
-    // this.exceedLast.set(40);
-    // this.totalThis.set(56);
-    // this.exceedThis.set(20);
     this.calculateBar();
   }
 
@@ -183,6 +180,8 @@ export class DashboardPage {
   }
 
   private calculateBar() {
+    if (!this._linkedCredential) return;
+
     const total = this._totalThisV > this._totalLastV ? this._totalThisV : this._totalLastV;
     this.totalLast.set(this._totalLastV / total * 100);
     this.totalThis.set(this._totalThisV / total * 100);

@@ -17,15 +17,15 @@ export class PlaidService {
   transactions$: Observable<any[]> = this.transactionSource.asObservable();
   private plaidClient;
 
- 
-  
+
+
 
   constructor() {
     console.log('Hello PlaidService Provider');
     this.plaidClient = new plaid.Client(
-      `5a8c91dc8d9239244b805dec`,              // client id
-      `befea17a6a5e505a4e979c3915d746`,        // secret
-      `5bd60517b0147259e73119216811f7`,        // public key
+      `5a8c0e36bdc6a47debd6ee15`,              // client id
+      `2ac6695774cef3665c793c1eb4a219`,        // secret
+      `28f2e54388e2f6a1aca59e789d353b`,        // public key
       plaid.environments.sandbox               // env
     );
   }
