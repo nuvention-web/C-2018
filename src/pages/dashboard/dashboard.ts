@@ -162,7 +162,7 @@ export class DashboardPage {
   }
 
   ionViewWillLeave() {
-    this._platformSubscriber.unsubscribe();
+    // this._platformSubscriber.unsubscribe();
   }
 
   ngAfterViewInit() {
@@ -246,29 +246,29 @@ export class DashboardPage {
 
     ///// plaid part
 
-    if (this._signedIn && !this._linkedCredential) {
-      this.linkHandler = Plaid.create({
-        clientName: `Coinscious`,
-        env: `sandbox`,
-        key: `28f2e54388e2f6a1aca59e789d353b`,
-        product: [`transactions`],
-        forceIframe: true,
-        selectAccount: false,
-        onSuccess: (public_token, metadata) => {
-          let newDoc = {} as UserAccount;
-          newDoc.accountToken = public_token;
-          newDoc.userId = this._user.uid;
-          this.userAccountCollections.add(newDoc).then(() => {
-            // this.loadingCtrl.create({
-            //   content: 'Please wait...'
-            // }).present();
-            this.navCtrl.setRoot('DashboardPage', { public_token: public_token, signed_in: true, linked_credential: true });
-          });
-          // console.log("Login Succeed");
-          // this._linkedCredential = true;
-        }
-      });
-    }
+    // if (this._signedIn && !this._linkedCredential) {
+    //   this.linkHandler = Plaid.create({
+    //     clientName: `Coinscious`,
+    //     env: `sandbox`,
+    //     key: `28f2e54388e2f6a1aca59e789d353b`,
+    //     product: [`transactions`],
+    //     forceIframe: true,
+    //     selectAccount: false,
+    //     onSuccess: (public_token, metadata) => {
+    //       let newDoc = {} as UserAccount;
+    //       newDoc.accountToken = public_token;
+    //       newDoc.userId = this._user.uid;
+    //       this.userAccountCollections.add(newDoc).then(() => {
+    //         // this.loadingCtrl.create({
+    //         //   content: 'Please wait...'
+    //         // }).present();
+    //         this.navCtrl.setRoot('DashboardPage', { public_token: public_token, signed_in: true, linked_credential: true });
+    //       });
+    //       // console.log("Login Succeed");
+    //       // this._linkedCredential = true;
+    //     }
+    //   });
+    // }
   }
 
   private calculateBar() {
