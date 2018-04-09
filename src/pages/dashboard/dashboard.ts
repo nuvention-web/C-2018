@@ -86,7 +86,7 @@ export class DashboardPage {
   private _exceedThisV = 220.5;
 
   private _loading;
-  private _isLoading = false;
+  private _isLoading = true;
 
   private linkHandler;
 
@@ -109,37 +109,41 @@ export class DashboardPage {
     this.public_token = this.navParams.get(`public_token`);
     const signedIn = this.navParams.get(`signed_in`);
     const linkedCredential = this.navParams.get(`linked_credential`);
+    const needRefresh = this.navParams.get(`need_refresh`);
+    this._isLoading = needRefresh == null ? true : needRefresh;
     this._signedIn = signedIn ? true : false;
     this._linkedCredential = linkedCredential ? true : false;
-    console.log(`constructor`);
+    // console.log(`constructor`);
     // this._demoText = this.public_token;
     // this._transactions = this.plaidService.transactions$;
-    // this._loading = this.loadingCtrl.create({
-    //   content: 'Please wait...'
-    // });
-    // if (this._linkedCredential || this._signedIn) {
-    //   this._loading.present();
-    // }
-    // this._platformSubscriber = this.platform.pause.subscribe(() => {
-    //   this.updateTransactions();
-    // });
+
+    if (!this._isLoading) return;
+
     if (this._linkedCredential) {
       this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${this.navParams.get(`user_doc_id`)}`);
-      // this._loading.dismiss();
+      this._isLoading = false;
       return;
     }
 
     if (this._signedIn) {
+      console.log(`check auth state`);
       this.afAuth.authState.subscribe(data => {
         this._user = new User(data);
         this.userAccountCollections.ref.where(`userId`, '==', this._user.uid).get().then(res => {
           res.forEach(doc => {
-            this.navCtrl.setRoot('DashboardPage', { public_token: doc.data().accountToken, user_doc_id: doc.id, signed_in: true, linked_credential: true });
+            this.navCtrl.setRoot(
+              'DashboardPage',
+              {
+                public_token: doc.data().accountToken,
+                user_doc_id: doc.id,
+                signed_in: true,
+                linked_credential: true,
+                need_refresh: true
+              });
           });
           console.log(`change root`);
-          // this._loading.dismiss();
         }, err => {
-          // this._loading.dismiss();
+
         });
       });
       return;
@@ -149,7 +153,13 @@ export class DashboardPage {
       if (user) {
         // user logged in
         console.log("logged in");
-        this.navCtrl.setRoot(`DashboardPage`, { signed_in: true, linked_credential: false });
+        this.navCtrl.setRoot(
+          `DashboardPage`,
+          {
+            signed_in: true,
+            linked_credential: false,
+            need_refresh: true
+          });
       } else {
         // user logged out
         console.log("logged out");
@@ -166,7 +176,8 @@ export class DashboardPage {
   }
 
   ngAfterViewInit() {
-    this.calculateBar();
+    if (!this._isLoading)
+      this.calculateBar();
   }
 
   ionViewDidEnter() {
@@ -246,29 +257,36 @@ export class DashboardPage {
 
     ///// plaid part
 
-    // if (this._signedIn && !this._linkedCredential) {
-    //   this.linkHandler = Plaid.create({
-    //     clientName: `Coinscious`,
-    //     env: `sandbox`,
-    //     key: `28f2e54388e2f6a1aca59e789d353b`,
-    //     product: [`transactions`],
-    //     forceIframe: true,
-    //     selectAccount: false,
-    //     onSuccess: (public_token, metadata) => {
-    //       let newDoc = {} as UserAccount;
-    //       newDoc.accountToken = public_token;
-    //       newDoc.userId = this._user.uid;
-    //       this.userAccountCollections.add(newDoc).then(() => {
-    //         // this.loadingCtrl.create({
-    //         //   content: 'Please wait...'
-    //         // }).present();
-    //         this.navCtrl.setRoot('DashboardPage', { public_token: public_token, signed_in: true, linked_credential: true });
-    //       });
-    //       // console.log("Login Succeed");
-    //       // this._linkedCredential = true;
-    //     }
-    //   });
-    // }
+    if (this._signedIn && !this._linkedCredential) {
+      this.linkHandler = Plaid.create({
+        clientName: `Coinscious`,
+        env: `sandbox`,
+        key: `28f2e54388e2f6a1aca59e789d353b`,
+        product: [`transactions`],
+        forceIframe: true,
+        selectAccount: false,
+        onSuccess: (public_token, metadata) => {
+          let newDoc = {} as UserAccount;
+          newDoc.accountToken = public_token;
+          newDoc.userId = this._user.uid;
+          this.userAccountCollections.add(newDoc).then(() => {
+            // this.loadingCtrl.create({
+            //   content: 'Please wait...'
+            // }).present();
+            this.navCtrl.setRoot(
+              'DashboardPage',
+              {
+                public_token: public_token,
+                signed_in: true,
+                linked_credential: true,
+                need_refresh: true
+              });
+          });
+          // console.log("Login Succeed");
+          // this._linkedCredential = true;
+        }
+      });
+    }
   }
 
   private calculateBar() {

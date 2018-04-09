@@ -36,7 +36,7 @@ export class LoginPage {
         if (user) {
           // user logged in
           console.log("logged in");
-          this.navCtrl.setRoot(`DashboardPage`, { signed_in: true, linked_credential: false });
+          this.navCtrl.setRoot(`DashboardPage`, { signed_in: true, linked_credential: false, need_refresh: true });
         } else {
           // user logged out
           console.log("logged out");
@@ -53,7 +53,7 @@ export class LoginPage {
     try {
       const result = await this.afAuth.auth.signInWithEmailAndPassword(email, password);
       if (result) {
-        this.navCtrl.setRoot(`DashboardPage`, { signed_in: true, linked_credential: false });
+        this.navCtrl.setRoot(`DashboardPage`, { signed_in: true, linked_credential: false, need_refresh: true });
       }
     } catch (e) {
       console.error(e);

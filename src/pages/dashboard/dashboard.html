@@ -3,7 +3,7 @@
   See http://ionicframework.com/docs/components/#navigation for more info on
   Ionic pages and navigation.
 -->
-<ion-header>
+<ion-header *ngIf="!_isLoading">
 
   <ion-navbar>
     <ion-buttons left *ngIf="_linkedCredential">
@@ -24,8 +24,12 @@
 
 </ion-header>
 
+<div class="loading" *ngIf="_isLoading">
+  <h4><ion-spinner></ion-spinner> Loading</h4>
+</div>
 
-<div class="brief" *ngIf="_signedIn && _linkedCredential" (click)="goToDetail()">
+
+<div class="brief" *ngIf="!_isLoading && _signedIn && _linkedCredential" (click)="goToDetail()">
   <h4>
    This Month
    <span>
@@ -63,7 +67,7 @@
   </div>
 </div>
 
-<ion-content *ngIf="_signedIn">
+<ion-content *ngIf="!_isLoading && _signedIn">
   <div class="unlinked-wrapper" *ngIf="!_linkedCredential">
     <div class="unlinked" *ngIf="!_linkedCredential">
       <p *ngIf="!_linkedCredential">

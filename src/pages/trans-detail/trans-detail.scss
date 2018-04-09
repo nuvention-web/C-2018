@@ -1,66 +1,60 @@
 page-trans-detail {
-	.chart {
-	    padding: 16px 16px 0 16px;
-	    border-bottom: 1px solid #cccccc;
-	    margin: -16px -16px 1.6rem;
-	    position: fixed;
-	    background-color: white;
-	    width: 100%;
-	    z-index: 100;
-	    box-shadow: 0 0 3px 3px rgba(0, 0, 0, 0.1);
-	    border-radius: 0 0 6px 6px;
+  ion-content {
+    background-color: #f3f3f3 !important;
+  }
 
-	}
+  .chart {
+    padding: 16px 16px 0 16px;
+    border-bottom: 1px solid #cccccc;
+    margin: -16px -16px 1.6rem;
+    position: fixed;
+    background-color: white;
+    width: 100%;
+    z-index: 100;
+    box-shadow: 0 0 3px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 6px 6px;
+  }
 
-	.month {
-	    padding: 16px 16px 0 16px;
-	    border-bottom: 1px solid #cccccc;
-	    margin: 170px -16px 1.6rem;
-	    position: fixed;
-	    background-color: white;
-	    width: 100%;
-	    z-index: 100;
-	    box-shadow: 0 0 3px 3px rgba(0, 0, 0, 0.1);
-	    border-radius: 0 0 6px 6px;
-	    
-	    h2 {
-	      font-size: 2rem;
+  .month {
+    background-color: white;
+    z-index: 100;
 
-	      span {
-	        font-size: 1.4rem;
-	        margin-left: 0.4rem;
-	        font-weight: 300;
-	        color: #222222;
-	      }
-	    }
+    h2 {
+      font-size: 2rem;
 
-	    .brief-heart {
-	      color: #5ced87;
-	      font-size: 1em;
-	      margin-right: .2rem;
-	    }
+      span {
+        font-size: 1.4rem;
+        margin-left: 0.4rem;
+        font-weight: 300;
+        color: #222222;
+      }
+    }
 
-	    .brief-heart-break {
-	      color: #ff9763;
-	      font-size: 1em;
-	      margin-right: .2rem;
-	    }
+    .brief-heart {
+      color: #5ced87;
+      font-size: 1em;
+      margin-right: .2rem;
+    }
 
-	    .brief-heart-flash {
-	      color: white;
-	      font-size: .6em;
-	      position: relative;
-	      right: 1.3rem;
-	      top: -.3rem;
-	      margin-right: -.7rem;
-	    }
-	}
+    .brief-heart-break {
+      color: #ff9763;
+      font-size: 1em;
+      margin-right: .2rem;
+    }
 
+    .brief-heart-flash {
+      color: white;
+      font-size: .6em;
+      position: relative;
+      right: 1.3rem;
+      top: -.3rem;
+      margin-right: -.7rem;
+    }
+  }
 
-	.purchase_wrap {
-	    background-color: #f3f3f3;
-	    margin: 17rem -16px -16px -16px;
-	    padding: 16px;
-	}
-	
+  .purchase_wrap {
+    background-color: #f3f3f3;
+    margin: 18.6rem -16px -16px -16px;
+    padding: 16px;
+  }
 }
