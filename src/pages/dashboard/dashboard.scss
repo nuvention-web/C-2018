@@ -56,6 +56,7 @@ page-dashboard {
 
   .ng-bar-placeholder {
     height: 7px;
+    margin-left: -16px;
 
     .ng-bar {
       border: 1px solid #ffffff;
@@ -67,7 +68,7 @@ page-dashboard {
   }
 
   .brief {
-    padding: 0 16px;
+    padding: 0;
     border-bottom: 1px solid #cccccc;
     display: block;
     position: absolute;
@@ -81,6 +82,7 @@ page-dashboard {
 
     h4 {
       font-size: 2rem;
+      padding: 0 16px;
 
       span {
         font-size: 1.4rem;
@@ -133,7 +135,7 @@ page-dashboard {
   }
 
   .linked {
-    margin-top: 12.6rem;
+    margin-top: 18.5rem;
   }
 
   .unlinked-wrapper {

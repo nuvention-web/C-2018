@@ -85,12 +85,11 @@ export class DashboardPage {
   private _signedIn = false;
   private _user: User;
 
-  private _totalLastV = 1211.66;
-  private _exceedLastV = 441.01;
-  private _totalThisV = 678.52;
-  private _exceedThisV = 220.5;
+  private _totalLastV = 0.00;
+  private _exceedLastV = 0.00;
+  private _totalThisV = 0.00;
+  private _exceedThisV = 0.00;
 
-  private _loading;
   private _isLoading = true;
 
   private linkHandler;
@@ -111,79 +110,8 @@ export class DashboardPage {
   ) {
     this.notificationCollections = this.firestore.collection<Notification>('notifications');
     this.userAccountCollections = this.firestore.collection<UserAccount>('user-accounts');
-    // this.public_token = this.navParams.get(`public_token`);
-    const signedIn = this.navParams.get(`signed_in`);
-    const linkedCredential = this.navParams.get(`linked_credential`);
-    const needRefresh = this.navParams.get(`need_refresh`);
-    this._isLoading = needRefresh == null ? true : needRefresh;
-    this._signedIn = signedIn ? true : false;
-    this._linkedCredential = linkedCredential ? true : false;
-    // console.log(`constructor`);
-    // this._demoText = this.public_token;
-    // this._transactions = this.plaidService.transactions$;
 
-    if (!this._isLoading) return;
-
-    if (this._linkedCredential) {
-      this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${this.navParams.get(`user_doc_id`)}`);
-      this._uaSubscription = this.userAccount.valueChanges().subscribe(ua => {
-        console.log(`received user account`);
-        console.log(ua);
-        this._userAccount = ua;
-        this._uaSubscription.unsubscribe();
-
-        this.plaidService.refreshTransaction(ua.accessToken);
-      });
-      // this.plaidService.refreshTransaction(this.userAccount.);
-      this._isLoading = false;
-      return;
-    }
-
-    if (this._signedIn) {
-      console.log(`check auth state`);
-      this.afAuth.authState.subscribe(data => {
-        this._user = new User(data);
-        this.userAccountCollections.ref.where(`userId`, '==', this._user.uid).get().then(res => {
-          if (!res.empty) {
-            console.log(`found credential`);
-            res.forEach(doc => {
-              this.navCtrl.setRoot(
-                'DashboardPage',
-                {
-                  public_token: doc.data().accountToken,
-                  user_doc_id: doc.id,
-                  signed_in: true,
-                  linked_credential: true,
-                  need_refresh: true
-                });
-            });
-          } else {
-            this._isLoading = false;
-          }
-        }, err => {
-
-        });
-      });
-      return;
-    }
-
-    this.afAuth.auth.onAuthStateChanged(user => {
-      if (user) {
-        // user logged in
-        console.log("logged in");
-        this.navCtrl.setRoot(
-          `DashboardPage`,
-          {
-            signed_in: true,
-            linked_credential: false,
-            need_refresh: true
-          });
-      } else {
-        // user logged out
-        console.log("logged out");
-        this.navCtrl.setRoot(`LoginPage`);
-      }
-    });
+    this.checkAuthState();
   }
 
   ionViewWillEnter() {
@@ -191,11 +119,6 @@ export class DashboardPage {
 
   ionViewWillLeave() {
     // this._platformSubscriber.unsubscribe();
-  }
-
-  ngAfterViewInit() {
-    if (!this._isLoading)
-      this.calculateBar();
   }
 
   ionViewDidEnter() {
@@ -325,16 +248,7 @@ export class DashboardPage {
             newDoc.accessToken = access_token;
             newDoc.userId = this._user.uid;
             this.userAccountCollections.add(newDoc).then(() => {
-              // this.loadingCtrl.create({
-              //   content: 'Please wait...'
-              // }).present();
-              this.navCtrl.setRoot(
-                'DashboardPage',
-                {
-                  signed_in: true,
-                  linked_credential: true,
-                  need_refresh: true
-                });
+              this.checkCredentials();
             });
           });
           // console.log("Login Succeed");
@@ -342,12 +256,99 @@ export class DashboardPage {
         }
       });
     }
+
+    ///// Plaid part end
+
+    this.plaidService.monthlyAmounts$.subscribe(records => {
+      this.zone.run(() => {
+        // this._demoText += ` Received`;
+        if (records[0] != null) {
+          this._totalThisV = records[0].totalAmount;
+          this._exceedThisV = records[0].exceedAmount;
+        }
+        if (records[1] != null) {
+          this._totalLastV = records[1].totalAmount;
+          this._exceedLastV = records[1].exceedAmount;
+        }
+        this.calculateBar();
+      });
+    });
+
+    this.plaidService.testString$.subscribe(s => {
+      this.zone.run(() => {
+        this._demoText += `0`;
+      });
+    });
+  }
+
+  private checkAuthState() {
+    this._isLoading = true;
+    this._signedIn = false;
+    this.afAuth.auth.onAuthStateChanged(user => {
+      if (user) {
+        // user logged in
+        console.log("logged in");
+
+        this._linkedCredential = false;
+        this._signedIn = true;
+        this.checkCredentials();
+      } else {
+        // user logged out
+        console.log("logged out");
+        this.navCtrl.setRoot(`LoginPage`);
+      }
+    });
+  }
+
+  private checkCredentials() {
+    this._isLoading = true;
+    this.afAuth.authState.subscribe(data => {
+      this._linkedCredential = false;
+      this._user = new User(data);
+      this.userAccountCollections.ref.where(`userId`, '==', this._user.uid).get().then(res => {
+        if (!res.empty) {
+          console.log(`found credential`);
+          this._linkedCredential = true;
+          this.getUserInfo(res.docs[0].id);
+          // this._userAccount = res[0].data();
+          // this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${res[0].id}`);
+        }
+      }, err => {
+        this._isLoading = false;
+        this._linkedCredential = false;
+      });
+    });
+  }
+
+  private getUserInfo(userId) {
+    this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${userId}`);
+    this._uaSubscription = this.userAccount.valueChanges().subscribe(ua => {
+      console.log(`received user account`);
+      console.log(ua);
+      this._userAccount = ua;
+      this._uaSubscription.unsubscribe();
+
+      this.plaidService.refreshTransaction(ua.accessToken);
+
+      this._isLoading = false;
+      this.calculateBar();
+      // get transaction data we have
+      let to = new Date();
+      let from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 10);
+      // TODO
+      this.plaidService.getTransactionRecords(ua.userId, from, to)
+        .then().catch();
+      this.plaidService.getMonthlyAmount(ua.userId);
+    });
+    // this.plaidService.refreshTransaction(this.userAccount.);
+    this._isLoading = false;
   }
 
   private calculateBar() {
     if (!this._signedIn || !this._linkedCredential) return;
 
-    const total = this._totalThisV > this._totalLastV ? this._totalThisV : this._totalLastV;
+    let total = this._totalThisV > this._totalLastV ? this._totalThisV : this._totalLastV;
+    total = total == 0 ? 0.01 : 0;
     this.totalLast.set(this._totalLastV / total * 100);
     this.totalThis.set(this._totalThisV / total * 100);
     this.exceedLast.set(this._exceedLastV / total * 100);
@@ -372,7 +373,7 @@ export class DashboardPage {
       this._totalThisV += Number(t.amount);
     });
     // ev.group = [];
-    console.log(ev.group);
+    // console.log(ev.group);
     this._transactions.splice(this._transactions.indexOf(ev.group), 1);
     this.calculateBar();
   }
@@ -383,14 +384,20 @@ export class DashboardPage {
   }
 
   private onFlag(ev) {
-    ev.group.data.splice(ev.index, 1);
-    this._totalThisV += Number(ev.transaction.amount);
-    this._exceedThisV += Number(ev.transaction.amount);
-    // this._flaggedTransactions.unshift(ev.transaction);
-    if (ev.group.data.length == 0) {
-      this._transactions.splice(this._transactions.indexOf(ev.group), 1);
-    }
-    this.calculateBar();
+    this.plaidService.addTransactionRecord(this._userAccount.userId, ev.transaction, false)
+      .then(() => {
+        ev.group.data.splice(ev.index, 1);
+        this._totalThisV += Number(ev.transaction.amount);
+        this._exceedThisV += Number(ev.transaction.amount);
+        // this._flaggedTransactions.unshift(ev.transaction);
+        if (ev.group.data.length == 0) {
+          this._transactions.splice(this._transactions.indexOf(ev.group), 1);
+        }
+        this.calculateBar();
+      })
+      .catch(err => {
+        this._demoText = err.message;
+      });
   }
 
   private goToDetail() {
@@ -416,8 +423,9 @@ export class DashboardPage {
           role: 'unbind',
           handler: () => {
             // console.log('Destructive clicked');
+            this._isLoading = true;
             this.userAccount.delete().then(() => {
-              this.navCtrl.setRoot('DashboardPage', { signed_in: true, linked_credential: false, need_refresh: true });
+              this.checkCredentials();
             });
           }
         }, {

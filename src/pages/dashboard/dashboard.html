@@ -44,8 +44,8 @@
     ${{(_totalThisV - _exceedThisV).toFixed(2)}}
   </span>
  </h4>
-  <ng-progress id="total-this" #totalThis color="#11b245"></ng-progress>
-  <ng-progress id="exceed-this" #exceedThis color="#ff9763"></ng-progress>
+  <ng-progress id="total-this" #totalThis color="#11b245" [min]="1"></ng-progress>
+  <ng-progress id="exceed-this" #exceedThis color="#ff9763" [min]="0"></ng-progress>
   <h4 class="last-month-label">
    Last Month
    <span>
@@ -60,8 +60,8 @@
     ${{(_totalLastV - _exceedLastV).toFixed(2)}}
    </span>
  </h4>
-  <ng-progress id="total-last" #totalLast color="#11b245" class="lastMonth"></ng-progress>
-  <ng-progress id="exceed-last" #exceedLast color="#ff9763" class="lastMonth"></ng-progress>
+  <ng-progress id="total-last" #totalLast color="#11b245" class="lastMonth" [min]="1"></ng-progress>
+  <ng-progress id="exceed-last" #exceedLast color="#ff9763" class="lastMonth" [min]="0"></ng-progress>
   <div class="button-wrapper">
     <button ion-button clear small> View Details </button>
   </div>
@@ -84,9 +84,9 @@
       </div> -->
 
     <div class="purchases-wrapper">
-      <!-- <div>
+      <div>
         {{_demoText}}
-      </div> -->
+      </div>
       <div>
         <h2>New Purchases</h2>
         <!-- <ion-badge *ngIf="!_transactions && _transactions.length != 0">{{_transaction.length}}</ion-badge> -->
