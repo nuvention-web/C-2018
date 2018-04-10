@@ -41,6 +41,7 @@ export class DashboardPage {
   private _uaSubscription: ISubscription;
   private _userAccount: UserAccount;
   public _demoText: string = `No message.`;
+  private months = [`Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`, `Jul`, `Aug`, `Sep`, `Oct`, `Nov`, `Dec`];
   private _transactions: any = [
     {
       name: `Today`,
@@ -260,6 +261,7 @@ export class DashboardPage {
     this.plaidService.transactions$.subscribe(transactions => {
       if (transactions) {
         this.zone.run(() => {
+          // this._demoText = `Success`;
           // if (this._count == 0) {
           //   this._count += 1;
           //   return;
@@ -270,10 +272,39 @@ export class DashboardPage {
           transactions.sort((a, b) => {
             return a.date > b.date ? -1 : 1;
           });
-          this._demoText = `New Message: ${transactions[0].name}, ${transactions[0].date}.`;
+          const today = new Date();
+          const yesterday = new Date(today.getTime() - 1000 * 60 * 60 * 24);
+          const dbeforey = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 2);
+
+          let trans = [
+            { name: "Today", data: [] },
+            { name: "Yesterday", data: [] },
+            { name: "2 Days Ago", data: [] }];
+
+          // this._demoText = `step 0`;
+
+          transactions.forEach((t: Transaction) => {
+            // const date = Number(t.date.substr(8, 2));
+            let date = t.date;
+            if (date == null) {
+              // this._demoText = `${t.toString()}`;
+              return;
+            }
+            let dateNum = Number(t.date.substr(8, 2));
+            if (dateNum == today.getDate()) {
+              trans[0].data.push(t);
+            } else if (dateNum == yesterday.getDate()) {
+              trans[1].data.push(t);
+            } else {
+              trans[2].data.push(t);
+            }
+          });
+
+          this._transactions = trans;
+          // this._demoText = `New Message: ${transactions[0].name}, ${transactions[0].date}.`;
         });
       }
-    });
+    }, err => { this._demoText = `${err.message}` });
 
 
     ///// plaid part

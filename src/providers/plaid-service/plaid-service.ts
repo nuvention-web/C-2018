@@ -100,7 +100,7 @@ export class PlaidService {
   public refreshLastMonthTransaction(public_token: string) {
     this.getAccessToken(public_token).then(access_token => {
       const today = new Date();
-      const daysAgo = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 3);
+      const daysAgo = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 2);
       this.plaidClient.getTransactions(
         access_token,
         `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`,
