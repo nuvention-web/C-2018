@@ -26,36 +26,56 @@ export class PlaidService {
       `5a8c0e36bdc6a47debd6ee15`,              // client id
       `2ac6695774cef3665c793c1eb4a219`,        // secret
       `28f2e54388e2f6a1aca59e789d353b`,        // public key
-      plaid.environments.sandbox               // env
+      // plaid.environments.sandbox               // env
+      plaid.environments.development               // env
     );
   }
 
-  private getAccessToken(public_token: string): Promise<string> {
+  public getAccessToken(public_token: string): Promise<string> {
     return new Promise<string>((resolve) => {
       console.log(`getting access token`);
 
       this.plaidClient.exchangePublicToken(public_token, (err, res) => {
-        this.transactionSource.next(res.access_token);
+        if (err) {
+          console.log(`error`);
+          console.log(err);
+          // this.transactionSource.next(err.error_message);
+          return;
+        }
+        console.log(`received access token`);
+
+        // this.transactionSource.next(res.access_token);
         resolve(res.access_token);
       });
     });
   }
 
-  public refreshTransaction(public_token: string) {
-    this.getAccessToken(public_token).then(access_token => {
-      const today = new Date();
-      const daysAgo = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 30);
-      this.plaidClient.getTransactions(
-        access_token,
-        // `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`,
-        // `${daysAgo.getFullYear()}-${daysAgo.getMonth()}-${daysAgo.getDate()}`,
-        `2017-03-01`,
-        `2017-04-01`,
-        (err, res) => {
-          this._transactions = res.transactions;
-          this.transactionSource.next(this._transactions);
-        });
-    });
+  public refreshTransaction(access_token: string) {
+    this.transactionSource.next([access_token]);
+    const today = new Date();
+    const daysAgo = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 3);
+    const tm = today.getMonth() < 9 ? `0${today.getMonth() + 1}` : `${today.getMonth()}`;
+    const td = today.getDate() < 10 ? `0${today.getDate()}` : `${today.getDate()}`;
+    const am = daysAgo.getMonth() < 9 ? `0${daysAgo.getMonth() + 1}` : `${daysAgo.getMonth()}`;
+    const ad = daysAgo.getDate() < 10 ? `0${daysAgo.getDate()}` : `${daysAgo.getDate()}`;
+    const todayString = `${today.getFullYear()}-${tm}-${td}`;
+    const daysAgoString = `${daysAgo.getFullYear()}-${am}-${ad}`;
+    this.plaidClient.getTransactions(
+      access_token,
+      daysAgoString,
+      todayString,
+      // `2017-03-01`,
+      // `2017-04-01`,
+      (err, res) => {
+        if (err) {
+          // this.transactionSource.next(err.error_message);
+          return;
+        }
+
+        this._transactions = res.transactions;
+        this.transactionSource.next(this._transactions);
+        // console.log(this._transactions);
+      });
   }
 
   public refreshThisMonthTransaction(public_token: string) {
@@ -64,10 +84,10 @@ export class PlaidService {
       const daysAgo = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 30);
       this.plaidClient.getTransactions(
         access_token,
-        // `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`,
-        // `${daysAgo.getFullYear()}-${daysAgo.getMonth()}-${daysAgo.getDate()}`,
-        `2017-04-01`,
-        `2017-05-01`,
+        `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`,
+        `${daysAgo.getFullYear()}-${daysAgo.getMonth()}-${daysAgo.getDate()}`,
+        // `2017-04-01`,
+        // `2017-05-01`,
         (err, res) => {
           this._transactions = res.transactions;
           this.transactionSource.next(this._transactions);
@@ -80,13 +100,13 @@ export class PlaidService {
   public refreshLastMonthTransaction(public_token: string) {
     this.getAccessToken(public_token).then(access_token => {
       const today = new Date();
-      const daysAgo = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 30);
+      const daysAgo = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 3);
       this.plaidClient.getTransactions(
         access_token,
-        // `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`,
-        // `${daysAgo.getFullYear()}-${daysAgo.getMonth()}-${daysAgo.getDate()}`,
-        `2017-03-01`,
-        `2017-04-01`,
+        `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`,
+        `${daysAgo.getFullYear()}-${daysAgo.getMonth()}-${daysAgo.getDate()}`,
+        // `2017-03-01`,
+        // `2017-04-01`,
         (err, res) => {
           this._transactions = res.transactions;
           this.transactionSource.next(this._transactions);

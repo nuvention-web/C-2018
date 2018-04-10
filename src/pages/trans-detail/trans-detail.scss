@@ -4,9 +4,9 @@ page-trans-detail {
   }
 
   .chart {
-    padding: 16px 16px 0 16px;
+    padding: 1.6rem;
     border-bottom: 1px solid #cccccc;
-    margin: -16px -16px 1.6rem;
+    margin: -16px -16px;
     position: fixed;
     background-color: white;
     width: 100%;
@@ -21,6 +21,7 @@ page-trans-detail {
 
     h2 {
       font-size: 2rem;
+      margin: 0 !important;
 
       span {
         font-size: 1.4rem;
@@ -54,7 +55,7 @@ page-trans-detail {
 
   .purchase_wrap {
     background-color: #f3f3f3;
-    margin: 18.6rem -16px -16px -16px;
+    margin: 208px -16px -16px -16px;
     padding: 16px;
   }
 }

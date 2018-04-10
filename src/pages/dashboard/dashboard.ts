@@ -4,6 +4,8 @@ import { Push, PushObject, PushOptions, NotificationEventResponse } from '@ionic
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { NgProgressComponent } from '@ngx-progressbar/core';
+import { Observable } from "rxjs/Observable";
+import { ISubscription } from "rxjs/Subscription";
 
 import { Notification } from '../../models/notification';
 import { UserAccount } from '../../models/userAccount';
@@ -36,7 +38,9 @@ export class DashboardPage {
   private notificationCollections: AngularFirestoreCollection<Notification>;
   private userAccountCollections: AngularFirestoreCollection<UserAccount>;
   private userAccount: AngularFirestoreDocument<UserAccount>;
-  public _demoText: string = ``;
+  private _uaSubscription: ISubscription;
+  private _userAccount: UserAccount;
+  public _demoText: string = `No message.`;
   private _transactions: any = [
     {
       name: `Today`,
@@ -72,7 +76,7 @@ export class DashboardPage {
     }
   ];
   private _flaggedTransactions: any = [];
-  private public_token: string;
+  // private public_token: string;
   private _point: number = 100;
   private _platformSubscriber;
   private _count = 0;
@@ -106,7 +110,7 @@ export class DashboardPage {
   ) {
     this.notificationCollections = this.firestore.collection<Notification>('notifications');
     this.userAccountCollections = this.firestore.collection<UserAccount>('user-accounts');
-    this.public_token = this.navParams.get(`public_token`);
+    // this.public_token = this.navParams.get(`public_token`);
     const signedIn = this.navParams.get(`signed_in`);
     const linkedCredential = this.navParams.get(`linked_credential`);
     const needRefresh = this.navParams.get(`need_refresh`);
@@ -121,6 +125,15 @@ export class DashboardPage {
 
     if (this._linkedCredential) {
       this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${this.navParams.get(`user_doc_id`)}`);
+      this._uaSubscription = this.userAccount.valueChanges().subscribe(ua => {
+        console.log(`received user account`);
+        console.log(ua);
+        this._userAccount = ua;
+        this._uaSubscription.unsubscribe();
+
+        this.plaidService.refreshTransaction(ua.accessToken);
+      });
+      // this.plaidService.refreshTransaction(this.userAccount.);
       this._isLoading = false;
       return;
     }
@@ -130,18 +143,22 @@ export class DashboardPage {
       this.afAuth.authState.subscribe(data => {
         this._user = new User(data);
         this.userAccountCollections.ref.where(`userId`, '==', this._user.uid).get().then(res => {
-          res.forEach(doc => {
-            this.navCtrl.setRoot(
-              'DashboardPage',
-              {
-                public_token: doc.data().accountToken,
-                user_doc_id: doc.id,
-                signed_in: true,
-                linked_credential: true,
-                need_refresh: true
-              });
-          });
-          console.log(`change root`);
+          if (!res.empty) {
+            console.log(`found credential`);
+            res.forEach(doc => {
+              this.navCtrl.setRoot(
+                'DashboardPage',
+                {
+                  public_token: doc.data().accountToken,
+                  user_doc_id: doc.id,
+                  signed_in: true,
+                  linked_credential: true,
+                  need_refresh: true
+                });
+            });
+          } else {
+            this._isLoading = false;
+          }
         }, err => {
 
         });
@@ -240,19 +257,23 @@ export class DashboardPage {
     // pushObject.on('registration').subscribe((registration: any) => console.log('Device registered', registration));
     // pushObject.on('error').subscribe(error => console.error('Error with Push plugin', error));
 
-    // this.plaidService.transactions$.subscribe(transactions => {
-    //   if (transactions) {
-    //     this.zone.run(() => {
-    //       if (this._count == 0) {
-    //         this._count += 1;
-    //         return;
-    //       }
-    //       this._transactions = transactions;
-    //       this.pushNotification();
-    //       this._count = 0;
-    //     });
-    //   }
-    // });
+    this.plaidService.transactions$.subscribe(transactions => {
+      if (transactions) {
+        this.zone.run(() => {
+          // if (this._count == 0) {
+          //   this._count += 1;
+          //   return;
+          // }
+          // this._transactions = transactions;
+          // this.pushNotification();
+          // this._count = 0;
+          transactions.sort((a, b) => {
+            return a.date > b.date ? -1 : 1;
+          });
+          this._demoText = `New Message: ${transactions[0].name}, ${transactions[0].date}.`;
+        });
+      }
+    });
 
 
     ///// plaid part
@@ -260,27 +281,30 @@ export class DashboardPage {
     if (this._signedIn && !this._linkedCredential) {
       this.linkHandler = Plaid.create({
         clientName: `Coinscious`,
-        env: `sandbox`,
+        // env: `sandbox`,
+        env: `development`,
         key: `28f2e54388e2f6a1aca59e789d353b`,
         product: [`transactions`],
         forceIframe: true,
         selectAccount: false,
         onSuccess: (public_token, metadata) => {
-          let newDoc = {} as UserAccount;
-          newDoc.accountToken = public_token;
-          newDoc.userId = this._user.uid;
-          this.userAccountCollections.add(newDoc).then(() => {
-            // this.loadingCtrl.create({
-            //   content: 'Please wait...'
-            // }).present();
-            this.navCtrl.setRoot(
-              'DashboardPage',
-              {
-                public_token: public_token,
-                signed_in: true,
-                linked_credential: true,
-                need_refresh: true
-              });
+          this.plaidService.getAccessToken(public_token).then(access_token => {
+            let newDoc = {} as UserAccount;
+            newDoc.publicToken = public_token;
+            newDoc.accessToken = access_token;
+            newDoc.userId = this._user.uid;
+            this.userAccountCollections.add(newDoc).then(() => {
+              // this.loadingCtrl.create({
+              //   content: 'Please wait...'
+              // }).present();
+              this.navCtrl.setRoot(
+                'DashboardPage',
+                {
+                  signed_in: true,
+                  linked_credential: true,
+                  need_refresh: true
+                });
+            });
           });
           // console.log("Login Succeed");
           // this._linkedCredential = true;
@@ -307,9 +331,9 @@ export class DashboardPage {
     this.notificationCollections.add(newMessage);
   }
 
-  private updateTransactions() {
-    this.plaidService.refreshTransaction(this.public_token);
-  }
+  // private updateTransactions() {
+  //   this.plaidService.refreshTransaction(this.public_token);
+  // }
 
   private onApprove(ev) {
     this._point += ev.point;
@@ -362,7 +386,7 @@ export class DashboardPage {
           handler: () => {
             // console.log('Destructive clicked');
             this.userAccount.delete().then(() => {
-              this.navCtrl.setRoot('DashboardPage', { signed_in: true, linked_credential: false });
+              this.navCtrl.setRoot('DashboardPage', { signed_in: true, linked_credential: false, need_refresh: true });
             });
           }
         }, {
