@@ -246,8 +246,12 @@ export class DashboardPage {
           this.getUserInfo(res.docs[0].id);
           // this._userAccount = res[0].data();
           // this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${res[0].id}`);
+        } else {
+          this._isLoading = false;
+          this._linkedCredential = false;
         }
       }, err => {
+        console.log(`error`);
         this._isLoading = false;
         this._linkedCredential = false;
       });
