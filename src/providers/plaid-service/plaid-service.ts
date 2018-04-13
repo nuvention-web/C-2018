@@ -24,10 +24,15 @@ export class PlaidService {
   private userTransCollections: AngularFirestoreCollection<UserTransaction>;
 
   //TODO change this to last Month's and this month's
-  private _monthAmounts: UserMonthlyRecord[] = [null, null];
-  private _monthAmountSource: BehaviorSubject<UserMonthlyRecord[]> = new BehaviorSubject<UserMonthlyRecord[]>(null);
-  monthlyAmounts$: Observable<UserMonthlyRecord[]> = this._monthAmountSource.asObservable();
+  private _lastMonthAmounts: UserMonthlyRecord = null;
+  private _lastMonthAmountSource: BehaviorSubject<UserMonthlyRecord> = new BehaviorSubject<UserMonthlyRecord>(null);
+  lastMonthlyAmounts$: Observable<UserMonthlyRecord> = this._lastMonthAmountSource.asObservable();
+  private _thisMonthAmounts: UserMonthlyRecord = null;
+  private _thisMonthAmountSource: BehaviorSubject<UserMonthlyRecord> = new BehaviorSubject<UserMonthlyRecord>(null);
+  thisMonthlyAmounts$: Observable<UserMonthlyRecord> = this._thisMonthAmountSource.asObservable();
   private _userMonthAmountsCollection: AngularFirestoreCollection<UserMonthlyRecord>;
+  private _thisMonthAmount: AngularFirestoreDocument<UserMonthlyRecord> = null;
+  private _lastMonthAmount: AngularFirestoreDocument<UserMonthlyRecord> = null;
 
   private _testSource: BehaviorSubject<any> = new BehaviorSubject<any>(null);
   testString$: Observable<any> = this._testSource.asObservable();
@@ -56,7 +61,7 @@ export class PlaidService {
     const lastYrStr = thisMonthNum == 1 ? `${now.getFullYear() - 1}` : `${now.getFullYear()}`;
     const lastMonth = new Date(`${lastYrStr}-${lastMonthStr}-01`);
 
-    this._testSource.next(`Getting monthly amount`);
+    // this._testSource.next(`Getting monthly amount`);
 
     this._userMonthAmountsCollection.ref.where(`userId`, "==", userId)
       .where(`date`, "==", thisMonth).get().then(ref => {
@@ -68,11 +73,11 @@ export class PlaidService {
           item.totalAmount = 0;
           item.userId = userId;
           this._userMonthAmountsCollection.add(item).then(r => {
-            this.getMonthlyAmountRecord(r.id, 0);
+            this.getThisMonthlyAmountRecord(r.id);
           });
         } else {
-          this._testSource.next(`Get doc 0`);
-          this.getMonthlyAmountRecord(ref.docs[0].id, 0);
+          // this._testSource.next(`Get doc 0`);
+          this.getThisMonthlyAmountRecord(ref.docs[0].id);
         }
       }).catch(err => { });
     this._userMonthAmountsCollection.ref.where(`userId`, "==", userId)
@@ -85,24 +90,46 @@ export class PlaidService {
           item.totalAmount = 0;
           item.userId = userId;
           this._userMonthAmountsCollection.add(item).then(r => {
-            this.getMonthlyAmountRecord(r.id, 1);
+            this.getLastMonthlyAmountRecord(r.id);
           });
         } else {
-          this._testSource.next(`Get doc 1`);
-          this.getMonthlyAmountRecord(ref.docs[0].id, 1);
+          // this._testSource.next(`Get doc 1`);
+          this.getLastMonthlyAmountRecord(ref.docs[0].id);
         }
       });
   }
 
-  private getMonthlyAmountRecord(docId, index) {
-    this.firestore.doc<UserMonthlyRecord>(`user-monthly-record/${docId}`).valueChanges().subscribe(
+  private getThisMonthlyAmountRecord(docId) {
+    this._thisMonthAmount = this.firestore.doc<UserMonthlyRecord>(`user-monthly-amount/${docId}`);
+    this._thisMonthAmount.valueChanges().subscribe(
       record => {
-        this._monthAmounts[index] = record;
-        this._monthAmountSource.next(this._monthAmounts);
+        this._thisMonthAmounts = record;
+        this._thisMonthAmountSource.next(this._thisMonthAmounts);
       }, error => {
-        this._monthAmountSource.next(this._monthAmounts);
+        this._thisMonthAmountSource.next(this._thisMonthAmounts);
       }
     );
+  }
+
+  private getLastMonthlyAmountRecord(docId) {
+    this._lastMonthAmount = this.firestore.doc<UserMonthlyRecord>(`user-monthly-amount/${docId}`);
+    this._lastMonthAmount.valueChanges().subscribe(
+      record => {
+        this._lastMonthAmounts = record;
+        this._lastMonthAmountSource.next(this._lastMonthAmounts);
+      }, error => {
+        this._lastMonthAmountSource.next(this._lastMonthAmounts);
+      }
+    );
+  }
+
+  public addMonthlyAmount(totalAmount, exceedAmount, totalAdd = 0, exceedAdd = 0): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this._thisMonthAmount.update({ totalAmount: totalAmount + totalAdd, exceedAmount: exceedAmount + exceedAdd })
+        .then(() => {
+          resolve();
+        });
+    });
   }
 
   public getAccessToken(public_token: string): Promise<string> {
@@ -127,7 +154,7 @@ export class PlaidService {
   public getTransactionRecords(userId, from, to): Promise<UserTransaction[]> {
     return new Promise<UserTransaction[]>((resolve, reject) => {
       this.userTransCollections.ref.where(`userId`, "==", userId)
-        .where(`date`, ">=", from).where(`date`, "<=", to)
+        .where(`date`, ">", from).where(`date`, "<", to).orderBy(`date`, "desc")
         .get().then(
           ref => {
             if (!ref.empty) {

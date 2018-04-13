@@ -11,6 +11,7 @@ import { Notification } from '../../models/notification';
 import { UserAccount } from '../../models/userAccount';
 import { User } from '../../models/user';
 import { Transaction } from '../../models/transaction';
+import { UserTransaction } from '../../models/userTransaction';
 import { PlaidService } from '../../providers/plaid-service/plaid-service';
 
 declare var cordova;
@@ -42,40 +43,8 @@ export class DashboardPage {
   private _userAccount: UserAccount;
   public _demoText: string = `No message.`;
   private months = [`Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`, `Jul`, `Aug`, `Sep`, `Oct`, `Nov`, `Dec`];
-  private _transactions: any = [
-    {
-      name: `Today`,
-      data: [
-        { name: `McDonald's`, amount: `10.74`, date: `2017-02-27`, love: false },
-        { name: `Starbucks`, amount: `7.32`, date: `2017-02-27`, love: false },
-        { name: `Uber 063015 SF**POOL**`, amount: `5.40`, date: `2017-02-25`, love: false }
-      ]
-    },
-    {
-      name: `Yesterday`,
-      data: [
-        { name: `United Airlines`, amount: `500.00`, date: `2017-02-23`, love: false },
-        { name: `AmazonPrime Membersh`, amount: `49.00`, date: `2017-02-23`, love: false }
-      ]
-    },
-    {
-      name: `Jan 18`,
-      data: [
-        { name: `TARGET.COM * 800-591-3869`, amount: `42.49`, date: `2017-02-22`, love: false },
-        { name: `AMAZON MKTPLACE`, amount: `27.57`, date: `2017-02-20`, love: false },
-        { name: `#03428 JEWEL EVANSTON IL`, amount: `56.20`, date: `2017-02-19`, love: false },
-        { name: `Nicor Gas NICPayment 1388019270`, amount: `50.00`, date: `2017-02-16`, love: false },
-        { name: `ZARA USA 3697 CHICAGO IL`, amount: `138.21`, date: `2017-02-12`, love: false },
-        { name: `B&H PHOTO`, amount: `298.00`, date: `2017-02-08`, love: false },
-        { name: `LITTLE TOKYO ROSEMONT`, amount: `11.15`, date: `2017-02-03`, love: false },
-        { name: `MICHAEL KORS`, amount: `141.41`, date: `2017-02-08`, love: false },
-        { name: `CALVIN KLEIN`, amount: `26.13`, date: `2017-02-06`, love: false },
-        { name: `USA*CANTEEN VENDING`, amount: `1.25`, date: `2017-02-03`, love: false },
-        { name: `NORRIS CENTER FOOD COUR`, amount: `8.02`, date: `2017-02-02`, love: false },
-        { name: `LIBRARY CAFE BERGSON`, amount: `3.85`, date: `2017-02-08`, love: false }
-      ]
-    }
-  ];
+  private _transactions: any = [];
+  private _transHistory: UserTransaction[] = null;
   private _flaggedTransactions: any = [];
   // private public_token: string;
   private _point: number = 100;
@@ -184,47 +153,7 @@ export class DashboardPage {
     this.plaidService.transactions$.subscribe(transactions => {
       if (transactions) {
         this.zone.run(() => {
-          // this._demoText = `Success`;
-          // if (this._count == 0) {
-          //   this._count += 1;
-          //   return;
-          // }
-          // this._transactions = transactions;
-          // this.pushNotification();
-          // this._count = 0;
-          transactions.sort((a, b) => {
-            return a.date > b.date ? -1 : 1;
-          });
-          const today = new Date();
-          const yesterday = new Date(today.getTime() - 1000 * 60 * 60 * 24);
-          const dbeforey = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 2);
-
-          let trans = [
-            { name: "Today", data: [] },
-            { name: "Yesterday", data: [] },
-            { name: "2 Days Ago", data: [] }];
-
-          // this._demoText = `step 0`;
-
-          transactions.forEach((t: Transaction) => {
-            // const date = Number(t.date.substr(8, 2));
-            let date = t.date;
-            if (date == null) {
-              // this._demoText = `${t.toString()}`;
-              return;
-            }
-            let dateNum = Number(t.date.substr(8, 2));
-            if (dateNum == today.getDate()) {
-              trans[0].data.push(t);
-            } else if (dateNum == yesterday.getDate()) {
-              trans[1].data.push(t);
-            } else {
-              trans[2].data.push(t);
-            }
-          });
-
-          this._transactions = trans;
-          // this._demoText = `New Message: ${transactions[0].name}, ${transactions[0].date}.`;
+          this.reshapeTransactions(transactions);
         });
       }
     }, err => { this._demoText = `${err.message}` });
@@ -259,16 +188,21 @@ export class DashboardPage {
 
     ///// Plaid part end
 
-    this.plaidService.monthlyAmounts$.subscribe(records => {
+    this.plaidService.lastMonthlyAmounts$.subscribe(record => {
       this.zone.run(() => {
-        // this._demoText += ` Received`;
-        if (records[0] != null) {
-          this._totalThisV = records[0].totalAmount;
-          this._exceedThisV = records[0].exceedAmount;
+        if (record != null) {
+          this._totalLastV = record.totalAmount;
+          this._exceedLastV = record.exceedAmount;
         }
-        if (records[1] != null) {
-          this._totalLastV = records[1].totalAmount;
-          this._exceedLastV = records[1].exceedAmount;
+        this.calculateBar();
+      });
+    });
+
+    this.plaidService.thisMonthlyAmounts$.subscribe(record => {
+      this.zone.run(() => {
+        if (record != null) {
+          this._totalThisV = record.totalAmount;
+          this._exceedThisV = record.exceedAmount;
         }
         this.calculateBar();
       });
@@ -276,7 +210,7 @@ export class DashboardPage {
 
     this.plaidService.testString$.subscribe(s => {
       this.zone.run(() => {
-        this._demoText += `0`;
+        this._demoText = s;
       });
     });
   }
@@ -337,11 +271,57 @@ export class DashboardPage {
       let from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 10);
       // TODO
       this.plaidService.getTransactionRecords(ua.userId, from, to)
-        .then().catch();
+        .then(transactions => {
+          // this._demoText = `Received Transaction Records`;
+          this._transHistory = transactions;
+          this.reshapeTransactions(this._transactions);
+        }).catch(err => {
+          // this._demoText = err.message;
+        });
       this.plaidService.getMonthlyAmount(ua.userId);
     });
     // this.plaidService.refreshTransaction(this.userAccount.);
     this._isLoading = false;
+  }
+
+  private reshapeTransactions(transactions) {
+    if (this._transHistory == null || transactions == null) return;
+
+    transactions.sort((a, b) => {
+      return a.date > b.date ? -1 : 1;
+    });
+    transactions = transactions.filter(t => !this._transHistory.some(tr => tr.transactionId == t.transaction_id));
+
+    const today = new Date();
+    const yesterday = new Date(today.getTime() - 1000 * 60 * 60 * 24);
+    const dbeforey = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 2);
+
+    let trans = [
+      { name: "Today", data: [] },
+      { name: "Yesterday", data: [] },
+      { name: "2 Days Ago", data: [] }];
+
+    // this._demoText = `step 0`;
+
+    transactions.forEach((t: Transaction) => {
+      // const date = Number(t.date.substr(8, 2));
+      let date = t.date;
+      if (date == null) {
+        // this._demoText = `${t.toString()}`;
+        return;
+      }
+
+      let dateNum = Number(t.date.substr(8, 2));
+      if (dateNum == today.getDate()) {
+        trans[0].data.push(t);
+      } else if (dateNum == yesterday.getDate()) {
+        trans[1].data.push(t);
+      } else {
+        trans[2].data.push(t);
+      }
+    });
+
+    this._transactions = trans;
   }
 
   private calculateBar() {
@@ -370,12 +350,18 @@ export class DashboardPage {
   private onApprove(ev) {
     this._point += ev.point;
     ev.group.data.forEach(t => {
-      this._totalThisV += Number(t.amount);
+      this.plaidService.addTransactionRecord(this._userAccount.userId, t, true)
+        .then(() => {
+          this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, t.amount);
+        })
+        .catch(err => {
+          this._demoText = err.message;
+        });
     });
     // ev.group = [];
     // console.log(ev.group);
     this._transactions.splice(this._transactions.indexOf(ev.group), 1);
-    this.calculateBar();
+    // this.calculateBar();
   }
 
   private onApproveFlag(ev) {
@@ -386,14 +372,17 @@ export class DashboardPage {
   private onFlag(ev) {
     this.plaidService.addTransactionRecord(this._userAccount.userId, ev.transaction, false)
       .then(() => {
-        ev.group.data.splice(ev.index, 1);
-        this._totalThisV += Number(ev.transaction.amount);
-        this._exceedThisV += Number(ev.transaction.amount);
+        this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, ev.transaction.amount, ev.transaction.amount)
+          .then(() => {
+            ev.group.data.splice(ev.index, 1);
+            if (ev.group.data.length == 0) {
+              this._transactions.splice(this._transactions.indexOf(ev.group), 1);
+            }
+            // this.calculateBar();
+          });
+        // this._totalThisV += Number(ev.transaction.amount);
+        // this._exceedThisV += Number(ev.transaction.amount);
         // this._flaggedTransactions.unshift(ev.transaction);
-        if (ev.group.data.length == 0) {
-          this._transactions.splice(this._transactions.indexOf(ev.group), 1);
-        }
-        this.calculateBar();
       })
       .catch(err => {
         this._demoText = err.message;
