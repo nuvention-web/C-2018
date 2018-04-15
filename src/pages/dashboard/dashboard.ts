@@ -242,6 +242,7 @@ export class DashboardPage {
       this.userAccountCollections.ref.where(`userId`, '==', this._user.uid).get().then(res => {
         if (!res.empty) {
           console.log(`found credential`);
+          this._isLoading = false;
           this._linkedCredential = true;
           this.getUserInfo(res.docs[0].id);
           // this._userAccount = res[0].data();
