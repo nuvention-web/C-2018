@@ -12,4 +12,5 @@ export class Transaction {
   pending_transaction_id: string;
   transaction_id: string;
   transaction_type: string;
+  love: boolean;
 }

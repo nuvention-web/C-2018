@@ -1,8 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Observable } from "rxjs/Observable";
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Transaction } from '../../models/transaction';
+import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
 import plaid from 'plaid';
+
+import { Transaction } from '../../models/transaction';
+import { UserTransaction } from '../../models/userTransaction';
+import { UserMonthlyRecord } from '../../models/user-monthly-record';
 
 /*
   Generated class for the PlaidService provider.
@@ -17,45 +21,190 @@ export class PlaidService {
   transactions$: Observable<any[]> = this.transactionSource.asObservable();
   private plaidClient;
 
+  private userTransCollections: AngularFirestoreCollection<UserTransaction>;
 
+  //TODO change this to last Month's and this month's
+  private _lastMonthAmounts: UserMonthlyRecord = null;
+  private _lastMonthAmountSource: BehaviorSubject<UserMonthlyRecord> = new BehaviorSubject<UserMonthlyRecord>(null);
+  lastMonthlyAmounts$: Observable<UserMonthlyRecord> = this._lastMonthAmountSource.asObservable();
+  private _thisMonthAmounts: UserMonthlyRecord = null;
+  private _thisMonthAmountSource: BehaviorSubject<UserMonthlyRecord> = new BehaviorSubject<UserMonthlyRecord>(null);
+  thisMonthlyAmounts$: Observable<UserMonthlyRecord> = this._thisMonthAmountSource.asObservable();
+  private _userMonthAmountsCollection: AngularFirestoreCollection<UserMonthlyRecord>;
+  private _thisMonthAmount: AngularFirestoreDocument<UserMonthlyRecord> = null;
+  private _lastMonthAmount: AngularFirestoreDocument<UserMonthlyRecord> = null;
 
+  private _testSource: BehaviorSubject<any> = new BehaviorSubject<any>(null);
+  testString$: Observable<any> = this._testSource.asObservable();
 
-  constructor() {
+  constructor(private firestore: AngularFirestore) {
     console.log('Hello PlaidService Provider');
     this.plaidClient = new plaid.Client(
       `5a8c0e36bdc6a47debd6ee15`,              // client id
       `2ac6695774cef3665c793c1eb4a219`,        // secret
       `28f2e54388e2f6a1aca59e789d353b`,        // public key
-      plaid.environments.sandbox               // env
+      // plaid.environments.sandbox               // env
+      plaid.environments.development               // env
+    );
+
+    this.userTransCollections = this.firestore.collection<UserTransaction>('user-transactions');
+    this._userMonthAmountsCollection = this.firestore.collection<UserMonthlyRecord>('user-monthly-amount');
+  }
+
+  public getMonthlyAmount(userId) {
+    const now = new Date();
+    let thisMonthNum = now.getMonth() + 1;
+    const thisMonthStr = thisMonthNum > 10 ? `${thisMonthNum}` : `0${thisMonthNum}`;
+    const thisMonth = new Date(`${now.getFullYear()}-${thisMonthStr}-01`);
+    const lastMonthStr = thisMonthNum == 1 ?
+      `12` : thisMonthNum - 1 > 10 ? `${thisMonthNum - 1}` : `0${thisMonthNum - 1}`;
+    const lastYrStr = thisMonthNum == 1 ? `${now.getFullYear() - 1}` : `${now.getFullYear()}`;
+    const lastMonth = new Date(`${lastYrStr}-${lastMonthStr}-01`);
+
+    // this._testSource.next(`Getting monthly amount`);
+
+    this._userMonthAmountsCollection.ref.where(`userId`, "==", userId)
+      .where(`date`, "==", thisMonth).get().then(ref => {
+        if (ref.empty) {
+          // create one!
+          let item = {} as UserMonthlyRecord;
+          item.date = thisMonth;
+          item.exceedAmount = 0;
+          item.totalAmount = 0;
+          item.userId = userId;
+          this._userMonthAmountsCollection.add(item).then(r => {
+            this.getThisMonthlyAmountRecord(r.id);
+          });
+        } else {
+          // this._testSource.next(`Get doc 0`);
+          this.getThisMonthlyAmountRecord(ref.docs[0].id);
+        }
+      }).catch(err => { });
+    this._userMonthAmountsCollection.ref.where(`userId`, "==", userId)
+      .where(`date`, "==", lastMonth).get().then(ref => {
+        if (ref.empty) {
+          // create one!
+          let item = {} as UserMonthlyRecord;
+          item.date = lastMonth;
+          item.exceedAmount = 0;
+          item.totalAmount = 0;
+          item.userId = userId;
+          this._userMonthAmountsCollection.add(item).then(r => {
+            this.getLastMonthlyAmountRecord(r.id);
+          });
+        } else {
+          // this._testSource.next(`Get doc 1`);
+          this.getLastMonthlyAmountRecord(ref.docs[0].id);
+        }
+      });
+  }
+
+  private getThisMonthlyAmountRecord(docId) {
+    this._thisMonthAmount = this.firestore.doc<UserMonthlyRecord>(`user-monthly-amount/${docId}`);
+    this._thisMonthAmount.valueChanges().subscribe(
+      record => {
+        this._thisMonthAmounts = record;
+        this._thisMonthAmountSource.next(this._thisMonthAmounts);
+      }, error => {
+        this._thisMonthAmountSource.next(this._thisMonthAmounts);
+      }
     );
   }
 
-  private getAccessToken(public_token: string): Promise<string> {
+  private getLastMonthlyAmountRecord(docId) {
+    this._lastMonthAmount = this.firestore.doc<UserMonthlyRecord>(`user-monthly-amount/${docId}`);
+    this._lastMonthAmount.valueChanges().subscribe(
+      record => {
+        this._lastMonthAmounts = record;
+        this._lastMonthAmountSource.next(this._lastMonthAmounts);
+      }, error => {
+        this._lastMonthAmountSource.next(this._lastMonthAmounts);
+      }
+    );
+  }
+
+  public addMonthlyAmount(totalAmount, exceedAmount, totalAdd = 0, exceedAdd = 0): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this._thisMonthAmount.update({ totalAmount: totalAmount + totalAdd, exceedAmount: exceedAmount + exceedAdd })
+        .then(() => {
+          resolve();
+        });
+    });
+  }
+
+  public getAccessToken(public_token: string): Promise<string> {
     return new Promise<string>((resolve) => {
       console.log(`getting access token`);
 
       this.plaidClient.exchangePublicToken(public_token, (err, res) => {
-        this.transactionSource.next(res.access_token);
+        if (err) {
+          console.log(`error`);
+          console.log(err);
+          // this.transactionSource.next(err.error_message);
+          return;
+        }
+        console.log(`received access token`);
+
+        // this.transactionSource.next(res.access_token);
         resolve(res.access_token);
       });
     });
   }
 
-  public refreshTransaction(public_token: string) {
-    this.getAccessToken(public_token).then(access_token => {
-      const today = new Date();
-      const daysAgo = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 30);
-      this.plaidClient.getTransactions(
-        access_token,
-        // `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`,
-        // `${daysAgo.getFullYear()}-${daysAgo.getMonth()}-${daysAgo.getDate()}`,
-        `2017-03-01`,
-        `2017-04-01`,
-        (err, res) => {
-          this._transactions = res.transactions;
-          this.transactionSource.next(this._transactions);
-        });
+  public getTransactionRecords(userId, from, to): Promise<UserTransaction[]> {
+    return new Promise<UserTransaction[]>((resolve, reject) => {
+      this.userTransCollections.ref.where(`userId`, "==", userId)
+        .where(`date`, ">", from).where(`date`, "<", to).orderBy(`date`, "desc")
+        .get().then(
+          ref => {
+            if (!ref.empty) {
+              // not empty;
+              var result = [];
+              ref.forEach(t => {
+                result.push(t.data());
+              });
+              resolve(result);
+            }
+          }
+        ).catch(err => reject(err));
     });
+  }
+
+  public addTransactionRecord(userId, transaction, loved): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      let t = {} as UserTransaction;
+      t.userId = userId;
+      t.transactionId = transaction.transaction_id;
+      t.date = new Date(transaction.date);
+      t.loved = loved;
+      this.userTransCollections.add(t).then(r => resolve()).catch(err => reject(err));
+    });
+  }
+
+  public refreshTransaction(access_token: string) {
+    this.transactionSource.next([access_token]);
+    const today = new Date();
+    const daysAgo = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 3);
+    const tm = today.getMonth() < 9 ? `0${today.getMonth() + 1}` : `${today.getMonth()}`;
+    const td = today.getDate() < 10 ? `0${today.getDate()}` : `${today.getDate()}`;
+    const am = daysAgo.getMonth() < 9 ? `0${daysAgo.getMonth() + 1}` : `${daysAgo.getMonth()}`;
+    const ad = daysAgo.getDate() < 10 ? `0${daysAgo.getDate()}` : `${daysAgo.getDate()}`;
+    const todayString = `${today.getFullYear()}-${tm}-${td}`;
+    const daysAgoString = `${daysAgo.getFullYear()}-${am}-${ad}`;
+    this.plaidClient.getTransactions(
+      access_token,
+      daysAgoString,
+      todayString,
+      (err, res) => {
+        if (err) {
+          // this.transactionSource.next(err.error_message);
+          return;
+        }
+
+        this._transactions = res.transactions;
+        this.transactionSource.next(this._transactions);
+        // console.log(this._transactions);
+      });
   }
 
   public refreshThisMonthTransaction(public_token: string) {
@@ -64,10 +213,10 @@ export class PlaidService {
       const daysAgo = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 30);
       this.plaidClient.getTransactions(
         access_token,
-        // `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`,
-        // `${daysAgo.getFullYear()}-${daysAgo.getMonth()}-${daysAgo.getDate()}`,
-        `2017-04-01`,
-        `2017-05-01`,
+        `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`,
+        `${daysAgo.getFullYear()}-${daysAgo.getMonth()}-${daysAgo.getDate()}`,
+        // `2017-04-01`,
+        // `2017-05-01`,
         (err, res) => {
           this._transactions = res.transactions;
           this.transactionSource.next(this._transactions);
@@ -80,13 +229,13 @@ export class PlaidService {
   public refreshLastMonthTransaction(public_token: string) {
     this.getAccessToken(public_token).then(access_token => {
       const today = new Date();
-      const daysAgo = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 30);
+      const daysAgo = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 2);
       this.plaidClient.getTransactions(
         access_token,
-        // `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`,
-        // `${daysAgo.getFullYear()}-${daysAgo.getMonth()}-${daysAgo.getDate()}`,
-        `2017-03-01`,
-        `2017-04-01`,
+        `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`,
+        `${daysAgo.getFullYear()}-${daysAgo.getMonth()}-${daysAgo.getDate()}`,
+        // `2017-03-01`,
+        // `2017-04-01`,
         (err, res) => {
           this._transactions = res.transactions;
           this.transactionSource.next(this._transactions);

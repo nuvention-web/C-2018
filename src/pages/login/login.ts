@@ -24,35 +24,48 @@ export class LoginPage {
     public navCtrl: NavController,
     public navParams: NavParams,
     private afAuth: AngularFireAuth) {
-    this.afAuth.auth.onAuthStateChanged(user => {
-      if (user) {
-        // user logged in
-        console.log("logged in");
-        this.navCtrl.setRoot(`DashboardPage`, { signed_in: true, linked_credential: false });
-      } else {
-        // user logged out
-        console.log("logged out");
-      }
-    });
+
+    if (this.navParams.get(`from_sign_up`)) {
+      this.signInWithData(
+        this.navParams.get(`email`),
+        this.navParams.get(`password`)
+      );
+    }
+    else {
+      this.afAuth.auth.onAuthStateChanged(user => {
+        if (user) {
+          // user logged in
+          console.log("logged in");
+          this.navCtrl.setRoot(`DashboardPage`, { signed_in: true, linked_credential: false, need_refresh: true });
+        } else {
+          // user logged out
+          console.log("logged out");
+        }
+      });
+    }
   }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad LoginPage');
   }
 
-  private async signIn() {
+  private async signInWithData(email, password) {
     try {
-      const result = await this.afAuth.auth.signInWithEmailAndPassword(this.user.email, this.user.password);
+      const result = await this.afAuth.auth.signInWithEmailAndPassword(email, password);
       if (result) {
-        this.navCtrl.setRoot(`DashboardPage`, { signed_in: true, linked_credential: false });
+        this.navCtrl.setRoot(`DashboardPage`, { signed_in: true, linked_credential: false, need_refresh: true });
       }
     } catch (e) {
       console.error(e);
     }
   }
 
-  private goToSignUp() {
+  private signIn() {
+    this.signInWithData(this.user.email, this.user.password);
+  }
 
+  private goToSignUp() {
+    this.navCtrl.push(`SignUpPage`);
   }
 
 }

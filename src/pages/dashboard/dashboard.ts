@@ -4,11 +4,14 @@ import { Push, PushObject, PushOptions, NotificationEventResponse } from '@ionic
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { NgProgressComponent } from '@ngx-progressbar/core';
+import { Observable } from "rxjs/Observable";
+import { ISubscription } from "rxjs/Subscription";
 
 import { Notification } from '../../models/notification';
 import { UserAccount } from '../../models/userAccount';
 import { User } from '../../models/user';
 import { Transaction } from '../../models/transaction';
+import { UserTransaction } from '../../models/userTransaction';
 import { PlaidService } from '../../providers/plaid-service/plaid-service';
 
 declare var cordova;
@@ -36,43 +39,14 @@ export class DashboardPage {
   private notificationCollections: AngularFirestoreCollection<Notification>;
   private userAccountCollections: AngularFirestoreCollection<UserAccount>;
   private userAccount: AngularFirestoreDocument<UserAccount>;
-  public _demoText: string = ``;
-  private _transactions: any = [
-    {
-      name: `Today`,
-      data: [
-        { name: `McDonald's`, amount: `10.74`, date: `2017-02-27`, love: false },
-        { name: `Starbucks`, amount: `7.32`, date: `2017-02-27`, love: false },
-        { name: `Uber 063015 SF**POOL**`, amount: `5.40`, date: `2017-02-25`, love: false }
-      ]
-    },
-    {
-      name: `Yesterday`,
-      data: [
-        { name: `United Airlines`, amount: `500.00`, date: `2017-02-23`, love: false },
-        { name: `AmazonPrime Membersh`, amount: `49.00`, date: `2017-02-23`, love: false }
-      ]
-    },
-    {
-      name: `Jan 18`,
-      data: [
-        { name: `TARGET.COM * 800-591-3869`, amount: `42.49`, date: `2017-02-22`, love: false },
-        { name: `AMAZON MKTPLACE`, amount: `27.57`, date: `2017-02-20`, love: false },
-        { name: `#03428 JEWEL EVANSTON IL`, amount: `56.20`, date: `2017-02-19`, love: false },
-        { name: `Nicor Gas NICPayment 1388019270`, amount: `50.00`, date: `2017-02-16`, love: false },
-        { name: `ZARA USA 3697 CHICAGO IL`, amount: `138.21`, date: `2017-02-12`, love: false },
-        { name: `B&H PHOTO`, amount: `298.00`, date: `2017-02-08`, love: false },
-        { name: `LITTLE TOKYO ROSEMONT`, amount: `11.15`, date: `2017-02-03`, love: false },
-        { name: `MICHAEL KORS`, amount: `141.41`, date: `2017-02-08`, love: false },
-        { name: `CALVIN KLEIN`, amount: `26.13`, date: `2017-02-06`, love: false },
-        { name: `USA*CANTEEN VENDING`, amount: `1.25`, date: `2017-02-03`, love: false },
-        { name: `NORRIS CENTER FOOD COUR`, amount: `8.02`, date: `2017-02-02`, love: false },
-        { name: `LIBRARY CAFE BERGSON`, amount: `3.85`, date: `2017-02-08`, love: false }
-      ]
-    }
-  ];
+  private _uaSubscription: ISubscription;
+  private _userAccount: UserAccount;
+  public _demoText: string = `No message.`;
+  private months = [`Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`, `Jul`, `Aug`, `Sep`, `Oct`, `Nov`, `Dec`];
+  private _transactions: any = [];
+  private _transHistory: UserTransaction[] = null;
   private _flaggedTransactions: any = [];
-  private public_token: string;
+  // private public_token: string;
   private _point: number = 100;
   private _platformSubscriber;
   private _count = 0;
@@ -80,13 +54,12 @@ export class DashboardPage {
   private _signedIn = false;
   private _user: User;
 
-  private _totalLastV = 1211.66;
-  private _exceedLastV = 441.01;
-  private _totalThisV = 678.52;
-  private _exceedThisV = 220.5;
+  private _totalLastV = 0.00;
+  private _exceedLastV = 0.00;
+  private _totalThisV = 0.00;
+  private _exceedThisV = 0.00;
 
-  private _loading;
-  private _isLoading = false;
+  private _isLoading = true;
 
   private linkHandler;
 
@@ -106,67 +79,15 @@ export class DashboardPage {
   ) {
     this.notificationCollections = this.firestore.collection<Notification>('notifications');
     this.userAccountCollections = this.firestore.collection<UserAccount>('user-accounts');
-    this.public_token = this.navParams.get(`public_token`);
-    const signedIn = this.navParams.get(`signed_in`);
-    const linkedCredential = this.navParams.get(`linked_credential`);
-    this._signedIn = signedIn ? true : false;
-    this._linkedCredential = linkedCredential ? true : false;
-    console.log(`constructor`);
-    // this._demoText = this.public_token;
-    // this._transactions = this.plaidService.transactions$;
-    // this._loading = this.loadingCtrl.create({
-    //   content: 'Please wait...'
-    // });
-    // if (this._linkedCredential || this._signedIn) {
-    //   this._loading.present();
-    // }
-    // this._platformSubscriber = this.platform.pause.subscribe(() => {
-    //   this.updateTransactions();
-    // });
-    if (this._linkedCredential) {
-      this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${this.navParams.get(`user_doc_id`)}`);
-      // this._loading.dismiss();
-      return;
-    }
 
-    if (this._signedIn) {
-      this.afAuth.authState.subscribe(data => {
-        this._user = new User(data);
-        this.userAccountCollections.ref.where(`userId`, '==', this._user.uid).get().then(res => {
-          res.forEach(doc => {
-            this.navCtrl.setRoot('DashboardPage', { public_token: doc.data().accountToken, user_doc_id: doc.id, signed_in: true, linked_credential: true });
-          });
-          console.log(`change root`);
-          // this._loading.dismiss();
-        }, err => {
-          // this._loading.dismiss();
-        });
-      });
-      return;
-    }
-
-    this.afAuth.auth.onAuthStateChanged(user => {
-      if (user) {
-        // user logged in
-        console.log("logged in");
-        this.navCtrl.setRoot(`DashboardPage`, { signed_in: true, linked_credential: false });
-      } else {
-        // user logged out
-        console.log("logged out");
-        this.navCtrl.setRoot(`LoginPage`);
-      }
-    });
+    this.checkAuthState();
   }
 
   ionViewWillEnter() {
   }
 
   ionViewWillLeave() {
-    this._platformSubscriber.unsubscribe();
-  }
-
-  ngAfterViewInit() {
-    this.calculateBar();
+    // this._platformSubscriber.unsubscribe();
   }
 
   ionViewDidEnter() {
@@ -229,19 +150,13 @@ export class DashboardPage {
     // pushObject.on('registration').subscribe((registration: any) => console.log('Device registered', registration));
     // pushObject.on('error').subscribe(error => console.error('Error with Push plugin', error));
 
-    // this.plaidService.transactions$.subscribe(transactions => {
-    //   if (transactions) {
-    //     this.zone.run(() => {
-    //       if (this._count == 0) {
-    //         this._count += 1;
-    //         return;
-    //       }
-    //       this._transactions = transactions;
-    //       this.pushNotification();
-    //       this._count = 0;
-    //     });
-    //   }
-    // });
+    this.plaidService.transactions$.subscribe(transactions => {
+      if (transactions) {
+        this.zone.run(() => {
+          this.reshapeTransactions(transactions);
+        });
+      }
+    }, err => { this._demoText = `${err.message}` });
 
 
     ///// plaid part
@@ -249,32 +164,176 @@ export class DashboardPage {
     if (this._signedIn && !this._linkedCredential) {
       this.linkHandler = Plaid.create({
         clientName: `Coinscious`,
-        env: `sandbox`,
+        // env: `sandbox`,
+        env: `development`,
         key: `28f2e54388e2f6a1aca59e789d353b`,
         product: [`transactions`],
         forceIframe: true,
         selectAccount: false,
         onSuccess: (public_token, metadata) => {
-          let newDoc = {} as UserAccount;
-          newDoc.accountToken = public_token;
-          newDoc.userId = this._user.uid;
-          this.userAccountCollections.add(newDoc).then(() => {
-            // this.loadingCtrl.create({
-            //   content: 'Please wait...'
-            // }).present();
-            this.navCtrl.setRoot('DashboardPage', { public_token: public_token, signed_in: true, linked_credential: true });
+          this.plaidService.getAccessToken(public_token).then(access_token => {
+            let newDoc = {} as UserAccount;
+            newDoc.publicToken = public_token;
+            newDoc.accessToken = access_token;
+            newDoc.userId = this._user.uid;
+            this.userAccountCollections.add(newDoc).then(() => {
+              this.checkCredentials();
+            });
           });
           // console.log("Login Succeed");
           // this._linkedCredential = true;
         }
       });
     }
+
+    ///// Plaid part end
+
+    this.plaidService.lastMonthlyAmounts$.subscribe(record => {
+      this.zone.run(() => {
+        if (record != null) {
+          this._totalLastV = record.totalAmount;
+          this._exceedLastV = record.exceedAmount;
+        }
+        this.calculateBar();
+      });
+    });
+
+    this.plaidService.thisMonthlyAmounts$.subscribe(record => {
+      this.zone.run(() => {
+        if (record != null) {
+          this._totalThisV = record.totalAmount;
+          this._exceedThisV = record.exceedAmount;
+        }
+        this.calculateBar();
+      });
+    });
+
+    this.plaidService.testString$.subscribe(s => {
+      this.zone.run(() => {
+        this._demoText = s;
+      });
+    });
+  }
+
+  private checkAuthState() {
+    this._isLoading = true;
+    this._signedIn = false;
+    this.afAuth.auth.onAuthStateChanged(user => {
+      if (user) {
+        // user logged in
+        console.log("logged in");
+
+        this._linkedCredential = false;
+        this._signedIn = true;
+        this.checkCredentials();
+      } else {
+        // user logged out
+        console.log("logged out");
+        this.navCtrl.setRoot(`LoginPage`);
+      }
+    });
+  }
+
+  private checkCredentials() {
+    this._isLoading = true;
+    this.afAuth.authState.subscribe(data => {
+      this._linkedCredential = false;
+      this._user = new User(data);
+      this.userAccountCollections.ref.where(`userId`, '==', this._user.uid).get().then(res => {
+        if (!res.empty) {
+          console.log(`found credential`);
+          this._isLoading = false;
+          this._linkedCredential = true;
+          this.getUserInfo(res.docs[0].id);
+          // this._userAccount = res[0].data();
+          // this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${res[0].id}`);
+        } else {
+          this._isLoading = false;
+          this._linkedCredential = false;
+        }
+      }, err => {
+        console.log(`error`);
+        this._isLoading = false;
+        this._linkedCredential = false;
+      });
+    });
+  }
+
+  private getUserInfo(userId) {
+    this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${userId}`);
+    this._uaSubscription = this.userAccount.valueChanges().subscribe(ua => {
+      console.log(`received user account`);
+      console.log(ua);
+      this._userAccount = ua;
+      this._uaSubscription.unsubscribe();
+
+      this.plaidService.refreshTransaction(ua.accessToken);
+
+      this._isLoading = false;
+      this.calculateBar();
+      // get transaction data we have
+      let to = new Date();
+      let from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 10);
+      // TODO
+      this.plaidService.getTransactionRecords(ua.userId, from, to)
+        .then(transactions => {
+          // this._demoText = `Received Transaction Records`;
+          this._transHistory = transactions;
+          this.reshapeTransactions(this._transactions);
+        }).catch(err => {
+          // this._demoText = err.message;
+        });
+      this.plaidService.getMonthlyAmount(ua.userId);
+    });
+    // this.plaidService.refreshTransaction(this.userAccount.);
+    this._isLoading = false;
+  }
+
+  private reshapeTransactions(transactions) {
+    if (this._transHistory == null || transactions == null) return;
+
+    transactions.sort((a, b) => {
+      return a.date > b.date ? -1 : 1;
+    });
+    transactions = transactions.filter(t => !this._transHistory.some(tr => tr.transactionId == t.transaction_id));
+
+    const today = new Date();
+    const yesterday = new Date(today.getTime() - 1000 * 60 * 60 * 24);
+    const dbeforey = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 2);
+
+    let trans = [
+      { name: "Today", data: [] },
+      { name: "Yesterday", data: [] },
+      { name: "2 Days Ago", data: [] }];
+
+    // this._demoText = `step 0`;
+
+    transactions.forEach((t: Transaction) => {
+      // const date = Number(t.date.substr(8, 2));
+      let date = t.date;
+      if (date == null) {
+        // this._demoText = `${t.toString()}`;
+        return;
+      }
+
+      let dateNum = Number(t.date.substr(8, 2));
+      if (dateNum == today.getDate()) {
+        trans[0].data.push(t);
+      } else if (dateNum == yesterday.getDate()) {
+        trans[1].data.push(t);
+      } else {
+        trans[2].data.push(t);
+      }
+    });
+
+    this._transactions = trans;
   }
 
   private calculateBar() {
     if (!this._signedIn || !this._linkedCredential) return;
 
-    const total = this._totalThisV > this._totalLastV ? this._totalThisV : this._totalLastV;
+    let total = this._totalThisV > this._totalLastV ? this._totalThisV : this._totalLastV;
+    total = total == 0 ? 0.01 : 0;
     this.totalLast.set(this._totalLastV / total * 100);
     this.totalThis.set(this._totalThisV / total * 100);
     this.exceedLast.set(this._exceedLastV / total * 100);
@@ -289,19 +348,25 @@ export class DashboardPage {
     this.notificationCollections.add(newMessage);
   }
 
-  private updateTransactions() {
-    this.plaidService.refreshTransaction(this.public_token);
-  }
+  // private updateTransactions() {
+  //   this.plaidService.refreshTransaction(this.public_token);
+  // }
 
   private onApprove(ev) {
     this._point += ev.point;
     ev.group.data.forEach(t => {
-      this._totalThisV += Number(t.amount);
+      this.plaidService.addTransactionRecord(this._userAccount.userId, t, true)
+        .then(() => {
+          this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, t.amount);
+        })
+        .catch(err => {
+          this._demoText = err.message;
+        });
     });
     // ev.group = [];
-    console.log(ev.group);
+    // console.log(ev.group);
     this._transactions.splice(this._transactions.indexOf(ev.group), 1);
-    this.calculateBar();
+    // this.calculateBar();
   }
 
   private onApproveFlag(ev) {
@@ -310,14 +375,23 @@ export class DashboardPage {
   }
 
   private onFlag(ev) {
-    ev.group.data.splice(ev.index, 1);
-    this._totalThisV += Number(ev.transaction.amount);
-    this._exceedThisV += Number(ev.transaction.amount);
-    // this._flaggedTransactions.unshift(ev.transaction);
-    if (ev.group.data.length == 0) {
-      this._transactions.splice(this._transactions.indexOf(ev.group), 1);
-    }
-    this.calculateBar();
+    this.plaidService.addTransactionRecord(this._userAccount.userId, ev.transaction, false)
+      .then(() => {
+        this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, ev.transaction.amount, ev.transaction.amount)
+          .then(() => {
+            ev.group.data.splice(ev.index, 1);
+            if (ev.group.data.length == 0) {
+              this._transactions.splice(this._transactions.indexOf(ev.group), 1);
+            }
+            // this.calculateBar();
+          });
+        // this._totalThisV += Number(ev.transaction.amount);
+        // this._exceedThisV += Number(ev.transaction.amount);
+        // this._flaggedTransactions.unshift(ev.transaction);
+      })
+      .catch(err => {
+        this._demoText = err.message;
+      });
   }
 
   private goToDetail() {
@@ -343,8 +417,9 @@ export class DashboardPage {
           role: 'unbind',
           handler: () => {
             // console.log('Destructive clicked');
+            this._isLoading = true;
             this.userAccount.delete().then(() => {
-              this.navCtrl.setRoot('DashboardPage', { signed_in: true, linked_credential: false });
+              this.checkCredentials();
             });
           }
         }, {

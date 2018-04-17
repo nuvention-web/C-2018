@@ -3,7 +3,7 @@
   See http://ionicframework.com/docs/components/#navigation for more info on
   Ionic pages and navigation.
 -->
-<ion-header>
+<ion-header *ngIf="!_isLoading">
 
   <ion-navbar>
     <ion-buttons left *ngIf="_linkedCredential">
@@ -24,8 +24,12 @@
 
 </ion-header>
 
+<div class="loading" *ngIf="_isLoading">
+  <h4><ion-spinner></ion-spinner> Loading</h4>
+</div>
 
-<div class="brief" *ngIf="_signedIn && _linkedCredential" (click)="goToDetail()">
+
+<div class="brief" *ngIf="!_isLoading && _signedIn && _linkedCredential" (click)="goToDetail()">
   <h4>
    This Month
    <span>
@@ -40,8 +44,8 @@
     ${{(_totalThisV - _exceedThisV).toFixed(2)}}
   </span>
  </h4>
-  <ng-progress id="total-this" #totalThis color="#11b245"></ng-progress>
-  <ng-progress id="exceed-this" #exceedThis color="#ff9763"></ng-progress>
+  <ng-progress id="total-this" #totalThis color="#11b245" [min]="1"></ng-progress>
+  <ng-progress id="exceed-this" #exceedThis color="#ff9763" [min]="0"></ng-progress>
   <h4 class="last-month-label">
    Last Month
    <span>
@@ -56,14 +60,14 @@
     ${{(_totalLastV - _exceedLastV).toFixed(2)}}
    </span>
  </h4>
-  <ng-progress id="total-last" #totalLast color="#11b245" class="lastMonth"></ng-progress>
-  <ng-progress id="exceed-last" #exceedLast color="#ff9763" class="lastMonth"></ng-progress>
+  <ng-progress id="total-last" #totalLast color="#11b245" class="lastMonth" [min]="1"></ng-progress>
+  <ng-progress id="exceed-last" #exceedLast color="#ff9763" class="lastMonth" [min]="0"></ng-progress>
   <div class="button-wrapper">
     <button ion-button clear small> View Details </button>
   </div>
 </div>
 
-<ion-content *ngIf="_signedIn">
+<ion-content *ngIf="!_isLoading && _signedIn">
   <div class="unlinked-wrapper" *ngIf="!_linkedCredential">
     <div class="unlinked" *ngIf="!_linkedCredential">
       <p *ngIf="!_linkedCredential">
@@ -74,15 +78,15 @@
   </div>
 
   <div class="linked" *ngIf="_linkedCredential">
-    <!-- <div>
-        {{_demoText}}
-      </div> -->
 
     <!-- <div class="points" (click)="goToDetail()">
         Your Points: {{_point}}
       </div> -->
 
     <div class="purchases-wrapper">
+      <div>
+        {{_demoText}}
+      </div>
       <div>
         <h2>New Purchases</h2>
         <!-- <ion-badge *ngIf="!_transactions && _transactions.length != 0">{{_transaction.length}}</ion-badge> -->

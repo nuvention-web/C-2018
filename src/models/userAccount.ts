@@ -1,4 +1,6 @@
 export interface UserAccount {
   userId: string;
-  accountToken: string;
+  publicToken: string;
+  accessToken: string;
+  lastSignIn: string;
 }
