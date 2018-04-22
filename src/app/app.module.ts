@@ -4,6 +4,7 @@ import { IonicApp, IonicErrorHandler, IonicModule } from 'ionic-angular';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
 import { Push } from '@ionic-native/push';
+import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { LocalNotifications } from '@ionic-native/local-notifications'
 import { AngularFireModule } from 'angularfire2';
 import { AngularFirestoreModule } from 'angularfire2/firestore';
@@ -38,7 +39,8 @@ import { PlaidService } from '../providers/plaid-service/plaid-service';
     LocalNotifications,
     { provide: ErrorHandler, useClass: IonicErrorHandler },
     PlaidService,
-    AngularFireAuth
+    AngularFireAuth,
+    InAppBrowser
   ]
 })
 export class AppModule { }

@@ -134,12 +134,13 @@ export class PlaidService {
 
   public getAccessToken(public_token: string): Promise<string> {
     return new Promise<string>((resolve) => {
-      console.log(`getting access token`);
+      console.log(`getting access token, ${public_token}`);
 
       this.plaidClient.exchangePublicToken(public_token, (err, res) => {
         if (err) {
-          console.log(`error`);
-          console.log(err);
+          // console.log(`error ${err.error_message}`);
+          // if (plaid.isPlaidError(err))
+          console.log(`error ${err.toString()}`);
           // this.transactionSource.next(err.error_message);
           return;
         }

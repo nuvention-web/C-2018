@@ -1,6 +1,7 @@
 import { Component, NgZone, ViewChild } from '@angular/core';
 import { IonicPage, NavController, NavParams, Platform, LoadingController, ActionSheetController, ToastController } from 'ionic-angular';
 import { Push, PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
+import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { NgProgressComponent } from '@ngx-progressbar/core';
@@ -75,7 +76,8 @@ export class DashboardPage {
     private afAuth: AngularFireAuth,
     private actionSheetCtrl: ActionSheetController,
     private loadingCtrl: LoadingController,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private iab: InAppBrowser
   ) {
     this.notificationCollections = this.firestore.collection<Notification>('notifications');
     this.userAccountCollections = this.firestore.collection<UserAccount>('user-accounts');
@@ -161,30 +163,42 @@ export class DashboardPage {
 
     ///// plaid part
 
-    if (this._signedIn && !this._linkedCredential) {
-      this.linkHandler = Plaid.create({
-        clientName: `Coinscious`,
-        // env: `sandbox`,
-        env: `development`,
-        key: `28f2e54388e2f6a1aca59e789d353b`,
-        product: [`transactions`],
-        forceIframe: true,
-        selectAccount: false,
-        onSuccess: (public_token, metadata) => {
-          this.plaidService.getAccessToken(public_token).then(access_token => {
-            let newDoc = {} as UserAccount;
-            newDoc.publicToken = public_token;
-            newDoc.accessToken = access_token;
-            newDoc.userId = this._user.uid;
-            this.userAccountCollections.add(newDoc).then(() => {
-              this.checkCredentials();
-            });
+    // if (this._signedIn && !this._linkedCredential) {
+    // }
+    this.linkHandler = Plaid.create({
+      clientName: `Coinscious`,
+      // env: `sandbox`,
+      env: `development`,
+      key: `28f2e54388e2f6a1aca59e789d353b`,
+      product: [`transactions`],
+      forceIframe: true,
+      selectAccount: false,
+      onSuccess: (public_token, metadata) => {
+        this.plaidService.getAccessToken(public_token).then(access_token => {
+          let newDoc = {} as UserAccount;
+          newDoc.publicToken = public_token;
+          newDoc.accessToken = access_token;
+          newDoc.userId = this._user.uid;
+          this.userAccountCollections.add(newDoc).then(() => {
+            this.checkCredentials();
           });
-          // console.log("Login Succeed");
-          // this._linkedCredential = true;
+        });
+        // console.log("Login Succeed");
+        // this._linkedCredential = true;
+      },
+      onLoad: () => {
+        // Optional, called when Link loads
+        console.log(`Plaid Link loaded`);
+      },
+      onExit: (err, matadata) => {
+        if (err != null) {
+          console.log(`ERROR!`);
+          console.log(err);
+        } else {
+          console.log(`Exit with no error`);
         }
-      });
-    }
+      }
+    });
 
     ///// Plaid part end
 
@@ -286,7 +300,7 @@ export class DashboardPage {
       this.plaidService.getMonthlyAmount(ua.userId);
     });
     // this.plaidService.refreshTransaction(this.userAccount.);
-    this._isLoading = false;
+    // this._isLoading = false;
   }
 
   private reshapeTransactions(transactions) {
@@ -326,6 +340,7 @@ export class DashboardPage {
       }
     });
 
+    // TODO Change it to in the ZONE
     this._transactions = trans;
   }
 
@@ -399,7 +414,76 @@ export class DashboardPage {
   }
 
   private linkAccount() {
-    this.linkHandler.open();
+    // this._demoText = `Linking account`;
+    // console.log(`Linking Account`);
+    // this.linkHandler.open();
+
+    // linkInitializeOptions.put("key", "[PLAID_PUBLIC_KEY]");
+    // linkInitializeOptions.put("product", "auth");
+    // linkInitializeOptions.put("apiVersion", "v2"); // set this to "v1" if using the legacy Plaid API
+    // linkInitializeOptions.put("env", "sandbox");
+    // linkInitializeOptions.put("clientName", "Test App");
+    // linkInitializeOptions.put("selectAccount", "true");
+    // linkInitializeOptions.put("webhook", "http://requestb.in");
+    // linkInitializeOptions.put("baseUrl", "https://cdn.plaid.com/link/v2/stable/link.html");
+
+    // clientName: `Coinscious`,
+    // // env: `sandbox`,
+    // env: `development`,
+    // key: `28f2e54388e2f6a1aca59e789d353b`,
+    // product: [`transactions`],
+    // forceIframe: true,
+    // selectAccount: false,
+
+    const linkUrl =
+      `https://cdn.plaid.com/link/v2/stable/link.html?` +
+      `key=28f2e54388e2f6a1aca59e789d353b` + `&` +
+      `env=development` + `&` +
+      `clientName=Coinscious` + `&` +
+      `product=transactions` + `&` +
+      `isMobile=true` + `&` +
+      `isWebview=true` + `&` +
+      `apiVersion=v2` + `&` +
+      `selectAccount=false`;
+
+    const browser = this.iab.create(linkUrl, '_blank', 'location=yes,toolbar=yes');
+    browser.on('loadstart').subscribe(event => {
+      console.log(`[InAppBrowser] On Load Start: ${event.url}`);
+      const redirectUrl = event.url;
+      const url = redirectUrl.split(`://`);
+      const protocol = url[0];
+      const path = url[1].split(`?`);
+      const ev = path[0];
+
+      if (ev != `connected`) return;
+
+      // this._isLoading = true;
+      browser.close();
+
+      const queryArr = path[1].split(`&`);
+      let queries = {};
+      queryArr.forEach(q => {
+        if (q.indexOf(`=`) < 0) return;
+        let query = q.split(`=`);
+        queries[query[0]] = query[1];
+      });
+      console.log(`Get public token! Token: ${queries[`public_token`]}`);
+
+      const public_token = queries[`public_token`];
+      this.plaidService.getAccessToken(public_token).then(access_token => {
+        console.log(`Get access token! Token: ${access_token}`);
+        let newDoc = {} as UserAccount;
+        newDoc.publicToken = public_token;
+        newDoc.accessToken = access_token;
+        newDoc.userId = this._user.uid;
+        this.userAccountCollections.add(newDoc).then(() => {
+          this.checkCredentials();
+        });
+      });
+    });
+    // browser.on('loaderror').subscribe(event => {
+    //   console.log(`[InAppBrowser] On Load Error: What happened?, ${event.url}`);
+    // });
   }
 
   private signOut() {
