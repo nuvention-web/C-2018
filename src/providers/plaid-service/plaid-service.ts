@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { Observable } from "rxjs/Observable";
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HTTP } from '@ionic-native/http';
 import plaid from 'plaid';
 
 import { Transaction } from '../../models/transaction';
@@ -33,11 +35,12 @@ export class PlaidService {
   private _userMonthAmountsCollection: AngularFirestoreCollection<UserMonthlyRecord>;
   private _thisMonthAmount: AngularFirestoreDocument<UserMonthlyRecord> = null;
   private _lastMonthAmount: AngularFirestoreDocument<UserMonthlyRecord> = null;
+  private environment: string;
 
   private _testSource: BehaviorSubject<any> = new BehaviorSubject<any>(null);
   testString$: Observable<any> = this._testSource.asObservable();
 
-  constructor(private firestore: AngularFirestore) {
+  constructor(private firestore: AngularFirestore, private http: HTTP) {
     console.log('Hello PlaidService Provider');
     this.plaidClient = new plaid.Client(
       `5a8c0e36bdc6a47debd6ee15`,              // client id
@@ -49,6 +52,9 @@ export class PlaidService {
 
     this.userTransCollections = this.firestore.collection<UserTransaction>('user-transactions');
     this._userMonthAmountsCollection = this.firestore.collection<UserMonthlyRecord>('user-monthly-amount');
+
+    // this.environment = `sandbox`;
+    this.environment = `development`;
   }
 
   public getMonthlyAmount(userId) {
@@ -136,19 +142,51 @@ export class PlaidService {
     return new Promise<string>((resolve) => {
       console.log(`getting access token, ${public_token}`);
 
-      this.plaidClient.exchangePublicToken(public_token, (err, res) => {
-        if (err) {
-          // console.log(`error ${err.error_message}`);
-          // if (plaid.isPlaidError(err))
-          console.log(`error ${err.toString()}`);
-          // this.transactionSource.next(err.error_message);
-          return;
-        }
-        console.log(`received access token`);
+      // this.plaidClient.exchangePublicToken(public_token, (err, res) => {
+      //   if (err) {
+      //     // console.log(`error ${err.error_message}`);
+      //     // if (plaid.isPlaidError(err))
+      //     console.log(`error ${err.toString()}`);
+      //     // this.transactionSource.next(err.error_message);
+      //     return;
+      //   }
+      //   console.log(`received access token`);
+      //
+      //   // this.transactionSource.next(res.access_token);
+      //   resolve(res.access_token);
+      // });
 
-        // this.transactionSource.next(res.access_token);
-        resolve(res.access_token);
-      });
+      const targetUrl = `http://Coinscious-env.tpg3qgcuzt.us-east-2.elasticbeanstalk.com/item/public_token/exchange`;
+
+      const httpOptions = {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json',
+          // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          // 'Accept': '*/*'
+        })
+      };
+
+      const data = {
+        body: {
+          client_id: "5a8c0e36bdc6a47debd6ee15",
+          secret: "2ac6695774cef3665c793c1eb4a219",
+          public_token: public_token
+        },
+        environment: this.environment
+      };
+
+      this.http.setDataSerializer('json');
+      this.http.post(targetUrl, data, { 'Content-Type': 'application/json' })
+        .then(res => {
+          res.data = JSON.parse(res.data);
+          let access_token = res.data["access_token"];
+          console.log(`received access token ${access_token}`);
+          if (access_token != undefined) {
+            resolve(access_token);
+          }
+        }).catch(err => {
+          console.log(`get access token err. ${err.error}`);
+        });
     });
   }
 
@@ -192,19 +230,50 @@ export class PlaidService {
     const ad = daysAgo.getDate() < 10 ? `0${daysAgo.getDate()}` : `${daysAgo.getDate()}`;
     const todayString = `${today.getFullYear()}-${tm}-${td}`;
     const daysAgoString = `${daysAgo.getFullYear()}-${am}-${ad}`;
-    this.plaidClient.getTransactions(
-      access_token,
-      daysAgoString,
-      todayString,
-      (err, res) => {
-        if (err) {
-          // this.transactionSource.next(err.error_message);
-          return;
-        }
+    // this.plaidClient.getTransactions(
+    //   access_token,
+    //   daysAgoString,
+    //   todayString,
+    //   (err, res) => {
+    //     if (err) {
+    //       // this.transactionSource.next(err.error_message);
+    //       return;
+    //     }
+    //
+    //     this._transactions = res.transactions;
+    //     this.transactionSource.next(this._transactions);
+    //     // console.log(this._transactions);
+    //   });
 
-        this._transactions = res.transactions;
+    const targetUrl = `http://Coinscious-env.tpg3qgcuzt.us-east-2.elasticbeanstalk.com/item/public_token/exchange`;
+
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        // 'Accept': '*/*'
+      })
+    };
+
+    const data = {
+      body: {
+        client_id: "5a8c0e36bdc6a47debd6ee15",
+        secret: "2ac6695774cef3665c793c1eb4a219",
+        access_token: access_token,
+        start_date: daysAgoString,
+        end_date: todayString
+      },
+      environment: this.environment
+    };
+
+    this.http.setDataSerializer('json');
+    this.http.post(targetUrl, data, { 'Content-Type': 'application/json' })
+      .then(res => {
+        res.data = JSON.parse(res.data);
+        this._transactions = res.data.transactions;
         this.transactionSource.next(this._transactions);
-        // console.log(this._transactions);
+      }).catch(err => {
+        console.log(`get access token err. ${err.error}`);
       });
   }
 

@@ -12,6 +12,7 @@ import { AngularFireAuthModule, AngularFireAuth } from 'angularfire2/auth';
 import { environment } from '../environments/environment';
 import { HttpClientModule } from '@angular/common/http';
 import { NgProgressModule } from '@ngx-progressbar/core';
+import { HTTP } from '@ionic-native/http';
 import { MyApp } from './app.component';
 import { PlaidService } from '../providers/plaid-service/plaid-service';
 
@@ -40,7 +41,8 @@ import { PlaidService } from '../providers/plaid-service/plaid-service';
     { provide: ErrorHandler, useClass: IonicErrorHandler },
     PlaidService,
     AngularFireAuth,
-    InAppBrowser
+    InAppBrowser,
+    HTTP
   ]
 })
 export class AppModule { }

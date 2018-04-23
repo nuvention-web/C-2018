@@ -154,11 +154,15 @@ export class DashboardPage {
 
     this.plaidService.transactions$.subscribe(transactions => {
       if (transactions) {
+        console.log(`New Transactions: ${transactions}`);
         this.zone.run(() => {
           this.reshapeTransactions(transactions);
         });
       }
-    }, err => { this._demoText = `${err.message}` });
+    }, err => {
+      console.log(`New Transaction Error: ${err.message}`);
+      this._demoText = `${err.message}`
+    });
 
 
     ///// plaid part
@@ -438,6 +442,7 @@ export class DashboardPage {
     const linkUrl =
       `https://cdn.plaid.com/link/v2/stable/link.html?` +
       `key=28f2e54388e2f6a1aca59e789d353b` + `&` +
+      // `env=sandbox` + `&` +
       `env=development` + `&` +
       `clientName=Coinscious` + `&` +
       `product=transactions` + `&` +
