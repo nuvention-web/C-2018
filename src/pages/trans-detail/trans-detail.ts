@@ -33,7 +33,7 @@ export class TransDetailPage {
     type: `bar`,
     data: {
       datasets: [{
-        data: [500, 480, 460, 380, 400, 370, 340, 320, 290, 270, 250, 260],
+        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         backgroundColor: [
           pattern.draw('dot-dash', '#ff9763'),
           pattern.draw('dot-dash', '#ff9763'),
@@ -68,7 +68,7 @@ export class TransDetailPage {
         borderWidth: 1
       },
       {
-        data: [600, 720, 700, 760, 720, 780, 800, 830, 850, 800, 920, 950],
+        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         backgroundColor: [
           'rgba(17, 178, 69, 0.2)',
           'rgba(17, 178, 69, 0.2)',
@@ -166,29 +166,25 @@ export class TransDetailPage {
     this.userAccountCollections.ref.where(`userId`, '==', this._userId).get().then( res => {
         res.forEach(t => {
             this._public_token = t.data().publicToken;
-            console.log("public toke before: " + this._public_token.toString());
+            //console.log("public toke before: " + this._public_token.toString());
         });
-        console.log("get public token good");
+        //console.log("get public token good");
     }, err => {
-        console.log("get public token error");
+        //console.log("get public token error");
     });
     //更新chart的数据
     this.userMonthlyRecord.ref.where(`userId`, '==', this._userId).get().then(res => {
       res.forEach(t => {
         let tempDate = new Date(t.data().date);
-        console.log("get date 1: " + tempDate.toDateString());
-        var time = tempDate.getTime() - 1;
-        let tempDate2 = new Date(tempDate.getFullYear(), tempDate.getMonth(), tempDate.getDay(), tempDate.getHours() - 1);
-        console.log("get date 2: " + tempDate2.toDateString());
         let thisMonth = tempDate.getMonth();
         this.chart.data.datasets[0].data[thisMonth] = t.data().totalAmount - t.data().exceedAmount;
         this.chart.data.datasets[1].data[thisMonth] = t.data().exceedAmount;
-        console.log("Happy Amount" + this.chart.data.datasets[0].data[thisMonth].toString());
-        console.log("UnHappy Amount" + this.chart.data.datasets[1].data[thisMonth].toString());
+        //console.log("Happy Amount" + this.chart.data.datasets[0].data[thisMonth].toString());
+        //console.log("UnHappy Amount" + this.chart.data.datasets[1].data[thisMonth].toString());
       });
     });
-    console.log("userId is: " + this._userId.toString());
-    console.log("public token then: " + this._public_token.toString());
+    //console.log("userId is: " + this._userId.toString());
+    //console.log("public token then: " + this._public_token.toString());
     this.chart = new Chart(`chart-canvas`, this.chartOptions);
     this.generateNewTransactions(new Date().getMonth());
   }
@@ -198,7 +194,7 @@ export class TransDetailPage {
 
   private generateNewTransactions(month) {
       //更新点击后表显示页的数据
-      console.log("public toke end: " + this._public_token.toString());
+      //console.log("public toke end: " + this._public_token.toString());
       this._monthUnhappy = this.chart.data.datasets[0].data[month];
       this._monthHappy = this.chart.data.datasets[1].data[month];
       var label = this.chart.data.labels[month];
@@ -216,14 +212,16 @@ export class TransDetailPage {
       this.plaidService.getTransactionRecords(this._userId, from, to).then(res => {
         res.forEach(t => {
           this._partTransactionIds.push(t.transactionId);
-          console.log("partTransactionIds length 2: " + this._partTransactionIds.length.toString());
+          this._transactions.push(t);
         });
       });
+
+      /*
       console.log("from date: " + from.toDateString());
       console.log("to date: " + to.toDateString());
       console.log("partTransactionIds length: " + this._partTransactionIds.length.toString());
       console.log("partTransactionIds 0: " + this._partTransactionIds[0].toString());
-      /*
+
       var i = 0;
       this.userTransactionCollections.ref.where(`userId`, '==', this._userId).get().then(res => {
           res.forEach( t => {
@@ -237,7 +235,6 @@ export class TransDetailPage {
           console.log("get partTransactions error");
       });
 */
-      this.plaidService.getAllTransactions(this._public_token, from, to);
       /*
 
       this.plaidService.getTransaction2(this._testPublicToken, from, to);
