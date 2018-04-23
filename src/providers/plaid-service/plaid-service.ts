@@ -245,7 +245,7 @@ export class PlaidService {
     //     // console.log(this._transactions);
     //   });
 
-    const targetUrl = `http://Coinscious-env.tpg3qgcuzt.us-east-2.elasticbeanstalk.com/item/public_token/exchange`;
+    const targetUrl = `http://Coinscious-env.tpg3qgcuzt.us-east-2.elasticbeanstalk.com/transactions/get`;
 
     const httpOptions = {
       headers: new HttpHeaders({
@@ -267,13 +267,17 @@ export class PlaidService {
     };
 
     this.http.setDataSerializer('json');
+    console.log(`getting transaction.`);
+    console.log(data);
     this.http.post(targetUrl, data, { 'Content-Type': 'application/json' })
       .then(res => {
         res.data = JSON.parse(res.data);
+        console.log(`got transaction response`);
+        // console.log(res.data);
         this._transactions = res.data.transactions;
         this.transactionSource.next(this._transactions);
       }).catch(err => {
-        console.log(`get access token err. ${err.error}`);
+        console.log(`get transaction err. ${err.error}`);
       });
   }
 

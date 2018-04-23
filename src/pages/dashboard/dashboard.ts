@@ -154,7 +154,7 @@ export class DashboardPage {
 
     this.plaidService.transactions$.subscribe(transactions => {
       if (transactions) {
-        console.log(`New Transactions: ${transactions}`);
+        console.log(`New Transactions arrived`);
         this.zone.run(() => {
           this.reshapeTransactions(transactions);
         });
@@ -308,7 +308,8 @@ export class DashboardPage {
   }
 
   private reshapeTransactions(transactions) {
-    if (this._transHistory == null || transactions == null) return;
+    if (this._transHistory == null) this._transHistory = [];
+    if (transactions == null) return;
 
     transactions.sort((a, b) => {
       return a.date > b.date ? -1 : 1;
