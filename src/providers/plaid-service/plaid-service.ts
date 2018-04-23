@@ -317,5 +317,22 @@ export class PlaidService {
     });
   }
 
+    public getAllTransactions(public_token: string, from, to) {
+        this.getAccessToken(public_token).then(access_token => {
+            this.plaidClient.getTransactions(
+                access_token,
+                `${from.getFullYear()}-${from.getMonth()}-${from.getDate()}`,
+                `${to.getFullYear()}-${to.getMonth()}-${to.getDate()}`,
+                // `2017-03-01`,
+                // `2017-04-01`,
+                (err, res) => {
+                    this._transactions = res.transactions;
+                    this.transactionSource.next(this._transactions);
+                    console.log("getAllTransactions length 2: " + this._transactions.length.toString());
+                });
+            console.log("getAllTransactions length 1: " + this._transactions.length.toString());
+        });
+    }
+
 
 }

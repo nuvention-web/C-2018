@@ -415,7 +415,7 @@ export class DashboardPage {
   }
 
   private goToDetail() {
-    this.navCtrl.push(`TransDetailPage`);
+    this.navCtrl.push(`TransDetailPage`, {userId: this._userAccount.userId});
   }
 
   private linkAccount() {
