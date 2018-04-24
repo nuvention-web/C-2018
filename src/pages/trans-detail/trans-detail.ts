@@ -163,6 +163,7 @@ export class TransDetailPage {
 
   ionViewDidLoad() {
     console.log("ionViewDidLoad tran-detail");
+    console.log("userID: " + this._userId);
     //得到public token
     this.userAccountCollections.ref.where(`userId`, '==', this._userId).get().then( res => {
         res.forEach(t => {
@@ -225,23 +226,37 @@ export class TransDetailPage {
       console.log("from: " + from.toDateString());
       console.log("to: " + to.toDateString());
       this.plaidService.getTransactionsWithTimeRange(this._access_token, from, to).then(res => {
-        console.log("getTransactionsWithTimeRange good");
+
         res.forEach(t => {
-          allTransactions.push(t);
           allTransactionsMap.set(t.transaction_id, t);
-          console.log("t transcationId: " + t.transaction_id);
-          console.log("allTransactions length: " + allTransactions.length.toString());
-        }), err => {
-          console.log("getTransactionsWithTimeRange error");
-        }
+          console.log("allTransactionsMap length: " + allTransactionsMap.size.toString());
+        });
+
+        this.plaidService.getTransactionRecords(this._userId, from, to).then(res => {
+            res.forEach(t => {
+                console.log("transactionId:" + t.transactionId);
+                if(!allTransactionsMap.hasOwnProperty(t.transactionId)) {
+                    console.log("don't have key allTransactionsMap length: " + allTransactionsMap.size.toString());
+                }
+                console.log("has key allTransactionsMap length: " + allTransactionsMap.size.toString());
+                this._transactions.push(allTransactionsMap.get(t.transactionId));
+            });
+        });
+
       });
 
+/*
       this.plaidService.getTransactionRecords(this._userId, from, to).then(res => {
           res.forEach(t => {
               console.log("transactionId:" + t.transactionId);
+              while(!allTransactionsMap.hasOwnProperty(t.transactionId)) {
+                  console.log("don't have key allTransactionsMap length: " + allTransactionsMap.size.toString());
+              }
+              console.log("has key allTransactionsMap length: " + allTransactionsMap.size.toString());
               this._transactions.push(allTransactionsMap.get(t.transactionId));
           });
       });
+      */
 
 
 
