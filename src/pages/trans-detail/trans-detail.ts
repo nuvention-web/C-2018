@@ -214,13 +214,14 @@ export class TransDetailPage {
       var date = new Date(), y = date.getFullYear();
       let from = new Date(y, month, 1);
       let to = new Date(y, month + 1, 0);
+      /*
       this.plaidService.getTransactionRecords(this._userId, from, to).then(res => {
         res.forEach(t => {
-
           partTransactionIds.push(t.transactionId);
           console.log("partTransactionIds length: " + partTransactionIds.length.toString());
         });
       });
+      */
 
       console.log("this._access_toke: " + this._access_token.toString());
       console.log("from: " + from.toDateString());
@@ -243,13 +244,14 @@ export class TransDetailPage {
             });
         });
 
+
       });
 
 /*
       this.plaidService.getTransactionRecords(this._userId, from, to).then(res => {
           res.forEach(t => {
               console.log("transactionId:" + t.transactionId);
-              while(!allTransactionsMap.hasOwnProperty(t.transactionId)) {
+              if(!allTransactionsMap.hasOwnProperty(t.transactionId)) {
                   console.log("don't have key allTransactionsMap length: " + allTransactionsMap.size.toString());
               }
               console.log("has key allTransactionsMap length: " + allTransactionsMap.size.toString());
@@ -257,7 +259,6 @@ export class TransDetailPage {
           });
       });
       */
-
 
 
 
