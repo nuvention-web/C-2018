@@ -67,7 +67,7 @@ export class PlaidService {
     const lastYrStr = thisMonthNum == 1 ? `${now.getFullYear() - 1}` : `${now.getFullYear()}`;
     const lastMonth = new Date(`${lastYrStr}-${lastMonthStr}-01`);
 
-    // this._testSource.next(`Getting monthly amount`);
+    console.log(`[Monthly Amount] Getting monthly amount`);
 
     this._userMonthAmountsCollection.ref.where(`userId`, "==", userId)
       .where(`date`, "==", thisMonth).get().then(ref => {
@@ -106,12 +106,15 @@ export class PlaidService {
   }
 
   private getThisMonthlyAmountRecord(docId) {
+    console.log("[Monthly Amount] Getting Monthly Amount Record");
     this._thisMonthAmount = this.firestore.doc<UserMonthlyRecord>(`user-monthly-amount/${docId}`);
     this._thisMonthAmount.valueChanges().subscribe(
       record => {
+        console.log("[Monthly Amount] Got Record");
         this._thisMonthAmounts = record;
         this._thisMonthAmountSource.next(this._thisMonthAmounts);
       }, error => {
+        console.log("[Monthly Amount] Error Got Record");
         this._thisMonthAmountSource.next(this._thisMonthAmounts);
       }
     );
@@ -203,6 +206,8 @@ export class PlaidService {
                 result.push(t.data());
               });
               resolve(result);
+            } else {
+              resolve([]);
             }
           }
         ).catch(err => reject(err));

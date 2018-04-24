@@ -54,6 +54,7 @@ export class DashboardPage {
   private _linkedCredential = false;
   private _signedIn = false;
   private _user: User;
+  public emptyTransactions = true;
 
   private _totalLastV = 0.00;
   private _exceedLastV = 0.00;
@@ -296,10 +297,13 @@ export class DashboardPage {
       this.plaidService.getTransactionRecords(ua.userId, from, to)
         .then(transactions => {
           // this._demoText = `Received Transaction Records`;
+          console.log(`Received Transaction Records`);
+          console.log(transactions);
           this._transHistory = transactions;
           this.reshapeTransactions(this._transactions);
         }).catch(err => {
           // this._demoText = err.message;
+          console.log(`Error Receiving Transaction Records, ${err.message}`);
         });
       this.plaidService.getMonthlyAmount(ua.userId);
     });
@@ -308,13 +312,15 @@ export class DashboardPage {
   }
 
   private reshapeTransactions(transactions) {
-    if (this._transHistory == null) this._transHistory = [];
-    if (transactions == null) return;
+    if (this._transHistory == null || transactions == null) return;
+    console.log(`Calculating Transactions`);
+    console.log(transactions);
 
     transactions.sort((a, b) => {
       return a.date > b.date ? -1 : 1;
     });
     transactions = transactions.filter(t => !this._transHistory.some(tr => tr.transactionId == t.transaction_id));
+    console.log(transactions);
 
     const today = new Date();
     const yesterday = new Date(today.getTime() - 1000 * 60 * 60 * 24);
@@ -345,8 +351,13 @@ export class DashboardPage {
       }
     });
 
-    // TODO Change it to in the ZONE
-    this._transactions = trans;
+    this.emptyTransactions = !trans.some(tr => tr.data.length > 0);
+
+    this.zone.run(() => {
+      console.log(`Calculated!`);
+      console.log(trans);
+      this._transactions = trans;
+    });
   }
 
   private calculateBar() {
@@ -368,10 +379,6 @@ export class DashboardPage {
     this.notificationCollections.add(newMessage);
   }
 
-  // private updateTransactions() {
-  //   this.plaidService.refreshTransaction(this.public_token);
-  // }
-
   private onApprove(ev) {
     this._point += ev.point;
     ev.group.data.forEach(t => {
@@ -383,10 +390,7 @@ export class DashboardPage {
           this._demoText = err.message;
         });
     });
-    // ev.group = [];
-    // console.log(ev.group);
     this._transactions.splice(this._transactions.indexOf(ev.group), 1);
-    // this.calculateBar();
   }
 
   private onApproveFlag(ev) {
@@ -403,11 +407,7 @@ export class DashboardPage {
             if (ev.group.data.length == 0) {
               this._transactions.splice(this._transactions.indexOf(ev.group), 1);
             }
-            // this.calculateBar();
           });
-        // this._totalThisV += Number(ev.transaction.amount);
-        // this._exceedThisV += Number(ev.transaction.amount);
-        // this._flaggedTransactions.unshift(ev.transaction);
       })
       .catch(err => {
         this._demoText = err.message;
@@ -415,31 +415,10 @@ export class DashboardPage {
   }
 
   private goToDetail() {
-    this.navCtrl.push(`TransDetailPage`, {userId: this._userAccount.userId});
+    this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId });
   }
 
   private linkAccount() {
-    // this._demoText = `Linking account`;
-    // console.log(`Linking Account`);
-    // this.linkHandler.open();
-
-    // linkInitializeOptions.put("key", "[PLAID_PUBLIC_KEY]");
-    // linkInitializeOptions.put("product", "auth");
-    // linkInitializeOptions.put("apiVersion", "v2"); // set this to "v1" if using the legacy Plaid API
-    // linkInitializeOptions.put("env", "sandbox");
-    // linkInitializeOptions.put("clientName", "Test App");
-    // linkInitializeOptions.put("selectAccount", "true");
-    // linkInitializeOptions.put("webhook", "http://requestb.in");
-    // linkInitializeOptions.put("baseUrl", "https://cdn.plaid.com/link/v2/stable/link.html");
-
-    // clientName: `Coinscious`,
-    // // env: `sandbox`,
-    // env: `development`,
-    // key: `28f2e54388e2f6a1aca59e789d353b`,
-    // product: [`transactions`],
-    // forceIframe: true,
-    // selectAccount: false,
-
     const linkUrl =
       `https://cdn.plaid.com/link/v2/stable/link.html?` +
       `key=28f2e54388e2f6a1aca59e789d353b` + `&` +
