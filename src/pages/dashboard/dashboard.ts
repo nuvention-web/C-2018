@@ -415,11 +415,7 @@ export class DashboardPage {
   }
 
   private goToDetail() {
-<<<<<<< HEAD
-    this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId });
-=======
-    this.navCtrl.push(`TransDetailPage`, {userId: this._userAccount.userId, accessToken: this._userAccount.accessToken});
->>>>>>> origin/develop
+    this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken });
   }
 
   private linkAccount() {
@@ -435,7 +431,7 @@ export class DashboardPage {
       `apiVersion=v2` + `&` +
       `selectAccount=false`;
 
-    const browser = this.iab.create(linkUrl, '_blank', 'location=yes,toolbar=yes');
+    const browser = this.iab.create(linkUrl, '_blank', 'location=no,toolbar=no');
     browser.on('loadstart').subscribe(event => {
       console.log(`[InAppBrowser] On Load Start: ${event.url}`);
       const redirectUrl = event.url;
