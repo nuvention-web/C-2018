@@ -153,17 +153,16 @@ export class DashboardPage {
     // pushObject.on('registration').subscribe((registration: any) => console.log('Device registered', registration));
     // pushObject.on('error').subscribe(error => console.error('Error with Push plugin', error));
 
-    this.plaidService.transactions$.subscribe(transactions => {
-      if (transactions) {
-        console.log(`New Transactions arrived`);
-        this.zone.run(() => {
-          this.reshapeTransactions(transactions);
-        });
-      }
-    }, err => {
-      console.log(`New Transaction Error: ${err.message}`);
-      this._demoText = `${err.message}`
-    });
+    // this.plaidService.transactions$.subscribe(transactions => {
+    //   if (transactions) {
+    //     console.log(`New Transactions arrived`);
+    //     console.log(transactions);
+    //     this.reshapeTransactions(transactions);
+    //   }
+    // }, err => {
+    //   console.log(`New Transaction Error: ${err.message}`);
+    //   this._demoText = `${err.message}`
+    // });
 
 
     ///// plaid part
@@ -286,25 +285,32 @@ export class DashboardPage {
       this._userAccount = ua;
       this._uaSubscription.unsubscribe();
 
-      this.plaidService.refreshTransaction(ua.accessToken);
-
       this._isLoading = false;
       this.calculateBar();
       // get transaction data we have
       let to = new Date();
       let from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 10);
+
       // TODO
-      this.plaidService.getTransactionRecords(ua.userId, from, to)
-        .then(transactions => {
-          // this._demoText = `Received Transaction Records`;
-          console.log(`Received Transaction Records`);
-          console.log(transactions);
-          this._transHistory = transactions;
-          this.reshapeTransactions(this._transactions);
-        }).catch(err => {
-          // this._demoText = err.message;
-          console.log(`Error Receiving Transaction Records, ${err.message}`);
-        });
+
+      this.plaidService.refreshTransaction(ua.accessToken).then(
+        res => {
+          this.plaidService.getTransactionRecords(ua.userId, from, to)
+            .then(transactions => {
+              // this._demoText = `Received Transaction Records`;
+              console.log(`Received Transaction Records`);
+              // console.log(transactions);
+              this._transHistory = transactions;
+              console.log(`plaid transactions`);
+              // console.log(res);
+              this.reshapeTransactions(res);
+            }).catch(err => {
+              // this._demoText = err.message;
+              console.log(`Error Receiving Transaction Records, ${err.message}`);
+            });
+        }
+      ).catch();
+
       this.plaidService.getMonthlyAmount(ua.userId);
     });
     // this.plaidService.refreshTransaction(this.userAccount.);
@@ -353,11 +359,9 @@ export class DashboardPage {
 
     this.emptyTransactions = !trans.some(tr => tr.data.length > 0);
 
-    this.zone.run(() => {
-      console.log(`Calculated!`);
-      console.log(trans);
-      this._transactions = trans;
-    });
+    console.log(`Calculated!`);
+    console.log(trans);
+    this._transactions = trans;
   }
 
   private calculateBar() {

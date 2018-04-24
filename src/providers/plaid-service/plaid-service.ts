@@ -145,20 +145,6 @@ export class PlaidService {
     return new Promise<string>((resolve) => {
       console.log(`getting access token, ${public_token}`);
 
-      // this.plaidClient.exchangePublicToken(public_token, (err, res) => {
-      //   if (err) {
-      //     // console.log(`error ${err.error_message}`);
-      //     // if (plaid.isPlaidError(err))
-      //     console.log(`error ${err.toString()}`);
-      //     // this.transactionSource.next(err.error_message);
-      //     return;
-      //   }
-      //   console.log(`received access token`);
-      //
-      //   // this.transactionSource.next(res.access_token);
-      //   resolve(res.access_token);
-      // });
-
       const targetUrl = `http://Coinscious-env.tpg3qgcuzt.us-east-2.elasticbeanstalk.com/item/public_token/exchange`;
 
       const httpOptions = {
@@ -226,64 +212,11 @@ export class PlaidService {
   }
 
   public refreshTransaction(access_token: string) {
-    this.transactionSource.next([access_token]);
+    // this.transactionSource.next([access_token]);
     const today = new Date();
     const daysAgo = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 3);
-    const tm = today.getMonth() < 9 ? `0${today.getMonth() + 1}` : `${today.getMonth()}`;
-    const td = today.getDate() < 10 ? `0${today.getDate()}` : `${today.getDate()}`;
-    const am = daysAgo.getMonth() < 9 ? `0${daysAgo.getMonth() + 1}` : `${daysAgo.getMonth()}`;
-    const ad = daysAgo.getDate() < 10 ? `0${daysAgo.getDate()}` : `${daysAgo.getDate()}`;
-    const todayString = `${today.getFullYear()}-${tm}-${td}`;
-    const daysAgoString = `${daysAgo.getFullYear()}-${am}-${ad}`;
-    // this.plaidClient.getTransactions(
-    //   access_token,
-    //   daysAgoString,
-    //   todayString,
-    //   (err, res) => {
-    //     if (err) {
-    //       // this.transactionSource.next(err.error_message);
-    //       return;
-    //     }
-    //
-    //     this._transactions = res.transactions;
-    //     this.transactionSource.next(this._transactions);
-    //     // console.log(this._transactions);
-    //   });
 
-    const targetUrl = `http://Coinscious-env.tpg3qgcuzt.us-east-2.elasticbeanstalk.com/transactions/get`;
-
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json',
-        // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        // 'Accept': '*/*'
-      })
-    };
-
-    const data = {
-      body: {
-        client_id: "5a8c0e36bdc6a47debd6ee15",
-        secret: "2ac6695774cef3665c793c1eb4a219",
-        access_token: access_token,
-        start_date: daysAgoString,
-        end_date: todayString
-      },
-      environment: this.environment
-    };
-
-    this.http.setDataSerializer('json');
-    console.log(`getting transaction.`);
-    console.log(data);
-    this.http.post(targetUrl, data, { 'Content-Type': 'application/json' })
-      .then(res => {
-        res.data = JSON.parse(res.data);
-        console.log(`got transaction response`);
-        // console.log(res.data);
-        this._transactions = res.data.transactions;
-        this.transactionSource.next(this._transactions);
-      }).catch(err => {
-        console.log(`get transaction err. ${err.error}`);
-      });
+    return this.getTransactionsWithTimeRange(access_token, daysAgo, today);
   }
 
   public getTransactionsWithTimeRange(access_token: string, from: Date, to: Date): Promise<any> {
