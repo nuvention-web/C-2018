@@ -252,7 +252,11 @@ export class TransDetailPage {
           // this._transactions.push(allTransactionsMap.get(t.transactionId));
 
           let target = trans[t["transactionId"]];
-          if (target != null) this._transactions.push(target);
+          if (target != null) {
+            console.log(`love the item? ${t["loved"]}`);
+            target["loved"] = t["loved"];
+            this._transactions.push(target);
+          }
         });
       });
 

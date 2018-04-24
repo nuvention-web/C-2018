@@ -20,7 +20,11 @@ export class TransactionItem_2Component {
   @Output() onFlag: EventEmitter<any> = new EventEmitter();
 
   constructor() {
+  }
 
+  ngAfterViewInit() {
+    // console.log(`Transaction Item`);
+    // console.log(this._transaction);
   }
 
   private approve() {
