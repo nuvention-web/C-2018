@@ -228,26 +228,30 @@ export class TransDetailPage {
     console.log("from: " + from.toDateString());
     console.log("to: " + to.toDateString());
     this.plaidService.getTransactionsWithTimeRange(this._access_token, from, to).then(res => {
+      // console.log(res);
 
       res.forEach(t => {
-        allTransactionsMap.set(t.transaction_id, t);
-        console.log("allTransactionsMap length: " + allTransactionsMap.size.toString());
+        // allTransactionsMap.set(t.transaction_id, t);
+        // console.log("allTransactionsMap length: " + allTransactionsMap.size.toString());
 
-        trans[t.transactions_id] = t;
+        trans[t["transaction_id"]] = t;
       });
 
-      this.plaidService.getTransactionRecords(this._userId, from, to).then(res => {
+      console.log(trans);
+
+      this.plaidService.getTransactionRecords(this._userId, from, to).then(r => {
         this._transactions.length = 0;
-        res.forEach(t => {
-          console.log("transactionId:" + t.transactionId);
-          if (!allTransactionsMap.hasOwnProperty(t.transactionId)) {
-            console.log("don't have key allTransactionsMap length: " + allTransactionsMap.size.toString());
-          }
-          console.log("has key allTransactionsMap length: " + allTransactionsMap.size.toString());
+        console.log(r);
+        r.forEach(t => {
+          // console.log("transactionId:" + t.transactionId);
+          // if (!allTransactionsMap.hasOwnProperty(t.transactionId)) {
+          //   console.log("don't have key allTransactionsMap length: " + allTransactionsMap.size.toString());
+          // }
+          // console.log("has key allTransactionsMap length: " + allTransactionsMap.size.toString());
 
           // this._transactions.push(allTransactionsMap.get(t.transactionId));
 
-          let target = trans[t.transactionId];
+          let target = trans[t["transactionId"]];
           if (target != null) this._transactions.push(target);
         });
       });
