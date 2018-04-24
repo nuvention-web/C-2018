@@ -287,8 +287,8 @@ export class PlaidService {
   }
 
   public getTransactionsWithTimeRange(access_token: string, from: Date, to: Date): Promise<any> {
-    const today = from;
-    const daysAgo = to;
+    const today = to;
+    const daysAgo = from;
     const tm = today.getMonth() < 9 ? `0${today.getMonth() + 1}` : `${today.getMonth()}`;
     const td = today.getDate() < 10 ? `0${today.getDate()}` : `${today.getDate()}`;
     const am = daysAgo.getMonth() < 9 ? `0${daysAgo.getMonth() + 1}` : `${daysAgo.getMonth()}`;
