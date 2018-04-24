@@ -4,6 +4,7 @@ import { IonicApp, IonicErrorHandler, IonicModule } from 'ionic-angular';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
 import { Push } from '@ionic-native/push';
+import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { LocalNotifications } from '@ionic-native/local-notifications'
 import { AngularFireModule } from 'angularfire2';
 import { AngularFirestoreModule } from 'angularfire2/firestore';
@@ -11,6 +12,7 @@ import { AngularFireAuthModule, AngularFireAuth } from 'angularfire2/auth';
 import { environment } from '../environments/environment';
 import { HttpClientModule } from '@angular/common/http';
 import { NgProgressModule } from '@ngx-progressbar/core';
+import { HTTP } from '@ionic-native/http';
 import { MyApp } from './app.component';
 import { PlaidService } from '../providers/plaid-service/plaid-service';
 
@@ -38,7 +40,9 @@ import { PlaidService } from '../providers/plaid-service/plaid-service';
     LocalNotifications,
     { provide: ErrorHandler, useClass: IonicErrorHandler },
     PlaidService,
-    AngularFireAuth
+    AngularFireAuth,
+    InAppBrowser,
+    HTTP
   ]
 })
 export class AppModule { }

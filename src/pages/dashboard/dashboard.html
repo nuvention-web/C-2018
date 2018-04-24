@@ -28,6 +28,10 @@
   <h4><ion-spinner></ion-spinner> Loading</h4>
 </div>
 
+<!-- <div *ngIf="!_linkedCredential">
+  {{_demoText}}
+</div> -->
+
 
 <div class="brief" *ngIf="!_isLoading && _signedIn && _linkedCredential" (click)="goToDetail()">
   <h4>
@@ -84,15 +88,15 @@
       </div> -->
 
     <div class="purchases-wrapper">
-      <div>
+      <!-- <div>
         {{_demoText}}
-      </div>
+      </div> -->
       <div>
         <h2>New Purchases</h2>
         <!-- <ion-badge *ngIf="!_transactions && _transactions.length != 0">{{_transaction.length}}</ion-badge> -->
       </div>
       <!-- <hr/> -->
-      <div class="empty-msg" *ngIf="!_transactions || _transactions.length == 0">
+      <div class="empty-msg" *ngIf="!_transactions || _transactions.length == 0 || emptyTransactions">
         No transactions.
       </div>
       <transaction-group *ngFor="let t of _transactions" [transactions]=t (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-group>

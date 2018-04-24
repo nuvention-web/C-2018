@@ -2,8 +2,11 @@ import { Component, Input } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { Chart } from 'chart.js';
 import * as pattern from 'patternomaly';
-
+import {UserTransaction} from "../../models/userTransaction";
+import {UserAccount} from "../../models/userAccount";
 import { PlaidService } from '../../providers/plaid-service/plaid-service';
+import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
+import {UserMonthlyRecord} from "../../models/user-monthly-record";
 
 /**
  * Generated class for the TransDetailPage page.
@@ -12,12 +15,17 @@ import { PlaidService } from '../../providers/plaid-service/plaid-service';
  * Ionic pages and navigation.
  */
 
+declare var Plaid;
+
 @IonicPage()
 @Component({
   selector: 'page-trans-detail',
   templateUrl: 'trans-detail.html',
 })
 export class TransDetailPage {
+  private userTransactionCollections: AngularFirestoreCollection<UserTransaction>;
+  private userAccountCollections: AngularFirestoreCollection<UserAccount>;
+  private userMonthlyRecord: AngularFirestoreCollection<UserMonthlyRecord>;
   private _monthUnhappy = 0;
   private _monthHappy = 0;
   private chart: Chart = [];
@@ -25,7 +33,7 @@ export class TransDetailPage {
     type: `bar`,
     data: {
       datasets: [{
-        data: [500, 480, 460, 380, 400, 370, 340, 320, 290, 270, 250, 260],
+        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         backgroundColor: [
           pattern.draw('dot-dash', '#ff9763'),
           pattern.draw('dot-dash', '#ff9763'),
@@ -60,7 +68,7 @@ export class TransDetailPage {
         borderWidth: 1
       },
       {
-        data: [600, 720, 700, 760, 720, 780, 800, 830, 850, 800, 920, 950],
+        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         backgroundColor: [
           'rgba(17, 178, 69, 0.2)',
           'rgba(17, 178, 69, 0.2)',
@@ -124,64 +132,14 @@ export class TransDetailPage {
           /* other stuff that requires slice's label and value */
           console.log(document.getElementById("wrap").scroll);
           this._month = `${label} 2018`;
-          this.generateNewTransactions(label);
+          this.generateNewTransactions(clickedElementindex);
         }
       }
     }
   };
 
-  private _ts: any = [
-    { name: `McDonald's`, amount: `10.74`, date: `2017-02-27`, love: true },
-    { name: `Starbucks`, amount: `7.32`, date: `2017-02-27`, love: false },
-    { name: `Uber 063015 SF**POOL**`, amount: `5.40`, date: `2017-02-25`, love: true },
-    { name: `United Airlines`, amount: `500.00`, date: `2017-02-23`, love: true },
-    { name: `AmazonPrime Membersh`, amount: `49.00`, date: `2017-02-23`, love: true },
-    { name: `TARGET.COM * 800-591-3869`, amount: `42.49`, date: `2017-02-22`, love: true },
-    { name: `AMAZON MKTPLACE`, amount: `27.57`, date: `2017-02-20`, love: true },
-    { name: `#03428 JEWEL EVANSTON IL`, amount: `56.20`, date: `2017-02-19`, love: true },
-    { name: `Nicor Gas NICPayment 1388019270`, amount: `50.00`, date: `2017-02-16`, love: true },
-    { name: `ZARA USA 3697 CHICAGO IL`, amount: `138.21`, date: `2017-02-12`, love: true },
-    { name: `B&H PHOTO`, amount: `298.00`, date: `2017-02-08`, love: true },
-    { name: `LITTLE TOKYO ROSEMONT`, amount: `11.15`, date: `2017-02-03`, love: true },
-    { name: `MICHAEL KORS`, amount: `141.41`, date: `2017-02-08`, love: true },
-    { name: `CALVIN KLEIN`, amount: `26.13`, date: `2017-02-06`, love: true },
-    { name: `USA*CANTEEN VENDING`, amount: `1.25`, date: `2017-02-03`, love: true },
-    { name: `NORRIS CENTER FOOD COUR`, amount: `8.02`, date: `2017-02-02`, love: true },
-    { name: `LIBRARY CAFE BERGSON`, amount: `3.85`, date: `2017-02-08`, love: true }
-  ];
 
-  private _tSource = [];
 
-  private _transactions: any = [{
-    name: `Name`,
-    amount: `12.00`,
-    date: `18-01-01`
-  }, {
-    name: `Name`,
-    amount: `12.00`,
-    date: `18-01-01`
-  }, {
-    name: `Name`,
-    amount: `12.00`,
-    date: `18-01-01`
-  }, {
-    name: `Name`,
-    amount: `12.00`,
-    date: `18-01-01`
-  }];
-  private _historyTransactions: any = [{
-    name: `Name`,
-    amount: `12.00`,
-    date: `18-01-01`
-  }, {
-    name: `Name`,
-    amount: `12.00`,
-    date: `18-01-01`
-  }, {
-    name: `Name`,
-    amount: `12.00`,
-    date: `18-01-01`
-  }];
 
   private _month = `Jan 2018`;
   private _months = {
@@ -189,45 +147,145 @@ export class TransDetailPage {
     "Jul": "07", "Aug": "08", "Sep": "09", "Oct": "10", "Nov": "11", "Dec": "12"
   };
 
+  private _userId: string = this.navParams.get("userId");
+  private _public_token: string = "";
+  private _access_token: string = this.navParams.get("accessToken");
+
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
+    private firestore: AngularFirestore,
     private plaidService: PlaidService) {
+      this.userMonthlyRecord = this.firestore.collection<UserMonthlyRecord>("user-monthly-amount");
+      this.userTransactionCollections = this.firestore.collection<UserTransaction>("user-transactions");
+      this.userAccountCollections = this.firestore.collection<UserAccount>("user-accounts");
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad TransDetailPage');
-
-    this.chart = new Chart(`chart-canvas`, this.chartOptions);
-    this._transactions = this._ts[0];
-    this._monthUnhappy = this.chart.data.datasets[0].data[0];
-    this._monthHappy = this.chart.data.datasets[1].data[0];
-    this.plaidService.transactions$.subscribe(transactions => {
-      this._tSource = transactions;
-      this.generateNewTransactions("Jan");
+    console.log("ionViewDidLoad tran-detail");
+    console.log("userID: " + this._userId);
+    //得到public token
+    this.userAccountCollections.ref.where(`userId`, '==', this._userId).get().then( res => {
+        res.forEach(t => {
+            this._public_token = t.data().publicToken;
+            //console.log("public toke before: " + this._public_token.toString());
+        });
+        //console.log("get public token good");
+    }, err => {
+        //console.log("get public token error");
     });
+    //更新chart的数据
+    this.userMonthlyRecord.ref.where(`userId`, '==', this._userId).get().then(res => {
+      res.forEach(t => {
+        let tempDate = new Date(t.data().date);
+        let thisMonth = tempDate.getMonth();
+        this.chart.data.datasets[0].data[thisMonth] = t.data().totalAmount - t.data().exceedAmount;
+        this.chart.data.datasets[1].data[thisMonth] = t.data().exceedAmount;
+        //console.log("Happy Amount" + this.chart.data.datasets[0].data[thisMonth].toString());
+        //console.log("UnHappy Amount" + this.chart.data.datasets[1].data[thisMonth].toString());
+      });
+    });
+    //console.log("userId is: " + this._userId.toString());
+    //console.log("public token then: " + this._public_token.toString());
+    this.chart = new Chart(`chart-canvas`, this.chartOptions);
+    this.generateNewTransactions(new Date().getMonth());
   }
 
+  private _transactions: any = [];
+  private _partTransactionIds: any = [];
+
   private generateNewTransactions(month) {
-    // const l = this._tSource.length;
-    const l = this._ts.length;
-    this._transactions = [];
-    let numbers = [];
-    for (let i = 0; i < 4 + Math.floor((Math.random() * 5)); i++) {
-      // let item = this._tSource[Math.floor((Math.random() * l))];
-      let num = Math.floor((Math.random() * l));
-      let found = numbers.find(n => (n == num));
-      if (found) {
-        i--;
-        continue;
-      }
-      numbers.push(num);
-      let item = this._ts[num];
-      item.love = Math.random() > 0.3;
-      item.date = `2018-${this._months[month]}-${item.date.substr(8, 2)}`;
-      this._transactions.push(item);
-    }
-    this._transactions.sort((a, b) => (a.date <= b.date));
+      //更新点击后表显示页的数据
+      //console.log("public toke end: " + this._public_token.toString());
+      this._monthUnhappy = this.chart.data.datasets[0].data[month];
+      this._monthHappy = this.chart.data.datasets[1].data[month];
+      var label = this.chart.data.labels[month];
+      this._month = `${label} 2018`;
+      console.log("this._month" + this._month.toString());
+
+
+      this._transactions = [];
+      let partTransactionIds = [];
+      let allTransactions = [];
+      var allTransactionsMap = new Map();
+
+
+      //得到当月在数据库的transcation id
+      var date = new Date(), y = date.getFullYear();
+      let from = new Date(y, month, 1);
+      let to = new Date(y, month + 1, 0);
+      /*
+      this.plaidService.getTransactionRecords(this._userId, from, to).then(res => {
+        res.forEach(t => {
+          partTransactionIds.push(t.transactionId);
+          console.log("partTransactionIds length: " + partTransactionIds.length.toString());
+        });
+      });
+      */
+
+      console.log("this._access_toke: " + this._access_token.toString());
+      console.log("from: " + from.toDateString());
+      console.log("to: " + to.toDateString());
+      this.plaidService.getTransactionsWithTimeRange(this._access_token, from, to).then(res => {
+
+        res.forEach(t => {
+          allTransactionsMap.set(t.transaction_id, t);
+          console.log("allTransactionsMap length: " + allTransactionsMap.size.toString());
+        });
+
+        this.plaidService.getTransactionRecords(this._userId, from, to).then(res => {
+            res.forEach(t => {
+                console.log("transactionId:" + t.transactionId);
+                if(!allTransactionsMap.hasOwnProperty(t.transactionId)) {
+                    console.log("don't have key allTransactionsMap length: " + allTransactionsMap.size.toString());
+                }
+                console.log("has key allTransactionsMap length: " + allTransactionsMap.size.toString());
+                this._transactions.push(allTransactionsMap.get(t.transactionId));
+            });
+        });
+
+
+      });
+
+/*
+      this.plaidService.getTransactionRecords(this._userId, from, to).then(res => {
+          res.forEach(t => {
+              console.log("transactionId:" + t.transactionId);
+              if(!allTransactionsMap.hasOwnProperty(t.transactionId)) {
+                  console.log("don't have key allTransactionsMap length: " + allTransactionsMap.size.toString());
+              }
+              console.log("has key allTransactionsMap length: " + allTransactionsMap.size.toString());
+              this._transactions.push(allTransactionsMap.get(t.transactionId));
+          });
+      });
+      */
+
+
+
+      /*
+      console.log("from date: " + from.toDateString());
+      console.log("to date: " + to.toDateString());
+      console.log("partTransactionIds length: " + this._partTransactionIds.length.toString());
+      console.log("partTransactionIds 0: " + this._partTransactionIds[0].toString());
+
+      var i = 0;
+      this.userTransactionCollections.ref.where(`userId`, '==', this._userId).get().then(res => {
+          res.forEach( t => {
+              this._partTransactionIds.push(t.data().transactionId);
+              console.log("i: " + i.toString() + " t.transcationId: " + t.data().transactionId.toString());
+              console.log("partTransactionIds length 2: " + this._partTransactionIds.length.toString());
+              i = i + 1;
+          });
+          console.log("get partTransactions good");
+      }, err => {
+          console.log("get partTransactions error");
+      });
+*/
+      /*
+
+      this.plaidService.getTransaction2(this._testPublicToken, from, to);
+      console.log("transaction length: " + this._transactions.length);
+      */
   }
 
 
