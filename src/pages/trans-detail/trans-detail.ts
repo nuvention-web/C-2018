@@ -149,6 +149,7 @@ export class TransDetailPage {
 
   private _userId: string = this.navParams.get("userId");
   private _public_token: string = "";
+  private _access_token: string = this.navParams.get("accessToken");
 
   constructor(
     public navCtrl: NavController,
@@ -199,10 +200,13 @@ export class TransDetailPage {
       this._monthHappy = this.chart.data.datasets[1].data[month];
       var label = this.chart.data.labels[month];
       this._month = `${label} 2018`;
+      console.log("this._month" + this._month.toString());
 
 
       this._transactions = [];
-      this._partTransactionIds= [];
+      let partTransactionIds = [];
+      let allTransactions = [];
+      var allTransactionsMap = new Map();
 
 
       //得到当月在数据库的transcation id
@@ -211,10 +215,36 @@ export class TransDetailPage {
       let to = new Date(y, month + 1, 0);
       this.plaidService.getTransactionRecords(this._userId, from, to).then(res => {
         res.forEach(t => {
-          this._partTransactionIds.push(t.transactionId);
-          this._transactions.push(t);
+
+          partTransactionIds.push(t.transactionId);
+          console.log("partTransactionIds length: " + partTransactionIds.length.toString());
         });
       });
+
+      console.log("this._access_toke: " + this._access_token.toString());
+      console.log("from: " + from.toDateString());
+      console.log("to: " + to.toDateString());
+      this.plaidService.getTransactionsWithTimeRange(this._access_token, from, to).then(res => {
+        console.log("getTransactionsWithTimeRange good");
+        res.forEach(t => {
+          allTransactions.push(t);
+          allTransactionsMap.set(t.transaction_id, t);
+          console.log("t transcationId: " + t.transaction_id);
+          console.log("allTransactions length: " + allTransactions.length.toString());
+        }), err => {
+          console.log("getTransactionsWithTimeRange error");
+        }
+      });
+
+      this.plaidService.getTransactionRecords(this._userId, from, to).then(res => {
+          res.forEach(t => {
+              console.log("transactionId:" + t.transactionId);
+              this._transactions.push(allTransactionsMap.get(t.transactionId));
+          });
+      });
+
+
+
 
       /*
       console.log("from date: " + from.toDateString());
