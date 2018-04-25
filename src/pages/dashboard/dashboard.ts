@@ -207,23 +207,27 @@ export class DashboardPage {
     ///// Plaid part end
 
     this.plaidService.lastMonthlyAmounts$.subscribe(record => {
-      this.zone.run(() => {
-        if (record != null) {
-          this._totalLastV = record.totalAmount;
-          this._exceedLastV = record.exceedAmount;
-        }
-        this.calculateBar();
-      });
+      console.log(`[Monthly Record] Got last month record.`);
+      console.log(record);
+      // this.zone.run(() => {
+      // });
+      if (record != null) {
+        this._totalLastV = record.totalAmount;
+        this._exceedLastV = record.exceedAmount;
+      }
+      this.calculateBar();
     });
 
     this.plaidService.thisMonthlyAmounts$.subscribe(record => {
-      this.zone.run(() => {
-        if (record != null) {
-          this._totalThisV = record.totalAmount;
-          this._exceedThisV = record.exceedAmount;
-        }
-        this.calculateBar();
-      });
+      console.log(`[Monthly Record] Got this month record.`);
+      console.log(record);
+      // this.zone.run(() => {
+      // });
+      if (record != null) {
+        this._totalThisV = record.totalAmount;
+        this._exceedThisV = record.exceedAmount;
+      }
+      this.calculateBar();
     });
 
     this.plaidService.testString$.subscribe(s => {
@@ -286,7 +290,7 @@ export class DashboardPage {
       this._uaSubscription.unsubscribe();
 
       this._isLoading = false;
-      this.calculateBar();
+      // this.calculateBar();
       // get transaction data we have
       let to = new Date();
       let from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 10);
@@ -359,7 +363,7 @@ export class DashboardPage {
 
     this.emptyTransactions = !trans.some(tr => tr.data.length > 0);
 
-    console.log(`Calculated!`);
+    console.log(`Calculated empty trans!`);
     console.log(trans);
     this._transactions = trans;
   }
@@ -368,11 +372,15 @@ export class DashboardPage {
     if (!this._signedIn || !this._linkedCredential) return;
 
     let total = this._totalThisV > this._totalLastV ? this._totalThisV : this._totalLastV;
+    console.log(`Calculating bar total: ${total}`);
     total = total == 0 ? 0.01 : 0;
     this.totalLast.set(this._totalLastV / total * 100);
     this.totalThis.set(this._totalThisV / total * 100);
     this.exceedLast.set(this._exceedLastV / total * 100);
     this.exceedThis.set(this._exceedThisV / total * 100);
+    if (this.totalLast == null || this.totalThis == null || this.exceedLast == null || this.exceedThis == null)
+      console.log(`Null element!`);
+    console.log(`Calculated bar!`);
   }
 
   private pushNotification() {
@@ -444,6 +452,7 @@ export class DashboardPage {
       const path = url[1].split(`?`);
       const ev = path[0];
 
+      // TODO fix if user cancelled the action
       if (ev != `connected`) return;
 
       // this._isLoading = true;

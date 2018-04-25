@@ -72,6 +72,7 @@ export class PlaidService {
     this._userMonthAmountsCollection.ref.where(`userId`, "==", userId)
       .where(`date`, "==", thisMonth).get().then(ref => {
         if (ref.empty) {
+          console.log(`[Monthly Amount] Not found this month's record`);
           // create one!
           let item = {} as UserMonthlyRecord;
           item.date = thisMonth;
@@ -79,16 +80,19 @@ export class PlaidService {
           item.totalAmount = 0;
           item.userId = userId;
           this._userMonthAmountsCollection.add(item).then(r => {
+            console.log(`[Monthly Amount] Created this month's record`);
             this.getThisMonthlyAmountRecord(r.id);
           });
         } else {
           // this._testSource.next(`Get doc 0`);
+          console.log(`[Monthly Amount] Found this month's record`);
           this.getThisMonthlyAmountRecord(ref.docs[0].id);
         }
       }).catch(err => { });
     this._userMonthAmountsCollection.ref.where(`userId`, "==", userId)
       .where(`date`, "==", lastMonth).get().then(ref => {
         if (ref.empty) {
+          console.log(`[Monthly Amount] Not found last month's record`);
           // create one!
           let item = {} as UserMonthlyRecord;
           item.date = lastMonth;
@@ -96,10 +100,12 @@ export class PlaidService {
           item.totalAmount = 0;
           item.userId = userId;
           this._userMonthAmountsCollection.add(item).then(r => {
+            console.log(`[Monthly Amount] Created last month's record`);
             this.getLastMonthlyAmountRecord(r.id);
           });
         } else {
           // this._testSource.next(`Get doc 1`);
+          console.log(`[Monthly Amount] Found last month's record`);
           this.getLastMonthlyAmountRecord(ref.docs[0].id);
         }
       });
