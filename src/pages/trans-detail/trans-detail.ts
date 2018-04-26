@@ -163,36 +163,46 @@ export class TransDetailPage {
 
   ionViewDidLoad() {
     console.log("ionViewDidLoad tran-detail");
-    console.log("userID: " + this._userId);
+    this.updateMonthLabel();
     //得到public token
     this.userAccountCollections.ref.where(`userId`, '==', this._userId).get().then(res => {
       res.forEach(t => {
         this._public_token = t.data().publicToken;
-        //console.log("public toke before: " + this._public_token.toString());
       });
-      //console.log("get public token good");
     }, err => {
-      //console.log("get public token error");
     });
     //更新chart的数据
     this.userMonthlyRecord.ref.where(`userId`, '==', this._userId).get().then(res => {
       res.forEach(t => {
         let tempDate = new Date(t.data().date);
         let thisMonth = tempDate.getMonth();
-        this.chart.data.datasets[0].data[thisMonth] = t.data().totalAmount - t.data().exceedAmount;
-        this.chart.data.datasets[1].data[thisMonth] = t.data().exceedAmount;
-        //console.log("Happy Amount" + this.chart.data.datasets[0].data[thisMonth].toString());
-        //console.log("UnHappy Amount" + this.chart.data.datasets[1].data[thisMonth].toString());
+        this.chartOptions.data.datasets[0].data[thisMonth] = t.data().totalAmount - t.data().exceedAmount;
+        this.chartOptions.data.datasets[1].data[thisMonth] = t.data().exceedAmount;
       });
     });
-    //console.log("userId is: " + this._userId.toString());
-    //console.log("public token then: " + this._public_token.toString());
     this.chart = new Chart(`chart-canvas`, this.chartOptions);
     this.generateNewTransactions(new Date().getMonth());
   }
 
   private _transactions: any = [];
   private _partTransactionIds: any = [];
+
+  private updateMonthLabel() {
+    console.log("updateMonthLabel");
+    var date = new Date();
+    for(var i = 11; i >= 0; i--) {
+      console.log("for loop " + i.toString());
+      var m = date.getMonth() + 1;
+      var y = date.getFullYear().toString().substr(2, 2);
+      var temp = `${m}/${y}`;
+      console.log("temp: " + temp.toString());
+      console.log("labels before: " +  this.chartOptions.data.labels[i].toString());
+      this.chartOptions.data.labels[i] = temp;
+      console.log("labels after: " +       this.chartOptions.data.labels[i].toString());
+      date.setMonth(date.getMonth() - 1);
+      console.log("date: " + date.toDateString());
+    }
+  }
 
   private generateNewTransactions(month) {
     //更新点击后表显示页的数据
@@ -215,24 +225,13 @@ export class TransDetailPage {
     var date = new Date(), y = date.getFullYear();
     let from = new Date(y, month, 1);
     let to = new Date(y, month + 1, 0);
-    /*
-    this.plaidService.getTransactionRecords(this._userId, from, to).then(res => {
-      res.forEach(t => {
-        partTransactionIds.push(t.transactionId);
-        console.log("partTransactionIds length: " + partTransactionIds.length.toString());
-      });
-    });
-    */
 
     console.log("this._access_toke: " + this._access_token.toString());
     console.log("from: " + from.toDateString());
     console.log("to: " + to.toDateString());
     this.plaidService.getTransactionsWithTimeRange(this._access_token, from, to).then(res => {
-      // console.log(res);
 
       res.forEach(t => {
-        // allTransactionsMap.set(t.transaction_id, t);
-        // console.log("allTransactionsMap length: " + allTransactionsMap.size.toString());
 
         trans[t["transaction_id"]] = t;
       });
@@ -243,13 +242,6 @@ export class TransDetailPage {
         this._transactions.length = 0;
         console.log(r);
         r.forEach(t => {
-          // console.log("transactionId:" + t.transactionId);
-          // if (!allTransactionsMap.hasOwnProperty(t.transactionId)) {
-          //   console.log("don't have key allTransactionsMap length: " + allTransactionsMap.size.toString());
-          // }
-          // console.log("has key allTransactionsMap length: " + allTransactionsMap.size.toString());
-
-          // this._transactions.push(allTransactionsMap.get(t.transactionId));
 
           let target = trans[t["transactionId"]];
           if (target != null) {
@@ -263,45 +255,6 @@ export class TransDetailPage {
 
     });
 
-    /*
-          this.plaidService.getTransactionRecords(this._userId, from, to).then(res => {
-              res.forEach(t => {
-                  console.log("transactionId:" + t.transactionId);
-                  if(!allTransactionsMap.hasOwnProperty(t.transactionId)) {
-                      console.log("don't have key allTransactionsMap length: " + allTransactionsMap.size.toString());
-                  }
-                  console.log("has key allTransactionsMap length: " + allTransactionsMap.size.toString());
-                  this._transactions.push(allTransactionsMap.get(t.transactionId));
-              });
-          });
-          */
-
-
-
-    /*
-    console.log("from date: " + from.toDateString());
-    console.log("to date: " + to.toDateString());
-    console.log("partTransactionIds length: " + this._partTransactionIds.length.toString());
-    console.log("partTransactionIds 0: " + this._partTransactionIds[0].toString());
-
-    var i = 0;
-    this.userTransactionCollections.ref.where(`userId`, '==', this._userId).get().then(res => {
-        res.forEach( t => {
-            this._partTransactionIds.push(t.data().transactionId);
-            console.log("i: " + i.toString() + " t.transcationId: " + t.data().transactionId.toString());
-            console.log("partTransactionIds length 2: " + this._partTransactionIds.length.toString());
-            i = i + 1;
-        });
-        console.log("get partTransactions good");
-    }, err => {
-        console.log("get partTransactions error");
-    });
-*/
-    /*
-
-    this.plaidService.getTransaction2(this._testPublicToken, from, to);
-    console.log("transaction length: " + this._transactions.length);
-    */
   }
 
 
