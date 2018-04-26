@@ -244,29 +244,23 @@ export class TransDetailPage {
     console.log("from: " + from.toDateString());
     console.log("to: " + to.toDateString());
     this.plaidService.getTransactionsWithTimeRange(this._access_token, from, to).then(res => {
-
       res.forEach(t => {
-
         trans[t["transaction_id"]] = t;
       });
-
-      console.log(trans);
-
-      this.plaidService.getTransactionRecords(this._userId, from, to).then(r => {
-        this._transactions.length = 0;
-        console.log(r);
-        r.forEach(t => {
-          let target = trans[t["transactionId"]];
-          if (target != null) {
-            console.log(`love the item? ${t["loved"]}`);
-            target["loved"] = t["loved"];
-            this._transactions.push(target);
-          }
+    }).then(() => {
+        this.plaidService.getTransactionRecords(this._userId, from, to).then(r => {
+            this._transactions.length = 0;
+            console.log(r);
+            r.forEach(t => {
+                let target = trans[t["transactionId"]];
+                if (target != null) {
+                    console.log(`love the item? ${t["loved"]}`);
+                    target["loved"] = t["loved"];
+                    this._transactions.push(target);
+                }
+            });
         });
       });
-
-
-    });
 
   }
 
