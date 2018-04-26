@@ -99,7 +99,7 @@ export class TransDetailPage {
         ],
         borderWidth: 1
       }],
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      labels: ['May', 'J17', 'Ju7', 'Aug 17', 'Sep 17', 'Oct 17', 'Nov 17', 'Dec 17', 'Jan 18', 'Feb 18', 'Mar 18', 'Apr 18']
     },
     options: {
       legend: {
@@ -146,6 +146,7 @@ export class TransDetailPage {
     "Jan": "01", "Feb": "02", "Mar": "03", "Apr": "04", "May": "05", "Jun": "06",
     "Jul": "07", "Aug": "08", "Sep": "09", "Oct": "10", "Nov": "11", "Dec": "12"
   };
+  private _montthsNumTOString = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   private _userId: string = this.navParams.get("userId");
   private _public_token: string = "";
@@ -192,9 +193,10 @@ export class TransDetailPage {
     var date = new Date();
     for(var i = 11; i >= 0; i--) {
       console.log("for loop " + i.toString());
-      var m = date.getMonth() + 1;
+      var tempM = date.getMonth();
+      var m = this._montthsNumTOString[tempM];
       var y = date.getFullYear().toString().substr(2, 2);
-      var temp = `${m}/${y}`;
+      var temp = `${m} ${y}`;
       console.log("temp: " + temp.toString());
       console.log("labels before: " +  this.chartOptions.data.labels[i].toString());
       this.chartOptions.data.labels[i] = temp;
@@ -209,11 +211,12 @@ export class TransDetailPage {
     //console.log("public toke end: " + this._public_token.toString());
     this._monthUnhappy = this.chart.data.datasets[0].data[month];
     this._monthHappy = this.chart.data.datasets[1].data[month];
-    var label = this.chart.data.labels[month];
-    this._month = `${label} 2018`;
+    var date = new Date();
+    var tempM1 = date.getMonth();
+    var tempM2 = this._montthsNumTOString[tempM1];
+    var tempY = date.getFullYear().toString().substr(2, 2);
+    this._month = `${tempM2} ${tempY}`;
     console.log("this._month" + this._month.toString());
-
-
     this._transactions = [];
     let partTransactionIds = [];
     let allTransactions = [];
@@ -222,7 +225,7 @@ export class TransDetailPage {
 
 
     //得到当月在数据库的transcation id
-    var date = new Date(), y = date.getFullYear();
+    var y = date.getFullYear();
     let from = new Date(y, month, 1);
     let to = new Date(y, month + 1, 0);
 
