@@ -131,7 +131,7 @@ export class TransDetailPage {
           console.log("happy", this._monthHappy);
           /* other stuff that requires slice's label and value */
           console.log(document.getElementById("wrap").scroll);
-          this._month = `${label} 2018`;
+          console.log("clickedElementindex: " + clickedElementindex.toString());
           this.generateNewTransactions(clickedElementindex);
         }
       }
@@ -141,7 +141,7 @@ export class TransDetailPage {
 
 
 
-  private _month = `Jan 2018`;
+  private _month = ``;
   private _months = {
     "Jan": "01", "Feb": "02", "Mar": "03", "Apr": "04", "May": "05", "Jun": "06",
     "Jul": "07", "Aug": "08", "Sep": "09", "Oct": "10", "Nov": "11", "Dec": "12"
@@ -175,14 +175,30 @@ export class TransDetailPage {
     //更新chart的数据
     this.userMonthlyRecord.ref.where(`userId`, '==', this._userId).get().then(res => {
       res.forEach(t => {
-        let tempDate = new Date(t.data().date);
-        let thisMonth = tempDate.getMonth();
-        this.chartOptions.data.datasets[0].data[thisMonth] = t.data().totalAmount - t.data().exceedAmount;
-        this.chartOptions.data.datasets[1].data[thisMonth] = t.data().exceedAmount;
+        let databaseDate = new Date(new Date(t.data().date));
+        databaseDate.setHours(24);
+        let databaseMonth = databaseDate.getMonth();
+        let databaseYear = databaseDate.getFullYear();
+        let thisDate = new Date();
+        let thisMonth = thisDate.getMonth();
+        let thisYear = thisDate.getFullYear();
+        let distance = (thisYear - databaseYear) * 12 + (thisMonth - databaseMonth);
+        //console.log("distance: " + distance.toString() + "thisDate: " + thisDate.toDateString() + "databaseDate: " + databaseDate.toDateString());
+        if(distance < 12)
+        {
+            this.chartOptions.data.datasets[0].data[11 - distance] = t.data().totalAmount - t.data().exceedAmount;
+            this.chartOptions.data.datasets[1].data[11 - distance] = t.data().exceedAmount;
+            console.log("distance: " + distance.toString() + "happy money: " + this.chartOptions.data.datasets[0].data[11 - distance].toString());
+            console.log("distance: " + distance.toString() + "unhappy money: " + this.chartOptions.data.datasets[1].data[11 - distance].toString());
+        }
       });
+    }).then(() => {
+            console.log("happy money begin chart" + this.chartOptions.data.datasets[1].data[11 - 2]);
+            this.chart = new Chart(`chart-canvas`, this.chartOptions)
+        }
+    ).then(() => {
+        this.generateNewTransactions(11);
     });
-    this.chart = new Chart(`chart-canvas`, this.chartOptions);
-    this.generateNewTransactions(new Date().getMonth());
   }
 
   private _transactions: any = [];
@@ -192,31 +208,26 @@ export class TransDetailPage {
     console.log("updateMonthLabel");
     var date = new Date();
     for(var i = 11; i >= 0; i--) {
-      console.log("for loop " + i.toString());
       var tempM = date.getMonth();
       var m = this._montthsNumTOString[tempM];
       var y = date.getFullYear().toString().substr(2, 2);
       var temp = `${m} ${y}`;
-      console.log("temp: " + temp.toString());
-      console.log("labels before: " +  this.chartOptions.data.labels[i].toString());
       this.chartOptions.data.labels[i] = temp;
-      console.log("labels after: " +       this.chartOptions.data.labels[i].toString());
       date.setMonth(date.getMonth() - 1);
-      console.log("date: " + date.toDateString());
     }
   }
 
-  private generateNewTransactions(month) {
+  private generateNewTransactions(clickedElement) {
     //更新点击后表显示页的数据
     //console.log("public toke end: " + this._public_token.toString());
-    this._monthUnhappy = this.chart.data.datasets[0].data[month];
-    this._monthHappy = this.chart.data.datasets[1].data[month];
+    this._monthUnhappy = this.chart.data.datasets[0].data[clickedElement];
+    this._monthHappy = this.chart.data.datasets[1].data[clickedElement];
     var date = new Date();
-    var tempM1 = date.getMonth();
-    var tempM2 = this._montthsNumTOString[tempM1];
-    var tempY = date.getFullYear().toString().substr(2, 2);
-    this._month = `${tempM2} ${tempY}`;
-    console.log("this._month" + this._month.toString());
+    date.setMonth(date.getMonth() - (11 - clickedElement));
+    var m = date.getMonth();
+    var mString = this._montthsNumTOString[m];
+    var ySring = date.getFullYear().toString().substr(2, 2);
+    this._month = `${mString} ${ySring}`;
     this._transactions = [];
     let partTransactionIds = [];
     let allTransactions = [];
@@ -225,9 +236,9 @@ export class TransDetailPage {
 
 
     //得到当月在数据库的transcation id
-    var y = date.getFullYear();
-    let from = new Date(y, month, 1);
-    let to = new Date(y, month + 1, 0);
+    var  y = date.getFullYear();
+    let from = new Date(y, m, 1);
+    let to = new Date(y, m + 1, 0);
 
     console.log("this._access_toke: " + this._access_token.toString());
     console.log("from: " + from.toDateString());
@@ -245,7 +256,6 @@ export class TransDetailPage {
         this._transactions.length = 0;
         console.log(r);
         r.forEach(t => {
-
           let target = trans[t["transactionId"]];
           if (target != null) {
             console.log(`love the item? ${t["loved"]}`);
