@@ -16,7 +16,7 @@ import { UserTransaction } from '../../models/userTransaction';
 import { PlaidService } from '../../providers/plaid-service/plaid-service';
 
 declare var cordova;
-declare var Plaid;
+// declare var Plaid;
 
 /**
  * Generated class for the DashboardPage page.
@@ -64,6 +64,18 @@ export class DashboardPage {
   private _isLoading = true;
 
   private linkHandler;
+
+  private fakeData = [
+    {
+      name: "Today", data: [
+        {
+          name: "name",
+          amount: 123
+        }
+      ]
+    },
+    { name: "Yesterday", data: [] },
+    { name: "2 Days Ago", data: [] }];
 
 
   constructor(
@@ -169,40 +181,40 @@ export class DashboardPage {
 
     // if (this._signedIn && !this._linkedCredential) {
     // }
-    this.linkHandler = Plaid.create({
-      clientName: `Coinscious`,
-      // env: `sandbox`,
-      env: `development`,
-      key: `28f2e54388e2f6a1aca59e789d353b`,
-      product: [`transactions`],
-      forceIframe: true,
-      selectAccount: false,
-      onSuccess: (public_token, metadata) => {
-        this.plaidService.getAccessToken(public_token).then(access_token => {
-          let newDoc = {} as UserAccount;
-          newDoc.publicToken = public_token;
-          newDoc.accessToken = access_token;
-          newDoc.userId = this._user.uid;
-          this.userAccountCollections.add(newDoc).then(() => {
-            this.checkCredentials();
-          });
-        });
-        // console.log("Login Succeed");
-        // this._linkedCredential = true;
-      },
-      onLoad: () => {
-        // Optional, called when Link loads
-        console.log(`Plaid Link loaded`);
-      },
-      onExit: (err, matadata) => {
-        if (err != null) {
-          console.log(`ERROR!`);
-          console.log(err);
-        } else {
-          console.log(`Exit with no error`);
-        }
-      }
-    });
+    // this.linkHandler = Plaid.create({
+    //   clientName: `Coinscious`,
+    //   // env: `sandbox`,
+    //   env: `development`,
+    //   key: `28f2e54388e2f6a1aca59e789d353b`,
+    //   product: [`transactions`],
+    //   forceIframe: true,
+    //   selectAccount: false,
+    //   onSuccess: (public_token, metadata) => {
+    //     this.plaidService.getAccessToken(public_token).then(access_token => {
+    //       let newDoc = {} as UserAccount;
+    //       newDoc.publicToken = public_token;
+    //       newDoc.accessToken = access_token;
+    //       newDoc.userId = this._user.uid;
+    //       this.userAccountCollections.add(newDoc).then(() => {
+    //         this.checkCredentials();
+    //       });
+    //     });
+    //     // console.log("Login Succeed");
+    //     // this._linkedCredential = true;
+    //   },
+    //   onLoad: () => {
+    //     // Optional, called when Link loads
+    //     console.log(`Plaid Link loaded`);
+    //   },
+    //   onExit: (err, matadata) => {
+    //     if (err != null) {
+    //       console.log(`ERROR!`);
+    //       console.log(err);
+    //     } else {
+    //       console.log(`Exit with no error`);
+    //     }
+    //   }
+    // });
 
     ///// Plaid part end
 
@@ -235,6 +247,9 @@ export class DashboardPage {
         this._demoText = s;
       });
     });
+
+    // this._transactions = this.fakeData;
+    // this.emptyTransactions = false;
   }
 
   private checkAuthState() {
@@ -452,7 +467,7 @@ export class DashboardPage {
       const path = url[1].split(`?`);
       const ev = path[0];
 
-      // TODO fix if user cancelled the action
+      if (ev == `exit`) browser.close();
       if (ev != `connected`) return;
 
       // this._isLoading = true;

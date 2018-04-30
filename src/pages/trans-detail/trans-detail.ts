@@ -134,7 +134,9 @@ export class TransDetailPage {
           console.log("clickedElementindex: " + clickedElementindex.toString());
           this.generateNewTransactions(clickedElementindex);
         }
-      }
+      },
+      maintainAspectRatio: false,
+      responsive: true
     }
   };
 
@@ -184,30 +186,38 @@ export class TransDetailPage {
         let thisYear = thisDate.getFullYear();
         let distance = (thisYear - databaseYear) * 12 + (thisMonth - databaseMonth);
         //console.log("distance: " + distance.toString() + "thisDate: " + thisDate.toDateString() + "databaseDate: " + databaseDate.toDateString());
-        if(distance < 12)
-        {
-            this.chartOptions.data.datasets[0].data[11 - distance] = t.data().totalAmount - t.data().exceedAmount;
-            this.chartOptions.data.datasets[1].data[11 - distance] = t.data().exceedAmount;
-            console.log("distance: " + distance.toString() + "happy money: " + this.chartOptions.data.datasets[0].data[11 - distance].toString());
-            console.log("distance: " + distance.toString() + "unhappy money: " + this.chartOptions.data.datasets[1].data[11 - distance].toString());
+        if (distance < 12) {
+          this.chartOptions.data.datasets[0].data[11 - distance] = t.data().totalAmount - t.data().exceedAmount;
+          this.chartOptions.data.datasets[1].data[11 - distance] = t.data().exceedAmount;
+          console.log("distance: " + distance.toString() + "happy money: " + this.chartOptions.data.datasets[0].data[11 - distance].toString());
+          console.log("distance: " + distance.toString() + "unhappy money: " + this.chartOptions.data.datasets[1].data[11 - distance].toString());
         }
       });
     }).then(() => {
-            console.log("happy money begin chart" + this.chartOptions.data.datasets[1].data[11 - 2]);
-            this.chart = new Chart(`chart-canvas`, this.chartOptions)
-        }
+      console.log("happy money begin chart" + this.chartOptions.data.datasets[1].data[11 - 2]);
+      this.chart = new Chart(`chart-canvas`, this.chartOptions)
+    }
     ).then(() => {
-        this.generateNewTransactions(11);
+      this.generateNewTransactions(11);
     });
+    // this._transactions = this.fakeData;
   }
 
+  private fakeData = [
+    {
+      name: "name",
+      amount: 123,
+      loved: false,
+      date: "12-34-56"
+    }
+  ];
   private _transactions: any = [];
   private _partTransactionIds: any = [];
 
   private updateMonthLabel() {
     console.log("updateMonthLabel");
     var date = new Date();
-    for(var i = 11; i >= 0; i--) {
+    for (var i = 11; i >= 0; i--) {
       var tempM = date.getMonth();
       var m = this._montthsNumTOString[tempM];
       var y = date.getFullYear().toString().substr(2, 2);
@@ -236,7 +246,7 @@ export class TransDetailPage {
 
 
     //得到当月在数据库的transcation id
-    var  y = date.getFullYear();
+    var y = date.getFullYear();
     let from = new Date(y, m, 1);
     let to = new Date(y, m + 1, 0);
 
@@ -248,19 +258,19 @@ export class TransDetailPage {
         trans[t["transaction_id"]] = t;
       });
     }).then(() => {
-        this.plaidService.getTransactionRecords(this._userId, from, to).then(r => {
-            this._transactions.length = 0;
-            console.log(r);
-            r.forEach(t => {
-                let target = trans[t["transactionId"]];
-                if (target != null) {
-                    console.log(`love the item? ${t["loved"]}`);
-                    target["loved"] = t["loved"];
-                    this._transactions.push(target);
-                }
-            });
+      this.plaidService.getTransactionRecords(this._userId, from, to).then(r => {
+        this._transactions.length = 0;
+        console.log(r);
+        r.forEach(t => {
+          let target = trans[t["transactionId"]];
+          if (target != null) {
+            console.log(`love the item? ${t["loved"]}`);
+            target["loved"] = t["loved"];
+            this._transactions.push(target);
+          }
         });
       });
+    });
 
   }
 

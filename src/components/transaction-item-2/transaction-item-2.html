@@ -1,34 +1,32 @@
 <!-- Generated template for the TransactionItem_2Component component -->
 <div class="trans-item">
 
-  <div class="trans-item-buttons">
-    <!-- <button ion-button icon-only clear (click)="approve()">
+  <!-- <div class="trans-item-buttons"> -->
+  <!-- <button ion-button icon-only clear (click)="approve()">
       <ion-icon name="thumbs-up"></ion-icon>
     </button> -->
-    <!--
+  <!--
     <button ion-button icon-only clear (click)="flag()" *ngIf=_transaction.love>
     -->
-    <div *ngIf="_transaction.loved">
-      <ion-icon name="md-heart"></ion-icon>
-    </div>
-    <!--
+  <!--
     </button>
 -->
-    <!--
+  <!--
     <button ion-button icon-only clear (click)="flag()" *ngIf=!_transaction.love>
     -->
-    <div *ngIf="!_transaction.loved">
-      <ion-icon name="md-heart" class="break"></ion-icon>
-      <ion-icon name="md-flash" class="flash"></ion-icon>
-    </div>
-    <!--
+  <!--
     </button>
 -->
-  </div>
+  <!-- </div> -->
 
   <div class="trans-item-title">
-
-    {{_transaction.name}}
+    <span *ngIf="_transaction.loved">
+      <ion-icon name="md-heart"></ion-icon>
+    </span>
+    <span *ngIf="!_transaction.loved">
+      <ion-icon name="md-heart" class="break"></ion-icon>
+      <ion-icon name="md-flash" class="flash"></ion-icon>
+    </span> {{_transaction.name}}
   </div>
 
   <div class="trans-item-text">${{_transaction.amount}} on {{_transaction.date}}</div>

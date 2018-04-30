@@ -1,6 +1,8 @@
 page-dashboard {
   .scroll-content {
     padding: 0 !important;
+    margin-top: 210px !important;
+    background-color: #f3f3f3;
   }
 
   ion-navbar {
@@ -71,7 +73,7 @@ page-dashboard {
     padding: 0;
     border-bottom: 1px solid #cccccc;
     display: block;
-    position: absolute;
+    position: fixed;
     top: 60px;
     left: 0;
     background-color: white;
@@ -79,6 +81,8 @@ page-dashboard {
     z-index: 5;
     box-shadow: 0 0 3px 3px rgba(0, 0, 0, 0.1);
     border-radius: 0 0 6px 6px;
+    min-height: 150px;
+    height: 150px;
 
     h4 {
       font-size: 2rem;
@@ -134,9 +138,9 @@ page-dashboard {
     }
   }
 
-  .linked {
-    margin-top: 18.5rem;
-  }
+  // .linked {
+  //   margin-top: 18.5rem;
+  // }
 
   .unlinked-wrapper {
     display: -webkit-flex;
