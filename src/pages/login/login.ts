@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { AngularFireAuth } from 'angularfire2/auth';
-import * as firebase from 'firebase/app';
+// import * as firebase from 'firebase/app';
 import { UserSign } from '../../models/userSign';
 
 /**
@@ -60,11 +60,11 @@ export class LoginPage {
     }
   }
 
-  private signIn() {
+  signIn() {
     this.signInWithData(this.user.email, this.user.password);
   }
 
-  private goToSignUp() {
+  goToSignUp() {
     this.navCtrl.push(`SignUpPage`);
   }
 

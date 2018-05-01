@@ -2,11 +2,10 @@ import { Injectable } from '@angular/core';
 import { Observable } from "rxjs/Observable";
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { HTTP } from '@ionic-native/http';
 import plaid from 'plaid';
 
-import { Transaction } from '../../models/transaction';
+// import { Transaction } from '../../models/transaction';
 import { UserTransaction } from '../../models/userTransaction';
 import { UserMonthlyRecord } from '../../models/user-monthly-record';
 
@@ -153,14 +152,6 @@ export class PlaidService {
 
       const targetUrl = `http://Coinscious-env.tpg3qgcuzt.us-east-2.elasticbeanstalk.com/item/public_token/exchange`;
 
-      const httpOptions = {
-        headers: new HttpHeaders({
-          'Content-Type': 'application/json',
-          // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          // 'Accept': '*/*'
-        })
-      };
-
       const data = {
         body: {
           client_id: "5a8c0e36bdc6a47debd6ee15",
@@ -236,12 +227,6 @@ export class PlaidService {
     const daysAgoString = `${daysAgo.getFullYear()}-${am}-${ad}`;
 
     const targetUrl = `http://Coinscious-env.tpg3qgcuzt.us-east-2.elasticbeanstalk.com/transactions/get`;
-
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
-    };
 
     const data = {
       body: {

@@ -27,7 +27,7 @@ export class TransactionItem_2Component {
     // console.log(this._transaction);
   }
 
-  private approve() {
+  approve() {
     this.onApprove.emit({
       transaction: this._transaction,
       point: 5,
@@ -38,7 +38,7 @@ export class TransactionItem_2Component {
     });
   }
 
-  private flag() {
+  flag() {
     this.onFlag.emit({
       transaction: this._transaction
     });

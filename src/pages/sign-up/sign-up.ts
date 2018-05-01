@@ -30,7 +30,7 @@ export class SignUpPage {
     console.log('ionViewDidLoad SignUpPage');
   }
 
-  private async signUp() {
+  async signUp() {
     try {
       const result = await this.afAuth.auth.createUserWithEmailAndPassword(this.user.email, this.user.password);
       if (result) {

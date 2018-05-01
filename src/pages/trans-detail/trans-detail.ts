@@ -1,11 +1,11 @@
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { Chart } from 'chart.js';
 import * as pattern from 'patternomaly';
 import { UserTransaction } from "../../models/userTransaction";
 import { UserAccount } from "../../models/userAccount";
 import { PlaidService } from '../../providers/plaid-service/plaid-service';
-import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
+import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
 import { UserMonthlyRecord } from "../../models/user-monthly-record";
 
 /**
@@ -15,7 +15,7 @@ import { UserMonthlyRecord } from "../../models/user-monthly-record";
  * Ionic pages and navigation.
  */
 
-declare var Plaid;
+// declare var Plaid;
 
 @IonicPage()
 @Component({
@@ -119,8 +119,8 @@ export class TransDetailPage {
           // get the internal index of slice in pie chart
           var clickedElementindex = activePoints[0]["_index"];
 
-          // get specific label by index
-          var label = this.chart.data.labels[clickedElementindex];
+          // // get specific label by index
+          // var label = this.chart.data.labels[clickedElementindex];
 
           // get value by index
           var value = this.chart.data.datasets[0].data[clickedElementindex];
@@ -212,7 +212,7 @@ export class TransDetailPage {
     }
   ];
   private _transactions: any = [];
-  private _partTransactionIds: any = [];
+  // private _partTransactionIds: any = [];
 
   private updateMonthLabel() {
     console.log("updateMonthLabel");
@@ -239,9 +239,9 @@ export class TransDetailPage {
     var ySring = date.getFullYear().toString().substr(2, 2);
     this._month = `${mString} ${ySring}`;
     this._transactions = [];
-    let partTransactionIds = [];
-    let allTransactions = [];
-    var allTransactionsMap = new Map();
+    // let partTransactionIds = [];
+    // let allTransactions = [];
+    // var allTransactionsMap = new Map();
     let trans = {};
 
 

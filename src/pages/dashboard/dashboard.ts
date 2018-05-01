@@ -1,11 +1,12 @@
 import { Component, NgZone, ViewChild } from '@angular/core';
-import { IonicPage, NavController, NavParams, Platform, LoadingController, ActionSheetController, ToastController } from 'ionic-angular';
-import { Push, PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
+import { IonicPage, NavController, NavParams, Platform, ActionSheetController } from 'ionic-angular';
+// import { PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
+// import { Push } from '@ionic-native/push';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { NgProgressComponent } from '@ngx-progressbar/core';
-import { Observable } from "rxjs/Observable";
+// import { Observable } from "rxjs/Observable";
 import { ISubscription } from "rxjs/Subscription";
 
 import { Notification } from '../../models/notification';
@@ -15,7 +16,7 @@ import { Transaction } from '../../models/transaction';
 import { UserTransaction } from '../../models/userTransaction';
 import { PlaidService } from '../../providers/plaid-service/plaid-service';
 
-declare var cordova;
+// declare var cordova;
 // declare var Plaid;
 
 /**
@@ -49,8 +50,8 @@ export class DashboardPage {
   private _flaggedTransactions: any = [];
   // private public_token: string;
   private _point: number = 100;
-  private _platformSubscriber;
-  private _count = 0;
+  // private _platformSubscriber;
+  // private _count = 0;
   private _linkedCredential = false;
   private _signedIn = false;
   private _user: User;
@@ -63,19 +64,17 @@ export class DashboardPage {
 
   private _isLoading = true;
 
-  private linkHandler;
-
-  private fakeData = [
-    {
-      name: "Today", data: [
-        {
-          name: "name",
-          amount: 123
-        }
-      ]
-    },
-    { name: "Yesterday", data: [] },
-    { name: "2 Days Ago", data: [] }];
+  // private fakeData = [
+  //   {
+  //     name: "Today", data: [
+  //       {
+  //         name: "name",
+  //         amount: 123
+  //       }
+  //     ]
+  //   },
+  //   { name: "Yesterday", data: [] },
+  //   { name: "2 Days Ago", data: [] }];
 
 
   constructor(
@@ -88,8 +87,8 @@ export class DashboardPage {
     public platform: Platform,
     private afAuth: AngularFireAuth,
     private actionSheetCtrl: ActionSheetController,
-    private loadingCtrl: LoadingController,
-    private toastCtrl: ToastController,
+    // private loadingCtrl: LoadingController,
+    // private toastCtrl: ToastController,
     private iab: InAppBrowser
   ) {
     this.notificationCollections = this.firestore.collection<Notification>('notifications');
@@ -119,23 +118,23 @@ export class DashboardPage {
     //   }
     // );
 
-    const options: PushOptions = {
-      android: {
-        senderID: `618786705474`,
-        topics: [
-          `coincious.general`
-        ]
-      },
-      ios: {
-        alert: 'true',
-        badge: true,
-        sound: 'false'
-      },
-      windows: {},
-      browser: {
-        pushServiceURL: 'http://push.api.phonegap.com/v1/push'
-      }
-    };
+    // const options: PushOptions = {
+    //   android: {
+    //     senderID: `618786705474`,
+    //     topics: [
+    //       `coincious.general`
+    //     ]
+    //   },
+    //   ios: {
+    //     alert: 'true',
+    //     badge: true,
+    //     sound: 'false'
+    //   },
+    //   windows: {},
+    //   browser: {
+    //     pushServiceURL: 'http://push.api.phonegap.com/v1/push'
+    //   }
+    // };
 
     // const pushObject: PushObject = this.push.init(options);
 
@@ -349,7 +348,7 @@ export class DashboardPage {
 
     const today = new Date();
     const yesterday = new Date(today.getTime() - 1000 * 60 * 60 * 24);
-    const dbeforey = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 2);
+    // const dbeforey = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 2);
 
     let trans = [
       { name: "Today", data: [] },
@@ -398,15 +397,15 @@ export class DashboardPage {
     console.log(`Calculated bar!`);
   }
 
-  private pushNotification() {
-    const newMessage: Notification = {
-      message: `Tap to view`,
-      title: `Time to check your weekly finance summary!`
-    };
-    this.notificationCollections.add(newMessage);
-  }
+  // private pushNotification() {
+  //   const newMessage: Notification = {
+  //     message: `Tap to view`,
+  //     title: `Time to check your weekly finance summary!`
+  //   };
+  //   this.notificationCollections.add(newMessage);
+  // }
 
-  private onApprove(ev) {
+  onApprove(ev) {
     this._point += ev.point;
     ev.group.data.forEach(t => {
       this.plaidService.addTransactionRecord(this._userAccount.userId, t, true)
@@ -420,12 +419,12 @@ export class DashboardPage {
     this._transactions.splice(this._transactions.indexOf(ev.group), 1);
   }
 
-  private onApproveFlag(ev) {
+  onApproveFlag(ev) {
     this._point += ev.point;
     this._flaggedTransactions.splice(this._flaggedTransactions.indexOf(ev.transaction), 1);
   }
 
-  private onFlag(ev) {
+  onFlag(ev) {
     this.plaidService.addTransactionRecord(this._userAccount.userId, ev.transaction, false)
       .then(() => {
         this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, ev.transaction.amount, ev.transaction.amount)
@@ -441,11 +440,11 @@ export class DashboardPage {
       });
   }
 
-  private goToDetail() {
+  goToDetail() {
     this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken });
   }
 
-  private linkAccount() {
+  linkAccount() {
     const linkUrl =
       `https://cdn.plaid.com/link/v2/stable/link.html?` +
       `key=28f2e54388e2f6a1aca59e789d353b` + `&` +
@@ -463,7 +462,7 @@ export class DashboardPage {
       console.log(`[InAppBrowser] On Load Start: ${event.url}`);
       const redirectUrl = event.url;
       const url = redirectUrl.split(`://`);
-      const protocol = url[0];
+      // const protocol = url[0];
       const path = url[1].split(`?`);
       const ev = path[0];
 
@@ -499,13 +498,13 @@ export class DashboardPage {
     // });
   }
 
-  private signOut() {
+  signOut() {
     this.afAuth.auth.signOut().then(() => {
       this.navCtrl.setRoot(`LoginPage`);
     });
   }
 
-  private showMenuActions() {
+  showMenuActions() {
     let actionSheet = this.actionSheetCtrl.create({
       title: 'Unbind Account?',
       buttons: [
