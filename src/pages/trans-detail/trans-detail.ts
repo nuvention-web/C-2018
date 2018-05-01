@@ -29,6 +29,7 @@ export class TransDetailPage {
   private _monthUnhappy = 0;
   private _monthHappy = 0;
   private chart: Chart = [];
+  private _chartVisible = true;
   private chartOptions = {
     type: `bar`,
     data: {
@@ -195,7 +196,7 @@ export class TransDetailPage {
       });
     }).then(() => {
       console.log("happy money begin chart" + this.chartOptions.data.datasets[1].data[11 - 2]);
-      this.chart = new Chart(`chart-canvas`, this.chartOptions)
+      this.chart = new Chart(`chart-canvas`, this.chartOptions);
     }
     ).then(() => {
       this.generateNewTransactions(11);
@@ -203,11 +204,21 @@ export class TransDetailPage {
     // this._transactions = this.fakeData;
   }
 
+  // ionViewWillLeave() {
+  //   this._chartVisible = false;
+  // }
+
   private fakeData = [
     {
       name: "name",
       amount: 123,
       loved: false,
+      date: "12-34-56"
+    },
+    {
+      name: "name",
+      amount: 123,
+      loved: true,
       date: "12-34-56"
     }
   ];
@@ -243,6 +254,7 @@ export class TransDetailPage {
     var ySring = date.getFullYear().toString().substr(2, 2);
     this._month = `${mString} ${ySring}`;
     this._transactions = [];
+
     // let partTransactionIds = [];
     // let allTransactions = [];
     // var allTransactionsMap = new Map();

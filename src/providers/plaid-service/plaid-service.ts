@@ -307,5 +307,7 @@ export class PlaidService {
     });
   }
 
+  public refreshLastLogin(userId, date) {
 
+  }
 }

@@ -322,6 +322,7 @@ export class DashboardPage {
               console.log(`plaid transactions`);
               // console.log(res);
               this.reshapeTransactions(res);
+              this.userAccount.update({ lastSignIn: to });
             }).catch(err => {
               // this._demoText = err.message;
               console.log(`Error Receiving Transaction Records, ${err.message}`);

@@ -12,13 +12,16 @@
 
 </ion-header>
 
-<div class="chart">
-  <div class="chart-wrapper">
-    <canvas id="chart-canvas"></canvas>
-  </div>
 
-  <div class="month">
-    <h2>
+<ion-content padding>
+
+  <div class="chart" *ngIf="_chartVisible">
+    <div class="chart-wrapper">
+      <canvas id="chart-canvas"></canvas>
+    </div>
+
+    <div class="month">
+      <h2>
     		{{_month}}
     		<span>
   	       <span class="span">
@@ -32,11 +35,8 @@
   	      ${{_monthHappy}}
       	</span>
       </h2>
+    </div>
   </div>
-</div>
-
-
-<ion-content padding>
 
   <div class="purchase_wrap" id="wrap">
     <transaction-item-2 *ngFor="let t of _transactions" [data]=t [isFlag]=false [isInDetail]=true></transaction-item-2>
