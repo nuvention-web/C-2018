@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { Chart } from 'chart.js';
 import * as pattern from 'patternomaly';
@@ -146,6 +146,7 @@ export class TransDetailPage {
   private _access_token: string = this.navParams.get("accessToken");
 
   constructor(
+      private zone: NgZone,
     public navCtrl: NavController,
     public navParams: NavParams,
     private firestore: AngularFirestore,
@@ -251,12 +252,14 @@ export class TransDetailPage {
         this._transactions.length = 0;
         console.log(r);
         r.forEach(t => {
-          let target = trans[t["transactionId"]];
-          if (target != null) {
-            console.log(`love the item? ${t["loved"]}`);
-            target["loved"] = t["loved"];
-            this._transactions.push(target);
-          }
+          this.zone.run( () => {
+              let target = trans[t["transactionId"]];
+              if (target != null) {
+                  console.log(`love the item? ${t["loved"]}`);
+                  target["loved"] = t["loved"];
+                  this._transactions.push(target);
+              }
+          });
         });
       });
     });
