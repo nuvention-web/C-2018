@@ -120,22 +120,7 @@ export class TransDetailPage {
           // get the internal index of slice in pie chart
           var clickedElementindex = activePoints[0]["_index"];
 
-          // // get specific label by index
-          // var label = this.chart.data.labels[clickedElementindex];
 
-          // get value by index
-          //var value = this.chart.data.datasets[0].data[clickedElementindex];
-          /*
-          console.log("value", value);
-          this._monthUnhappy = this.chart.data.datasets[0].data[clickedElementindex];
-          this._monthUnhappy = 0.010001;
-          //this._monthUnhappy = Math.floor(this._monthUnhappy * 100) / 100;
-
-          this._monthHappy = this.chart.data.datasets[1].data[clickedElementindex];
-          this._monthHappy = 0.010001;
-          this._monthHappy = this._monthHappy.toFixed(2);
-          this._monthHappy = Math.floor(this._monthHappy * 100 ) / 100;
-          */
 
           this.generateNewTransactions(clickedElementindex);
         }
@@ -243,7 +228,7 @@ export class TransDetailPage {
     //console.log("public toke end: " + this._public_token.toString());
     this._monthUnhappy = this.chart.data.datasets[0].data[clickedElement];
     //this._monthUnhappy = 0.11111;
-    this._monthUnhappy = Math.floor(this._monthUnhappy * 100) / 100;
+    this._monthUnhappy = Math.round(this._monthUnhappy * 100) / 100;
 
     this._monthHappy = this.chart.data.datasets[1].data[clickedElement];
     //this._monthHappy = 0.11111;
