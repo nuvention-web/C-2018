@@ -201,7 +201,7 @@ export class TransDetailPage {
     ).then(() => {
       this.generateNewTransactions(11);
     });
-    // this._transactions = this.fakeData;
+    this._transactions = this.fakeData;
   }
 
   // ionViewWillLeave() {
@@ -253,7 +253,7 @@ export class TransDetailPage {
     var mString = this._montthsNumTOString[m];
     var ySring = date.getFullYear().toString().substr(2, 2);
     this._month = `${mString} ${ySring}`;
-    this._transactions = [];
+    // this._transactions = [];
 
     // let partTransactionIds = [];
     // let allTransactions = [];

@@ -373,6 +373,7 @@ export class DashboardPage {
       return a.date > b.date ? -1 : 1;
     });
     transactions = transactions.filter(t => !this._transHistory.some(tr => tr.transactionId == t.transaction_id));
+    transactions = transactions.filter(t => t.amount > 0);
     console.log(transactions);
 
     const today = new Date();

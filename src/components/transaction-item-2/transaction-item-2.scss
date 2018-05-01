@@ -8,25 +8,32 @@ transaction-item-2 {
     border-top: 1px solid rgba(205, 205, 205, 1);
     background-color: white;
 
-    .trans-item-title {
-      font-size: 13pt;
+    .trans-item-content {
       display: inline-block;
-      position: relative;
-      right: -5px;
-      top: 0px;
-    }
+      width: calc(100% - 80px);
 
-    .trans-item-text {
-      font-size: 11pt;
+      .trans-item-title {
+        font-size: 13pt;
+        display: inline-block;
+        position: relative;
+        right: -5px;
+        top: 0px;
+      }
 
-      // margin-bottom: 1em;
-      margin-top: 0em;
+      .trans-item-text {
+        font-size: 11pt;
+
+        // margin-bottom: 1em;
+        margin-top: 0em;
+      }
     }
 
     .trans-item-buttons {
       display: inline-block;
+      position: relative;
       right: -16px;
-      top: -10px;
+      top: -16px;
+      margin-bottom: -16px;
       text-align: right;
     }
 
