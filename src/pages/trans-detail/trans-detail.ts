@@ -187,8 +187,8 @@ export class TransDetailPage {
         let distance = (thisYear - databaseYear) * 12 + (thisMonth - databaseMonth);
         //console.log("distance: " + distance.toString() + "thisDate: " + thisDate.toDateString() + "databaseDate: " + databaseDate.toDateString());
         if (distance < 12) {
-          this.chartOptions.data.datasets[0].data[11 - distance] = t.data().totalAmount - t.data().exceedAmount;
-          this.chartOptions.data.datasets[1].data[11 - distance] = t.data().exceedAmount;
+          this.chartOptions.data.datasets[0].data[11 - distance] = t.data().exceedAmount;
+          this.chartOptions.data.datasets[1].data[11 - distance] = t.data().totalAmount -  t.data().exceedAmount;
           console.log("distance: " + distance.toString() + "happy money: " + this.chartOptions.data.datasets[0].data[11 - distance].toString());
           console.log("distance: " + distance.toString() + "unhappy money: " + this.chartOptions.data.datasets[1].data[11 - distance].toString());
         }
@@ -216,13 +216,17 @@ export class TransDetailPage {
 
   private updateMonthLabel() {
     console.log("updateMonthLabel");
-    var date = new Date();
+    var tempDate = new Date();
+    var date = new Date(tempDate.getFullYear(), tempDate.getMonth(), 1);
     for (var i = 11; i >= 0; i--) {
       var tempM = date.getMonth();
       var m = this._montthsNumTOString[tempM];
       var y = date.getFullYear().toString().substr(2, 2);
+      console.log("this date: " + date.toDateString() + " this tempM: " + tempM.toString() + " this month: " + m.toString());
       var temp = `${m} ${y}`;
       this.chartOptions.data.labels[i] = temp;
+      console.log();
+      console.log("this getMonth: " + (date.getMonth() - 1).toString());
       date.setMonth(date.getMonth() - 1);
     }
   }
