@@ -111,7 +111,12 @@ export class TransDetailPage {
           ticks: {
             beginAtZero: true
           }
-        }]
+        }],
+        xAxes: [{
+            ticks: {
+                fontSize: 10
+            }
+        }],
       },
       onClick: (evt) => {
         var activePoints = this.chart.getElementsAtEvent(evt);
@@ -119,15 +124,14 @@ export class TransDetailPage {
         if (activePoints.length > 0) {
           // get the internal index of slice in pie chart
           var clickedElementindex = activePoints[0]["_index"];
-
-
-
           this.generateNewTransactions(clickedElementindex);
         }
       },
       maintainAspectRatio: false,
       responsive: true
     }
+
+
   };
 
 
@@ -175,15 +179,13 @@ export class TransDetailPage {
         if (distance < 12) {
           this.chartOptions.data.datasets[0].data[11 - distance] = t.data().exceedAmount;
           this.chartOptions.data.datasets[1].data[11 - distance] = t.data().totalAmount - t.data().exceedAmount;
-          console.log("distance: " + distance.toString() + "happy money: " + this.chartOptions.data.datasets[0].data[11 - distance].toString());
-          console.log("distance: " + distance.toString() + "unhappy money: " + this.chartOptions.data.datasets[1].data[11 - distance].toString());
         }
       });
     }).then(() => {
-      console.log("happy money begin chart" + this.chartOptions.data.datasets[1].data[11 - 2]);
       this.chart = new Chart(`chart-canvas`, this.chartOptions);
     }
     ).then(() => {
+      console.log("generateNewTransactions 11");
       this.generateNewTransactions(11);
     });
   }
@@ -192,20 +194,7 @@ export class TransDetailPage {
   //   this._chartVisible = false;
   // }
 
-  private fakeData = [
-    {
-      name: "name",
-      amount: 123,
-      loved: false,
-      date: "12-34-56"
-    },
-    {
-      name: "name",
-      amount: 123,
-      loved: true,
-      date: "12-34-56"
-    }
-  ];
+
   private _transactions: any = [];
   // private _partTransactionIds: any = [];
 
