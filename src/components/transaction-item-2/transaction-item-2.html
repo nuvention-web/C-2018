@@ -29,5 +29,5 @@
     </span> {{_transaction.name}}
   </div>
 
-  <div class="trans-item-text">${{_transaction.amount}} on {{_transaction.date}}</div>
+  <div class="trans-item-text">{{_transaction.amount > 0 ? "-":""}}${{abs(_transaction.amount).toFixed(2)}} on {{_transaction.date}}</div>
 </div>

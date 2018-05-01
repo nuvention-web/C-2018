@@ -189,7 +189,7 @@ export class TransDetailPage {
         //console.log("distance: " + distance.toString() + "thisDate: " + thisDate.toDateString() + "databaseDate: " + databaseDate.toDateString());
         if (distance < 12) {
           this.chartOptions.data.datasets[0].data[11 - distance] = t.data().exceedAmount;
-          this.chartOptions.data.datasets[1].data[11 - distance] = t.data().totalAmount -  t.data().exceedAmount;
+          this.chartOptions.data.datasets[1].data[11 - distance] = t.data().totalAmount - t.data().exceedAmount;
           console.log("distance: " + distance.toString() + "happy money: " + this.chartOptions.data.datasets[0].data[11 - distance].toString());
           console.log("distance: " + distance.toString() + "unhappy money: " + this.chartOptions.data.datasets[1].data[11 - distance].toString());
         }
@@ -288,6 +288,10 @@ export class TransDetailPage {
       });
     });
 
+  }
+
+  abs(x) {
+    return Math.abs(x);
   }
 
 
