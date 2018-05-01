@@ -1,11 +1,12 @@
 import { Component, NgZone, ViewChild } from '@angular/core';
-import { IonicPage, NavController, NavParams, Platform, LoadingController, ActionSheetController, ToastController } from 'ionic-angular';
-import { Push, PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
+import { IonicPage, NavController, NavParams, Platform, ActionSheetController } from 'ionic-angular';
+// import { PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
+// import { Push } from '@ionic-native/push';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { NgProgressComponent } from '@ngx-progressbar/core';
-import { Observable } from "rxjs/Observable";
+// import { Observable } from "rxjs/Observable";
 import { ISubscription } from "rxjs/Subscription";
 
 import { Notification } from '../../models/notification';
@@ -15,8 +16,8 @@ import { Transaction } from '../../models/transaction';
 import { UserTransaction } from '../../models/userTransaction';
 import { PlaidService } from '../../providers/plaid-service/plaid-service';
 
-declare var cordova;
-declare var Plaid;
+// declare var cordova;
+// declare var Plaid;
 
 /**
  * Generated class for the DashboardPage page.
@@ -49,8 +50,8 @@ export class DashboardPage {
   private _flaggedTransactions: any = [];
   // private public_token: string;
   private _point: number = 100;
-  private _platformSubscriber;
-  private _count = 0;
+  // private _platformSubscriber;
+  // private _count = 0;
   private _linkedCredential = false;
   private _signedIn = false;
   private _user: User;
@@ -63,7 +64,17 @@ export class DashboardPage {
 
   private _isLoading = true;
 
-  private linkHandler;
+  // private fakeData = [
+  //   {
+  //     name: "Today", data: [
+  //       {
+  //         name: "name",
+  //         amount: 123
+  //       }
+  //     ]
+  //   },
+  //   { name: "Yesterday", data: [] },
+  //   { name: "2 Days Ago", data: [] }];
 
 
   constructor(
@@ -76,8 +87,8 @@ export class DashboardPage {
     public platform: Platform,
     private afAuth: AngularFireAuth,
     private actionSheetCtrl: ActionSheetController,
-    private loadingCtrl: LoadingController,
-    private toastCtrl: ToastController,
+    // private loadingCtrl: LoadingController,
+    // private toastCtrl: ToastController,
     private iab: InAppBrowser
   ) {
     this.notificationCollections = this.firestore.collection<Notification>('notifications');
@@ -107,23 +118,23 @@ export class DashboardPage {
     //   }
     // );
 
-    const options: PushOptions = {
-      android: {
-        senderID: `618786705474`,
-        topics: [
-          `coincious.general`
-        ]
-      },
-      ios: {
-        alert: 'true',
-        badge: true,
-        sound: 'false'
-      },
-      windows: {},
-      browser: {
-        pushServiceURL: 'http://push.api.phonegap.com/v1/push'
-      }
-    };
+    // const options: PushOptions = {
+    //   android: {
+    //     senderID: `618786705474`,
+    //     topics: [
+    //       `coincious.general`
+    //     ]
+    //   },
+    //   ios: {
+    //     alert: 'true',
+    //     badge: true,
+    //     sound: 'false'
+    //   },
+    //   windows: {},
+    //   browser: {
+    //     pushServiceURL: 'http://push.api.phonegap.com/v1/push'
+    //   }
+    // };
 
     // const pushObject: PushObject = this.push.init(options);
 
@@ -153,78 +164,81 @@ export class DashboardPage {
     // pushObject.on('registration').subscribe((registration: any) => console.log('Device registered', registration));
     // pushObject.on('error').subscribe(error => console.error('Error with Push plugin', error));
 
-    this.plaidService.transactions$.subscribe(transactions => {
-      if (transactions) {
-        console.log(`New Transactions arrived`);
-        this.zone.run(() => {
-          this.reshapeTransactions(transactions);
-        });
-      }
-    }, err => {
-      console.log(`New Transaction Error: ${err.message}`);
-      this._demoText = `${err.message}`
-    });
+    // this.plaidService.transactions$.subscribe(transactions => {
+    //   if (transactions) {
+    //     console.log(`New Transactions arrived`);
+    //     console.log(transactions);
+    //     this.reshapeTransactions(transactions);
+    //   }
+    // }, err => {
+    //   console.log(`New Transaction Error: ${err.message}`);
+    //   this._demoText = `${err.message}`
+    // });
 
 
     ///// plaid part
 
     // if (this._signedIn && !this._linkedCredential) {
     // }
-    this.linkHandler = Plaid.create({
-      clientName: `Coinscious`,
-      // env: `sandbox`,
-      env: `development`,
-      key: `28f2e54388e2f6a1aca59e789d353b`,
-      product: [`transactions`],
-      forceIframe: true,
-      selectAccount: false,
-      onSuccess: (public_token, metadata) => {
-        this.plaidService.getAccessToken(public_token).then(access_token => {
-          let newDoc = {} as UserAccount;
-          newDoc.publicToken = public_token;
-          newDoc.accessToken = access_token;
-          newDoc.userId = this._user.uid;
-          this.userAccountCollections.add(newDoc).then(() => {
-            this.checkCredentials();
-          });
-        });
-        // console.log("Login Succeed");
-        // this._linkedCredential = true;
-      },
-      onLoad: () => {
-        // Optional, called when Link loads
-        console.log(`Plaid Link loaded`);
-      },
-      onExit: (err, matadata) => {
-        if (err != null) {
-          console.log(`ERROR!`);
-          console.log(err);
-        } else {
-          console.log(`Exit with no error`);
-        }
-      }
-    });
+    // this.linkHandler = Plaid.create({
+    //   clientName: `Coinscious`,
+    //   // env: `sandbox`,
+    //   env: `development`,
+    //   key: `28f2e54388e2f6a1aca59e789d353b`,
+    //   product: [`transactions`],
+    //   forceIframe: true,
+    //   selectAccount: false,
+    //   onSuccess: (public_token, metadata) => {
+    //     this.plaidService.getAccessToken(public_token).then(access_token => {
+    //       let newDoc = {} as UserAccount;
+    //       newDoc.publicToken = public_token;
+    //       newDoc.accessToken = access_token;
+    //       newDoc.userId = this._user.uid;
+    //       this.userAccountCollections.add(newDoc).then(() => {
+    //         this.checkCredentials();
+    //       });
+    //     });
+    //     // console.log("Login Succeed");
+    //     // this._linkedCredential = true;
+    //   },
+    //   onLoad: () => {
+    //     // Optional, called when Link loads
+    //     console.log(`Plaid Link loaded`);
+    //   },
+    //   onExit: (err, matadata) => {
+    //     if (err != null) {
+    //       console.log(`ERROR!`);
+    //       console.log(err);
+    //     } else {
+    //       console.log(`Exit with no error`);
+    //     }
+    //   }
+    // });
 
     ///// Plaid part end
 
     this.plaidService.lastMonthlyAmounts$.subscribe(record => {
-      this.zone.run(() => {
-        if (record != null) {
-          this._totalLastV = record.totalAmount;
-          this._exceedLastV = record.exceedAmount;
-        }
-        this.calculateBar();
-      });
+      console.log(`[Monthly Record] Got last month record.`);
+      console.log(record);
+      // this.zone.run(() => {
+      // });
+      if (record != null) {
+        this._totalLastV = record.totalAmount;
+        this._exceedLastV = record.exceedAmount;
+      }
+      this.calculateBar();
     });
 
     this.plaidService.thisMonthlyAmounts$.subscribe(record => {
-      this.zone.run(() => {
-        if (record != null) {
-          this._totalThisV = record.totalAmount;
-          this._exceedThisV = record.exceedAmount;
-        }
-        this.calculateBar();
-      });
+      console.log(`[Monthly Record] Got this month record.`);
+      console.log(record);
+      // this.zone.run(() => {
+      // });
+      if (record != null) {
+        this._totalThisV = record.totalAmount;
+        this._exceedThisV = record.exceedAmount;
+      }
+      this.calculateBar();
     });
 
     this.plaidService.testString$.subscribe(s => {
@@ -232,6 +246,9 @@ export class DashboardPage {
         this._demoText = s;
       });
     });
+
+    // this._transactions = this.fakeData;
+    // this.emptyTransactions = false;
   }
 
   private checkAuthState() {
@@ -286,25 +303,33 @@ export class DashboardPage {
       this._userAccount = ua;
       this._uaSubscription.unsubscribe();
 
-      this.plaidService.refreshTransaction(ua.accessToken);
-
       this._isLoading = false;
-      this.calculateBar();
+      // this.calculateBar();
       // get transaction data we have
       let to = new Date();
       let from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 10);
+
       // TODO
-      this.plaidService.getTransactionRecords(ua.userId, from, to)
-        .then(transactions => {
-          // this._demoText = `Received Transaction Records`;
-          console.log(`Received Transaction Records`);
-          console.log(transactions);
-          this._transHistory = transactions;
-          this.reshapeTransactions(this._transactions);
-        }).catch(err => {
-          // this._demoText = err.message;
-          console.log(`Error Receiving Transaction Records, ${err.message}`);
-        });
+
+      this.plaidService.refreshTransaction(ua.accessToken).then(
+        res => {
+          this.plaidService.getTransactionRecords(ua.userId, from, to)
+            .then(transactions => {
+              // this._demoText = `Received Transaction Records`;
+              console.log(`Received Transaction Records`);
+              // console.log(transactions);
+              this._transHistory = transactions;
+              console.log(`plaid transactions`);
+              // console.log(res);
+              this.reshapeTransactions(res);
+              this.userAccount.update({ lastSignIn: to });
+            }).catch(err => {
+              // this._demoText = err.message;
+              console.log(`Error Receiving Transaction Records, ${err.message}`);
+            });
+        }
+      ).catch();
+
       this.plaidService.getMonthlyAmount(ua.userId);
     });
     // this.plaidService.refreshTransaction(this.userAccount.);
@@ -324,7 +349,7 @@ export class DashboardPage {
 
     const today = new Date();
     const yesterday = new Date(today.getTime() - 1000 * 60 * 60 * 24);
-    const dbeforey = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 2);
+    // const dbeforey = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 2);
 
     let trans = [
       { name: "Today", data: [] },
@@ -353,33 +378,35 @@ export class DashboardPage {
 
     this.emptyTransactions = !trans.some(tr => tr.data.length > 0);
 
-    this.zone.run(() => {
-      console.log(`Calculated!`);
-      console.log(trans);
-      this._transactions = trans;
-    });
+    console.log(`Calculated empty trans!`);
+    console.log(trans);
+    this._transactions = trans;
   }
 
   private calculateBar() {
     if (!this._signedIn || !this._linkedCredential) return;
 
     let total = this._totalThisV > this._totalLastV ? this._totalThisV : this._totalLastV;
+    console.log(`Calculating bar total: ${total}`);
     total = total == 0 ? 0.01 : 0;
     this.totalLast.set(this._totalLastV / total * 100);
     this.totalThis.set(this._totalThisV / total * 100);
     this.exceedLast.set(this._exceedLastV / total * 100);
     this.exceedThis.set(this._exceedThisV / total * 100);
+    if (this.totalLast == null || this.totalThis == null || this.exceedLast == null || this.exceedThis == null)
+      console.log(`Null element!`);
+    console.log(`Calculated bar!`);
   }
 
-  private pushNotification() {
-    const newMessage: Notification = {
-      message: `Tap to view`,
-      title: `Time to check your weekly finance summary!`
-    };
-    this.notificationCollections.add(newMessage);
-  }
+  // private pushNotification() {
+  //   const newMessage: Notification = {
+  //     message: `Tap to view`,
+  //     title: `Time to check your weekly finance summary!`
+  //   };
+  //   this.notificationCollections.add(newMessage);
+  // }
 
-  private onApprove(ev) {
+  onApprove(ev) {
     this._point += ev.point;
     ev.group.data.forEach(t => {
       this.plaidService.addTransactionRecord(this._userAccount.userId, t, true)
@@ -393,12 +420,12 @@ export class DashboardPage {
     this._transactions.splice(this._transactions.indexOf(ev.group), 1);
   }
 
-  private onApproveFlag(ev) {
+  onApproveFlag(ev) {
     this._point += ev.point;
     this._flaggedTransactions.splice(this._flaggedTransactions.indexOf(ev.transaction), 1);
   }
 
-  private onFlag(ev) {
+  onFlag(ev) {
     this.plaidService.addTransactionRecord(this._userAccount.userId, ev.transaction, false)
       .then(() => {
         this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, ev.transaction.amount, ev.transaction.amount)
@@ -414,11 +441,11 @@ export class DashboardPage {
       });
   }
 
-  private goToDetail() {
+  goToDetail() {
     this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken });
   }
 
-  private linkAccount() {
+  linkAccount() {
     const linkUrl =
       `https://cdn.plaid.com/link/v2/stable/link.html?` +
       `key=28f2e54388e2f6a1aca59e789d353b` + `&` +
@@ -436,10 +463,11 @@ export class DashboardPage {
       console.log(`[InAppBrowser] On Load Start: ${event.url}`);
       const redirectUrl = event.url;
       const url = redirectUrl.split(`://`);
-      const protocol = url[0];
+      // const protocol = url[0];
       const path = url[1].split(`?`);
       const ev = path[0];
 
+      if (ev == `exit`) browser.close();
       if (ev != `connected`) return;
 
       // this._isLoading = true;
@@ -471,13 +499,13 @@ export class DashboardPage {
     // });
   }
 
-  private signOut() {
+  signOut() {
     this.afAuth.auth.signOut().then(() => {
       this.navCtrl.setRoot(`LoginPage`);
     });
   }
 
-  private showMenuActions() {
+  showMenuActions() {
     let actionSheet = this.actionSheetCtrl.create({
       title: 'Unbind Account?',
       buttons: [

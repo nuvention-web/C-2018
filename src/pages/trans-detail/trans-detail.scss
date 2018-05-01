@@ -1,18 +1,39 @@
 page-trans-detail {
+  // .scroll-content {
+  //   margin-top: 290px !important;
+  // }
+
+  ion-navbar {
+    height: 60px !important;
+
+    ion-title {
+      height: 60px !important;
+    }
+  }
+
   ion-content {
     background-color: #f3f3f3 !important;
+  }
+
+  .chart-wrapper {
+    height: 170px;
   }
 
   .chart {
     padding: 1.6rem;
     border-bottom: 1px solid #cccccc;
-    margin: -16px -16px;
+
+    // margin: -16px -16px;
+    margin-top: 60px;
     position: fixed;
     background-color: white;
     width: 100%;
-    z-index: 100;
+    z-index: 5;
     box-shadow: 0 0 3px 3px rgba(0, 0, 0, 0.1);
     border-radius: 0 0 6px 6px;
+    height: 230px;
+    min-height: 230px;
+    margin: -16px;
   }
 
   .month {
@@ -55,7 +76,8 @@ page-trans-detail {
 
   .purchase_wrap {
     background-color: #f3f3f3;
-    margin: 208px -16px -16px -16px;
+    margin: -16px;
+    margin-top: 214px;
     padding: 16px;
   }
 }

@@ -1,12 +1,12 @@
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { Chart } from 'chart.js';
 import * as pattern from 'patternomaly';
-import {UserTransaction} from "../../models/userTransaction";
-import {UserAccount} from "../../models/userAccount";
+import { UserTransaction } from "../../models/userTransaction";
+import { UserAccount } from "../../models/userAccount";
 import { PlaidService } from '../../providers/plaid-service/plaid-service';
-import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
-import {UserMonthlyRecord} from "../../models/user-monthly-record";
+import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
+import { UserMonthlyRecord } from "../../models/user-monthly-record";
 
 /**
  * Generated class for the TransDetailPage page.
@@ -15,7 +15,7 @@ import {UserMonthlyRecord} from "../../models/user-monthly-record";
  * Ionic pages and navigation.
  */
 
-declare var Plaid;
+// declare var Plaid;
 
 @IonicPage()
 @Component({
@@ -29,6 +29,7 @@ export class TransDetailPage {
   private _monthUnhappy = 0;
   private _monthHappy = 0;
   private chart: Chart = [];
+  private _chartVisible = true;
   private chartOptions = {
     type: `bar`,
     data: {
@@ -99,7 +100,7 @@ export class TransDetailPage {
         ],
         borderWidth: 1
       }],
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      labels: ['May', 'J17', 'Ju7', 'Aug 17', 'Sep 17', 'Oct 17', 'Nov 17', 'Dec 17', 'Jan 18', 'Feb 18', 'Mar 18', 'Apr 18']
     },
     options: {
       legend: {
@@ -119,33 +120,36 @@ export class TransDetailPage {
           // get the internal index of slice in pie chart
           var clickedElementindex = activePoints[0]["_index"];
 
-          // get specific label by index
-          var label = this.chart.data.labels[clickedElementindex];
+          // // get specific label by index
+          // var label = this.chart.data.labels[clickedElementindex];
 
           // get value by index
           var value = this.chart.data.datasets[0].data[clickedElementindex];
           console.log("value", value);
           this._monthUnhappy = this.chart.data.datasets[0].data[clickedElementindex];
           console.log("unhappy", this._monthUnhappy);
-          this._monthHappy = this.chart.data.datasets[1].data[clickedElementindex];    
+          this._monthHappy = this.chart.data.datasets[1].data[clickedElementindex];
           console.log("happy", this._monthHappy);
           /* other stuff that requires slice's label and value */
           console.log(document.getElementById("wrap").scroll);
-          this._month = `${label} 2018`;
+          console.log("clickedElementindex: " + clickedElementindex.toString());
           this.generateNewTransactions(clickedElementindex);
         }
-      }
+      },
+      maintainAspectRatio: false,
+      responsive: true
     }
   };
 
 
 
 
-  private _month = `Jan 2018`;
+  private _month = ``;
   private _months = {
     "Jan": "01", "Feb": "02", "Mar": "03", "Apr": "04", "May": "05", "Jun": "06",
     "Jul": "07", "Aug": "08", "Sep": "09", "Oct": "10", "Nov": "11", "Dec": "12"
   };
+  private _montthsNumTOString = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   private _userId: string = this.navParams.get("userId");
   private _public_token: string = "";
@@ -156,136 +160,134 @@ export class TransDetailPage {
     public navParams: NavParams,
     private firestore: AngularFirestore,
     private plaidService: PlaidService) {
-      this.userMonthlyRecord = this.firestore.collection<UserMonthlyRecord>("user-monthly-amount");
-      this.userTransactionCollections = this.firestore.collection<UserTransaction>("user-transactions");
-      this.userAccountCollections = this.firestore.collection<UserAccount>("user-accounts");
+    this.userMonthlyRecord = this.firestore.collection<UserMonthlyRecord>("user-monthly-amount");
+    this.userTransactionCollections = this.firestore.collection<UserTransaction>("user-transactions");
+    this.userAccountCollections = this.firestore.collection<UserAccount>("user-accounts");
   }
 
   ionViewDidLoad() {
     console.log("ionViewDidLoad tran-detail");
-    console.log("userID: " + this._userId);
+    this.updateMonthLabel();
     //得到public token
-    this.userAccountCollections.ref.where(`userId`, '==', this._userId).get().then( res => {
-        res.forEach(t => {
-            this._public_token = t.data().publicToken;
-            //console.log("public toke before: " + this._public_token.toString());
-        });
-        //console.log("get public token good");
+    this.userAccountCollections.ref.where(`userId`, '==', this._userId).get().then(res => {
+      res.forEach(t => {
+        this._public_token = t.data().publicToken;
+      });
     }, err => {
-        //console.log("get public token error");
     });
     //更新chart的数据
     this.userMonthlyRecord.ref.where(`userId`, '==', this._userId).get().then(res => {
       res.forEach(t => {
-        let tempDate = new Date(t.data().date);
-        let thisMonth = tempDate.getMonth();
-        this.chart.data.datasets[0].data[thisMonth] = t.data().totalAmount - t.data().exceedAmount;
-        this.chart.data.datasets[1].data[thisMonth] = t.data().exceedAmount;
-        //console.log("Happy Amount" + this.chart.data.datasets[0].data[thisMonth].toString());
-        //console.log("UnHappy Amount" + this.chart.data.datasets[1].data[thisMonth].toString());
+        let databaseDate = new Date(new Date(t.data().date));
+        databaseDate.setHours(24);
+        let databaseMonth = databaseDate.getMonth();
+        let databaseYear = databaseDate.getFullYear();
+        let thisDate = new Date();
+        let thisMonth = thisDate.getMonth();
+        let thisYear = thisDate.getFullYear();
+        let distance = (thisYear - databaseYear) * 12 + (thisMonth - databaseMonth);
+        //console.log("distance: " + distance.toString() + "thisDate: " + thisDate.toDateString() + "databaseDate: " + databaseDate.toDateString());
+        if (distance < 12) {
+          this.chartOptions.data.datasets[0].data[11 - distance] = t.data().exceedAmount;
+          this.chartOptions.data.datasets[1].data[11 - distance] = t.data().totalAmount -  t.data().exceedAmount;
+          console.log("distance: " + distance.toString() + "happy money: " + this.chartOptions.data.datasets[0].data[11 - distance].toString());
+          console.log("distance: " + distance.toString() + "unhappy money: " + this.chartOptions.data.datasets[1].data[11 - distance].toString());
+        }
       });
+    }).then(() => {
+      console.log("happy money begin chart" + this.chartOptions.data.datasets[1].data[11 - 2]);
+      this.chart = new Chart(`chart-canvas`, this.chartOptions);
+    }
+    ).then(() => {
+      this.generateNewTransactions(11);
     });
-    //console.log("userId is: " + this._userId.toString());
-    //console.log("public token then: " + this._public_token.toString());
-    this.chart = new Chart(`chart-canvas`, this.chartOptions);
-    this.generateNewTransactions(new Date().getMonth());
+    // this._transactions = this.fakeData;
   }
 
+  // ionViewWillLeave() {
+  //   this._chartVisible = false;
+  // }
+
+  private fakeData = [
+    {
+      name: "name",
+      amount: 123,
+      loved: false,
+      date: "12-34-56"
+    },
+    {
+      name: "name",
+      amount: 123,
+      loved: true,
+      date: "12-34-56"
+    }
+  ];
   private _transactions: any = [];
-  private _partTransactionIds: any = [];
+  // private _partTransactionIds: any = [];
 
-  private generateNewTransactions(month) {
-      //更新点击后表显示页的数据
-      //console.log("public toke end: " + this._public_token.toString());
-      this._monthUnhappy = this.chart.data.datasets[0].data[month];
-      this._monthHappy = this.chart.data.datasets[1].data[month];
-      var label = this.chart.data.labels[month];
-      this._month = `${label} 2018`;
-      console.log("this._month" + this._month.toString());
+  private updateMonthLabel() {
+    console.log("updateMonthLabel");
+    var tempDate = new Date();
+    var date = new Date(tempDate.getFullYear(), tempDate.getMonth(), 1);
+    for (var i = 11; i >= 0; i--) {
+      var tempM = date.getMonth();
+      var m = this._montthsNumTOString[tempM];
+      var y = date.getFullYear().toString().substr(2, 2);
+      console.log("this date: " + date.toDateString() + " this tempM: " + tempM.toString() + " this month: " + m.toString());
+      var temp = `${m} ${y}`;
+      this.chartOptions.data.labels[i] = temp;
+      console.log();
+      console.log("this getMonth: " + (date.getMonth() - 1).toString());
+      date.setMonth(date.getMonth() - 1);
+    }
+  }
+
+  private generateNewTransactions(clickedElement) {
+    //更新点击后表显示页的数据
+    //console.log("public toke end: " + this._public_token.toString());
+    this._monthUnhappy = this.chart.data.datasets[0].data[clickedElement];
+    this._monthHappy = this.chart.data.datasets[1].data[clickedElement];
+    var date = new Date();
+    date.setMonth(date.getMonth() - (11 - clickedElement));
+    var m = date.getMonth();
+    var mString = this._montthsNumTOString[m];
+    var ySring = date.getFullYear().toString().substr(2, 2);
+    this._month = `${mString} ${ySring}`;
+    this._transactions = [];
+
+    // let partTransactionIds = [];
+    // let allTransactions = [];
+    // var allTransactionsMap = new Map();
+    let trans = {};
 
 
-      this._transactions = [];
-      let partTransactionIds = [];
-      let allTransactions = [];
-      var allTransactionsMap = new Map();
+    //得到当月在数据库的transcation id
+    var y = date.getFullYear();
+    let from = new Date(y, m, 1);
+    let to = new Date(y, m + 1, 0);
 
-
-      //得到当月在数据库的transcation id
-      var date = new Date(), y = date.getFullYear();
-      let from = new Date(y, month, 1);
-      let to = new Date(y, month + 1, 0);
-      /*
-      this.plaidService.getTransactionRecords(this._userId, from, to).then(res => {
-        res.forEach(t => {
-          partTransactionIds.push(t.transactionId);
-          console.log("partTransactionIds length: " + partTransactionIds.length.toString());
+    console.log("this._access_toke: " + this._access_token.toString());
+    console.log("from: " + from.toDateString());
+    console.log("to: " + to.toDateString());
+    this.plaidService.getTransactionsWithTimeRange(this._access_token, from, to).then(res => {
+      res.forEach(t => {
+        trans[t["transaction_id"]] = t;
+      });
+    }).then(() => {
+      this.plaidService.getTransactionRecords(this._userId, from, to).then(r => {
+        this._transactions.length = 0;
+        console.log(r);
+        r.forEach(t => {
+          let target = trans[t["transactionId"]];
+          if (target != null) {
+            console.log(`love the item? ${t["loved"]}`);
+            target["loved"] = t["loved"];
+            this._transactions.push(target);
+          }
         });
       });
-      */
+    });
 
-      console.log("this._access_toke: " + this._access_token.toString());
-      console.log("from: " + from.toDateString());
-      console.log("to: " + to.toDateString());
-      this.plaidService.getTransactionsWithTimeRange(this._access_token, from, to).then(res => {
-
-        res.forEach(t => {
-          allTransactionsMap.set(t.transaction_id, t);
-          console.log("allTransactionsMap length: " + allTransactionsMap.size.toString());
-        });
-
-        this.plaidService.getTransactionRecords(this._userId, from, to).then(res => {
-            res.forEach(t => {
-                console.log("transactionId:" + t.transactionId);
-                if(!allTransactionsMap.hasOwnProperty(t.transactionId)) {
-                    console.log("don't have key allTransactionsMap length: " + allTransactionsMap.size.toString());
-                }
-                console.log("has key allTransactionsMap length: " + allTransactionsMap.size.toString());
-                this._transactions.push(allTransactionsMap.get(t.transactionId));
-            });
-        });
-
-
-      });
-
-/*
-      this.plaidService.getTransactionRecords(this._userId, from, to).then(res => {
-          res.forEach(t => {
-              console.log("transactionId:" + t.transactionId);
-              if(!allTransactionsMap.hasOwnProperty(t.transactionId)) {
-                  console.log("don't have key allTransactionsMap length: " + allTransactionsMap.size.toString());
-              }
-              console.log("has key allTransactionsMap length: " + allTransactionsMap.size.toString());
-              this._transactions.push(allTransactionsMap.get(t.transactionId));
-          });
-      });
-      */
-
-
-
-      /*
-      console.log("from date: " + from.toDateString());
-      console.log("to date: " + to.toDateString());
-      console.log("partTransactionIds length: " + this._partTransactionIds.length.toString());
-      console.log("partTransactionIds 0: " + this._partTransactionIds[0].toString());
-
-      var i = 0;
-      this.userTransactionCollections.ref.where(`userId`, '==', this._userId).get().then(res => {
-          res.forEach( t => {
-              this._partTransactionIds.push(t.data().transactionId);
-              console.log("i: " + i.toString() + " t.transcationId: " + t.data().transactionId.toString());
-              console.log("partTransactionIds length 2: " + this._partTransactionIds.length.toString());
-              i = i + 1;
-          });
-          console.log("get partTransactions good");
-      }, err => {
-          console.log("get partTransactions error");
-      });
-*/
-      /*
-
-      this.plaidService.getTransaction2(this._testPublicToken, from, to);
-      console.log("transaction length: " + this._transactions.length);
-      */
   }
 
 

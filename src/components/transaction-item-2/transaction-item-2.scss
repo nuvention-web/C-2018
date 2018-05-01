@@ -1,51 +1,51 @@
 transaction-item-2 {
-	.trans-item {
-		// border-radius: 2px;
-		// box-shadow: 0 2px 2px 2px rgba(0, 0, 0, 0.08);
-		margin: -1px -16px;
-		padding: 16px;
-		border-bottom: 1px solid rgba(205, 205, 205, 1);
-		border-top: 1px solid rgba(205, 205, 205, 1);
-		background-color: white;
+  .trans-item {
+    // border-radius: 2px;
+    // box-shadow: 0 2px 2px 2px rgba(0, 0, 0, 0.08);
+    margin: -1px -16px;
+    padding: 16px;
+    border-bottom: 1px solid rgba(205, 205, 205, 1);
+    border-top: 1px solid rgba(205, 205, 205, 1);
+    background-color: white;
 
+    .trans-item-title {
+      font-size: 13pt;
+      display: inline-block;
+      position: relative;
+      right: -5px;
+      top: 0px;
+    }
 
-		.trans-item-title {
-			font-size: 13pt;
-			display: inline-block;
-			position: relative;
-		    right: -5px;
-		    top: 0px;
-		}
+    .trans-item-text {
+      font-size: 11pt;
 
-		.trans-item-text {
-			font-size: 11pt;
+      // margin-bottom: 1em;
+      margin-top: 0em;
+    }
 
-			// margin-bottom: 1em;
-			margin-top: 0em;
-		}
+    .trans-item-buttons {
+      display: inline-block;
+      right: -16px;
+      top: -10px;
+      text-align: right;
+    }
 
-		.trans-item-buttons {
-		  display: inline-block;
-		  right: -16px;
-		  top: -10px;
-		  text-align: right;
-		}
+    ion-icon {
+      color: #5ced87;
+      margin-right: .2em;
+    }
 
-		ion-icon {
-		  color: #5ced87;
-		}
+    .break {
+      color: #ff9763;
+    }
 
-		.break {
-		  color: #ff9763;
-		}
-
-		.flash {
-		  position: absolute;
-		  color: white;
-		  font-size: 1.1em;
-		  margin-top: -1.2em;
-		  margin-left: -0.75em;
-		}
-	}
-
+    .flash {
+      position: relative;
+      color: white;
+      font-size: .85em;
+      top: -0.35em;
+      left: -1.32em;
+      margin-right: -.6em;
+    }
+  }
 }

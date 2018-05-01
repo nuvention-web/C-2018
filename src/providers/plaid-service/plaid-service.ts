@@ -2,11 +2,10 @@ import { Injectable } from '@angular/core';
 import { Observable } from "rxjs/Observable";
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { HTTP } from '@ionic-native/http';
 import plaid from 'plaid';
 
-import { Transaction } from '../../models/transaction';
+// import { Transaction } from '../../models/transaction';
 import { UserTransaction } from '../../models/userTransaction';
 import { UserMonthlyRecord } from '../../models/user-monthly-record';
 
@@ -72,6 +71,7 @@ export class PlaidService {
     this._userMonthAmountsCollection.ref.where(`userId`, "==", userId)
       .where(`date`, "==", thisMonth).get().then(ref => {
         if (ref.empty) {
+          console.log(`[Monthly Amount] Not found this month's record`);
           // create one!
           let item = {} as UserMonthlyRecord;
           item.date = thisMonth;
@@ -79,16 +79,19 @@ export class PlaidService {
           item.totalAmount = 0;
           item.userId = userId;
           this._userMonthAmountsCollection.add(item).then(r => {
+            console.log(`[Monthly Amount] Created this month's record`);
             this.getThisMonthlyAmountRecord(r.id);
           });
         } else {
           // this._testSource.next(`Get doc 0`);
+          console.log(`[Monthly Amount] Found this month's record`);
           this.getThisMonthlyAmountRecord(ref.docs[0].id);
         }
       }).catch(err => { });
     this._userMonthAmountsCollection.ref.where(`userId`, "==", userId)
       .where(`date`, "==", lastMonth).get().then(ref => {
         if (ref.empty) {
+          console.log(`[Monthly Amount] Not found last month's record`);
           // create one!
           let item = {} as UserMonthlyRecord;
           item.date = lastMonth;
@@ -96,10 +99,12 @@ export class PlaidService {
           item.totalAmount = 0;
           item.userId = userId;
           this._userMonthAmountsCollection.add(item).then(r => {
+            console.log(`[Monthly Amount] Created last month's record`);
             this.getLastMonthlyAmountRecord(r.id);
           });
         } else {
           // this._testSource.next(`Get doc 1`);
+          console.log(`[Monthly Amount] Found last month's record`);
           this.getLastMonthlyAmountRecord(ref.docs[0].id);
         }
       });
@@ -145,29 +150,7 @@ export class PlaidService {
     return new Promise<string>((resolve) => {
       console.log(`getting access token, ${public_token}`);
 
-      // this.plaidClient.exchangePublicToken(public_token, (err, res) => {
-      //   if (err) {
-      //     // console.log(`error ${err.error_message}`);
-      //     // if (plaid.isPlaidError(err))
-      //     console.log(`error ${err.toString()}`);
-      //     // this.transactionSource.next(err.error_message);
-      //     return;
-      //   }
-      //   console.log(`received access token`);
-      //
-      //   // this.transactionSource.next(res.access_token);
-      //   resolve(res.access_token);
-      // });
-
       const targetUrl = `http://Coinscious-env.tpg3qgcuzt.us-east-2.elasticbeanstalk.com/item/public_token/exchange`;
-
-      const httpOptions = {
-        headers: new HttpHeaders({
-          'Content-Type': 'application/json',
-          // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          // 'Accept': '*/*'
-        })
-      };
 
       const data = {
         body: {
@@ -226,64 +209,11 @@ export class PlaidService {
   }
 
   public refreshTransaction(access_token: string) {
-    this.transactionSource.next([access_token]);
+    // this.transactionSource.next([access_token]);
     const today = new Date();
     const daysAgo = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 3);
-    const tm = today.getMonth() < 9 ? `0${today.getMonth() + 1}` : `${today.getMonth()}`;
-    const td = today.getDate() < 10 ? `0${today.getDate()}` : `${today.getDate()}`;
-    const am = daysAgo.getMonth() < 9 ? `0${daysAgo.getMonth() + 1}` : `${daysAgo.getMonth()}`;
-    const ad = daysAgo.getDate() < 10 ? `0${daysAgo.getDate()}` : `${daysAgo.getDate()}`;
-    const todayString = `${today.getFullYear()}-${tm}-${td}`;
-    const daysAgoString = `${daysAgo.getFullYear()}-${am}-${ad}`;
-    // this.plaidClient.getTransactions(
-    //   access_token,
-    //   daysAgoString,
-    //   todayString,
-    //   (err, res) => {
-    //     if (err) {
-    //       // this.transactionSource.next(err.error_message);
-    //       return;
-    //     }
-    //
-    //     this._transactions = res.transactions;
-    //     this.transactionSource.next(this._transactions);
-    //     // console.log(this._transactions);
-    //   });
 
-    const targetUrl = `http://Coinscious-env.tpg3qgcuzt.us-east-2.elasticbeanstalk.com/transactions/get`;
-
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json',
-        // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        // 'Accept': '*/*'
-      })
-    };
-
-    const data = {
-      body: {
-        client_id: "5a8c0e36bdc6a47debd6ee15",
-        secret: "2ac6695774cef3665c793c1eb4a219",
-        access_token: access_token,
-        start_date: daysAgoString,
-        end_date: todayString
-      },
-      environment: this.environment
-    };
-
-    this.http.setDataSerializer('json');
-    console.log(`getting transaction.`);
-    console.log(data);
-    this.http.post(targetUrl, data, { 'Content-Type': 'application/json' })
-      .then(res => {
-        res.data = JSON.parse(res.data);
-        console.log(`got transaction response`);
-        // console.log(res.data);
-        this._transactions = res.data.transactions;
-        this.transactionSource.next(this._transactions);
-      }).catch(err => {
-        console.log(`get transaction err. ${err.error}`);
-      });
+    return this.getTransactionsWithTimeRange(access_token, daysAgo, today);
   }
 
   public getTransactionsWithTimeRange(access_token: string, from: Date, to: Date): Promise<any> {
@@ -297,12 +227,6 @@ export class PlaidService {
     const daysAgoString = `${daysAgo.getFullYear()}-${am}-${ad}`;
 
     const targetUrl = `http://Coinscious-env.tpg3qgcuzt.us-east-2.elasticbeanstalk.com/transactions/get`;
-
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
-    };
 
     const data = {
       body: {
@@ -383,5 +307,7 @@ export class PlaidService {
     });
   }
 
+  public refreshLastLogin(userId, date) {
 
+  }
 }

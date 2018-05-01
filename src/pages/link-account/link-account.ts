@@ -1,9 +1,9 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component } from '@angular/core';
 import { IonicPage, NavController } from 'ionic-angular';
 
-import { HttpClient } from '@angular/common/http';
-import { NgProgress } from '@ngx-progressbar/core';
-import plaid from 'plaid';
+// import { HttpClient } from '@angular/common/http';
+// import { NgProgress } from '@ngx-progressbar/core';
+// import plaid from 'plaid';
 
 
 declare var Plaid;
@@ -25,7 +25,7 @@ export class LinkAccountPage {
   private linkHandler;
 
   constructor(
-    private http: HttpClient,
+    // private http: HttpClient,
     public navCtrl: NavController
   ) { }
 

@@ -21,7 +21,7 @@ export class TransactionGroupComponent {
 
   }
 
-  private onApproveItem(ev) {
+  onApproveItem(ev) {
     this.onApprove.emit({
       group: this._transactions.data,
       transaction: ev.transaction,
@@ -34,7 +34,7 @@ export class TransactionGroupComponent {
     // });
   }
 
-  private onFlagItem(ev) {
+  onFlagItem(ev) {
     this.onFlag.emit({
       group: this._transactions,
       transaction: ev.transaction,
@@ -42,7 +42,7 @@ export class TransactionGroupComponent {
     });
   }
 
-  private approve() {
+  approve() {
     this.onApprove.emit({
       group: this._transactions,
       point: 5,
