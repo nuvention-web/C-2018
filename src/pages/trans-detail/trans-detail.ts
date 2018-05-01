@@ -189,7 +189,7 @@ export class TransDetailPage {
         let distance = (thisYear - databaseYear) * 12 + (thisMonth - databaseMonth);
         if (distance < 12) {
           this.chartOptions.data.datasets[0].data[11 - distance] = t.data().exceedAmount;
-          this.chartOptions.data.datasets[1].data[11 - distance] = t.data().totalAmount -  t.data().exceedAmount;
+          this.chartOptions.data.datasets[1].data[11 - distance] = t.data().totalAmount - t.data().exceedAmount;
           console.log("distance: " + distance.toString() + "happy money: " + this.chartOptions.data.datasets[0].data[11 - distance].toString());
           console.log("distance: " + distance.toString() + "unhappy money: " + this.chartOptions.data.datasets[1].data[11 - distance].toString());
         }
@@ -287,6 +287,10 @@ export class TransDetailPage {
       });
     });
 
+  }
+
+  abs(x) {
+    return Math.abs(x);
   }
 
 

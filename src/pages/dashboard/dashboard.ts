@@ -17,7 +17,7 @@ import { UserTransaction } from '../../models/userTransaction';
 import { PlaidService } from '../../providers/plaid-service/plaid-service';
 
 // declare var cordova;
-// declare var Plaid;
+declare var Plaid;
 
 /**
  * Generated class for the DashboardPage page.
@@ -37,6 +37,8 @@ export class DashboardPage {
   @ViewChild(`exceedLast`) exceedLast: NgProgressComponent;
   @ViewChild(`totalThis`) totalThis: NgProgressComponent;
   @ViewChild(`exceedThis`) exceedThis: NgProgressComponent;
+  @ViewChild(`totalLastBelow`) totalLastBelow: NgProgressComponent;
+  @ViewChild(`totalThisBelow`) totalThisBelow: NgProgressComponent;
 
   private notificationCollections: AngularFirestoreCollection<Notification>;
   private userAccountCollections: AngularFirestoreCollection<UserAccount>;
@@ -61,8 +63,12 @@ export class DashboardPage {
   private _exceedLastV = 0.00;
   private _totalThisV = 0.00;
   private _exceedThisV = 0.00;
+  private _spendingMoreThis = false;
+  private _spendingMoreLast = false;
 
   private _isLoading = true;
+
+  private linkHandler;
 
   // private fakeData = [
   //   {
@@ -214,6 +220,28 @@ export class DashboardPage {
     //     }
     //   }
     // });
+    this.linkHandler = Plaid.create({
+      clientName: `Coinscious`,
+      // env: `sandbox`,
+      env: `development`,
+      key: `28f2e54388e2f6a1aca59e789d353b`,
+      product: [`transactions`],
+      forceIframe: true,
+      selectAccount: false,
+      onSuccess: (public_token, metadata) => {
+        this.plaidService.getAccessToken(public_token).then(access_token => {
+          let newDoc = {} as UserAccount;
+          newDoc.publicToken = public_token;
+          newDoc.accessToken = access_token;
+          newDoc.userId = this._user.uid;
+          this.userAccountCollections.add(newDoc).then(() => {
+            this.checkCredentials();
+          });
+        });
+        // console.log("Login Succeed");
+        // this._linkedCredential = true;
+      }
+    });
 
     ///// Plaid part end
 
@@ -386,15 +414,37 @@ export class DashboardPage {
   private calculateBar() {
     if (!this._signedIn || !this._linkedCredential) return;
 
-    let total = this._totalThisV > this._totalLastV ? this._totalThisV : this._totalLastV;
+    let absTotalThis = Math.abs(this._totalThisV);
+    let absTotalLast = Math.abs(this._totalLastV);
+    let absExceedThis = Math.abs(this._exceedThisV);
+    let absExceedLast = Math.abs(this._exceedLastV);
+
+    let total = absTotalThis > absTotalLast ? absTotalThis : absTotalLast;
+    total = absExceedThis > total ? absExceedThis : total;
+    total = absExceedLast > total ? absExceedLast : total;
+    total = total == 0 ? 0.01 : total;
     console.log(`Calculating bar total: ${total}`);
-    total = total == 0 ? 0.01 : 0;
-    this.totalLast.set(this._totalLastV / total * 100);
-    this.totalThis.set(this._totalThisV / total * 100);
-    this.exceedLast.set(this._exceedLastV / total * 100);
-    this.exceedThis.set(this._exceedThisV / total * 100);
-    if (this.totalLast == null || this.totalThis == null || this.exceedLast == null || this.exceedThis == null)
-      console.log(`Null element!`);
+    if (this.totalLast != null) this.totalLast.set(absTotalLast / total * 100);
+    if (this.totalThis != null) this.totalThis.set(absTotalThis / total * 100);
+    if (this.totalLastBelow != null) this.totalLastBelow.set(absTotalLast / total * 100);
+    if (this.totalThisBelow != null) this.totalThisBelow.set(absTotalThis / total * 100);
+    this.exceedLast.set(absExceedLast / total * 100);
+    this.exceedThis.set(absExceedThis / total * 100);
+    console.log(`${this._totalLastV}, ${this._totalThisV}`);
+    console.log(`${this._exceedLastV}, ${this._exceedThisV}`);
+    console.log(`${this._totalLastV / total * 100}, ${this._totalThisV / total * 100}`);
+    console.log(`${this._exceedLastV / total * 100}, ${this._exceedThisV / total * 100}`);
+
+    this._spendingMoreThis = absExceedThis > absTotalThis;
+    this._spendingMoreLast = absExceedLast > absTotalLast;
+
+    // if (this.totalLast == null ||
+    //   this.totalThis == null ||
+    //   this.exceedLast == null ||
+    //   this.exceedThis == null ||
+    //   this.totalLastBelow == null ||
+    //   this.totalThisBelow == null)
+    //   console.log(`Null element!`);
     console.log(`Calculated bar!`);
   }
 
@@ -412,6 +462,7 @@ export class DashboardPage {
       this.plaidService.addTransactionRecord(this._userAccount.userId, t, true)
         .then(() => {
           this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, t.amount);
+          this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
         })
         .catch(err => {
           this._demoText = err.message;
@@ -434,6 +485,7 @@ export class DashboardPage {
             if (ev.group.data.length == 0) {
               this._transactions.splice(this._transactions.indexOf(ev.group), 1);
             }
+            this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
           });
       })
       .catch(err => {
@@ -446,6 +498,11 @@ export class DashboardPage {
   }
 
   linkAccount() {
+    if (this.platform.is('android')) {
+      this.linkHandler.open();
+      return;
+    }
+
     const linkUrl =
       `https://cdn.plaid.com/link/v2/stable/link.html?` +
       `key=28f2e54388e2f6a1aca59e789d353b` + `&` +
@@ -459,6 +516,12 @@ export class DashboardPage {
       `selectAccount=false`;
 
     const browser = this.iab.create(linkUrl, '_blank', 'location=no,toolbar=no');
+    browser.on('loadstop').subscribe(event => {
+      console.log(`[InAppBrowser] On Load Stop : ${event.url}`);
+    });
+    browser.on('loaderror').subscribe(event => {
+      console.log(`[InAppBrowser] On Load Error : ${event.url}`);
+    });
     browser.on('loadstart').subscribe(event => {
       console.log(`[InAppBrowser] On Load Start: ${event.url}`);
       const redirectUrl = event.url;
@@ -529,6 +592,10 @@ export class DashboardPage {
       ]
     });
     actionSheet.present();
+  }
+
+  abs(x) {
+    return Math.abs(x);
   }
 
 }

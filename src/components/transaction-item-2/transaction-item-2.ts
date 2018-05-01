@@ -43,4 +43,8 @@ export class TransactionItem_2Component {
       transaction: this._transaction
     });
   }
+
+  abs(x) {
+    return Math.abs(x);
+  }
 }
