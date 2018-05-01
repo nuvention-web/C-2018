@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { Chart } from 'chart.js';
 import * as pattern from 'patternomaly';
@@ -111,7 +111,12 @@ export class TransDetailPage {
           ticks: {
             beginAtZero: true
           }
-        }]
+        }],
+        xAxes: [{
+          ticks: {
+            fontSize: 10
+          }
+        }],
       },
       onClick: (evt) => {
         var activePoints = this.chart.getElementsAtEvent(evt);
@@ -119,36 +124,21 @@ export class TransDetailPage {
         if (activePoints.length > 0) {
           // get the internal index of slice in pie chart
           var clickedElementindex = activePoints[0]["_index"];
-
-          // // get specific label by index
-          // var label = this.chart.data.labels[clickedElementindex];
-
-          // get value by index
-          var value = this.chart.data.datasets[0].data[clickedElementindex];
-          console.log("value", value);
-          this._monthUnhappy = this.chart.data.datasets[0].data[clickedElementindex];
-          console.log("unhappy", this._monthUnhappy);
-          this._monthHappy = this.chart.data.datasets[1].data[clickedElementindex];
-          console.log("happy", this._monthHappy);
-          /* other stuff that requires slice's label and value */
-          console.log(document.getElementById("wrap").scroll);
-          console.log("clickedElementindex: " + clickedElementindex.toString());
           this.generateNewTransactions(clickedElementindex);
         }
       },
       maintainAspectRatio: false,
       responsive: true
     }
+
+
   };
 
 
 
 
   private _month = ``;
-  private _months = {
-    "Jan": "01", "Feb": "02", "Mar": "03", "Apr": "04", "May": "05", "Jun": "06",
-    "Jul": "07", "Aug": "08", "Sep": "09", "Oct": "10", "Nov": "11", "Dec": "12"
-  };
+
   private _montthsNumTOString = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   private _userId: string = this.navParams.get("userId");
@@ -156,6 +146,7 @@ export class TransDetailPage {
   private _access_token: string = this.navParams.get("accessToken");
 
   constructor(
+    private zone: NgZone,
     public navCtrl: NavController,
     public navParams: NavParams,
     private firestore: AngularFirestore,
@@ -166,7 +157,7 @@ export class TransDetailPage {
   }
 
   ionViewDidLoad() {
-    console.log("ionViewDidLoad tran-detail");
+    console.log("ionViewDidLoad tran-detail 1");
     this.updateMonthLabel();
     //得到public token
     this.userAccountCollections.ref.where(`userId`, '==', this._userId).get().then(res => {
@@ -186,42 +177,26 @@ export class TransDetailPage {
         let thisMonth = thisDate.getMonth();
         let thisYear = thisDate.getFullYear();
         let distance = (thisYear - databaseYear) * 12 + (thisMonth - databaseMonth);
-        //console.log("distance: " + distance.toString() + "thisDate: " + thisDate.toDateString() + "databaseDate: " + databaseDate.toDateString());
         if (distance < 12) {
           this.chartOptions.data.datasets[0].data[11 - distance] = t.data().exceedAmount;
           this.chartOptions.data.datasets[1].data[11 - distance] = t.data().totalAmount - t.data().exceedAmount;
-          console.log("distance: " + distance.toString() + "happy money: " + this.chartOptions.data.datasets[0].data[11 - distance].toString());
-          console.log("distance: " + distance.toString() + "unhappy money: " + this.chartOptions.data.datasets[1].data[11 - distance].toString());
         }
       });
     }).then(() => {
-      console.log("happy money begin chart" + this.chartOptions.data.datasets[1].data[11 - 2]);
       this.chart = new Chart(`chart-canvas`, this.chartOptions);
     }
     ).then(() => {
+      console.log("generateNewTransactions 11");
       this.generateNewTransactions(11);
     });
-    this._transactions = this.fakeData;
+    // this._transactions = this.fakeData;
   }
 
   // ionViewWillLeave() {
   //   this._chartVisible = false;
   // }
 
-  private fakeData = [
-    {
-      name: "name",
-      amount: 123,
-      loved: false,
-      date: "12-34-56"
-    },
-    {
-      name: "name",
-      amount: 123,
-      loved: true,
-      date: "12-34-56"
-    }
-  ];
+
   private _transactions: any = [];
   // private _partTransactionIds: any = [];
 
@@ -233,11 +208,8 @@ export class TransDetailPage {
       var tempM = date.getMonth();
       var m = this._montthsNumTOString[tempM];
       var y = date.getFullYear().toString().substr(2, 2);
-      console.log("this date: " + date.toDateString() + " this tempM: " + tempM.toString() + " this month: " + m.toString());
       var temp = `${m} ${y}`;
       this.chartOptions.data.labels[i] = temp;
-      console.log();
-      console.log("this getMonth: " + (date.getMonth() - 1).toString());
       date.setMonth(date.getMonth() - 1);
     }
   }
@@ -246,14 +218,20 @@ export class TransDetailPage {
     //更新点击后表显示页的数据
     //console.log("public toke end: " + this._public_token.toString());
     this._monthUnhappy = this.chart.data.datasets[0].data[clickedElement];
+    //this._monthUnhappy = 0.11111;
+    this._monthUnhappy = Math.round(this._monthUnhappy * 100) / 100;
+
     this._monthHappy = this.chart.data.datasets[1].data[clickedElement];
+    //this._monthHappy = 0.11111;
+    this._monthHappy = Math.round(this._monthHappy * 100) / 100;
+
     var date = new Date();
     date.setMonth(date.getMonth() - (11 - clickedElement));
     var m = date.getMonth();
     var mString = this._montthsNumTOString[m];
     var ySring = date.getFullYear().toString().substr(2, 2);
     this._month = `${mString} ${ySring}`;
-    // this._transactions = [];
+    this._transactions = [];
 
     // let partTransactionIds = [];
     // let allTransactions = [];
@@ -266,9 +244,6 @@ export class TransDetailPage {
     let from = new Date(y, m, 1);
     let to = new Date(y, m + 1, 0);
 
-    console.log("this._access_toke: " + this._access_token.toString());
-    console.log("from: " + from.toDateString());
-    console.log("to: " + to.toDateString());
     this.plaidService.getTransactionsWithTimeRange(this._access_token, from, to).then(res => {
       res.forEach(t => {
         trans[t["transaction_id"]] = t;
@@ -278,12 +253,14 @@ export class TransDetailPage {
         this._transactions.length = 0;
         console.log(r);
         r.forEach(t => {
-          let target = trans[t["transactionId"]];
-          if (target != null) {
-            console.log(`love the item? ${t["loved"]}`);
-            target["loved"] = t["loved"];
-            this._transactions.push(target);
-          }
+          this.zone.run(() => {
+            let target = trans[t["transactionId"]];
+            if (target != null) {
+              console.log(`love the item? ${t["loved"]}`);
+              target["loved"] = t["loved"];
+              this._transactions.push(target);
+            }
+          });
         });
       });
     });
