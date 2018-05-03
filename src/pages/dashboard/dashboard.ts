@@ -1,5 +1,6 @@
 import { Component, NgZone, ViewChild } from '@angular/core';
 import { IonicPage, NavController, NavParams, Platform, ActionSheetController } from 'ionic-angular';
+import { MenuController } from 'ionic-angular';
 // import { PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
 // import { Push } from '@ionic-native/push';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
@@ -93,6 +94,7 @@ export class DashboardPage {
     public platform: Platform,
     private afAuth: AngularFireAuth,
     private actionSheetCtrl: ActionSheetController,
+    private menuCtrl: MenuController,
     // private loadingCtrl: LoadingController,
     // private toastCtrl: ToastController,
     private iab: InAppBrowser
@@ -569,7 +571,7 @@ export class DashboardPage {
     });
   }
 
-  showMenuActions() {
+  unbindAccount() {
     let actionSheet = this.actionSheetCtrl.create({
       title: 'Unbind Account?',
       buttons: [
@@ -597,6 +599,10 @@ export class DashboardPage {
 
   abs(x) {
     return Math.abs(x);
+  }
+
+  openMenu() {
+    this.menuCtrl.open();
   }
 
 }
