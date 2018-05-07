@@ -8,6 +8,7 @@ import plaid from 'plaid';
 // import { Transaction } from '../../models/transaction';
 import { UserTransaction } from '../../models/userTransaction';
 import { UserMonthlyRecord } from '../../models/user-monthly-record';
+import { Transaction } from '../../models/transaction';
 
 /*
   Generated class for the PlaidService provider.
@@ -36,6 +37,8 @@ export class PlaidService {
   private _lastMonthAmount: AngularFirestoreDocument<UserMonthlyRecord> = null;
   private environment: string;
 
+  private _demoTransactionsCollection: AngularFirestoreCollection<Transaction>;
+
   private _testSource: BehaviorSubject<any> = new BehaviorSubject<any>(null);
   testString$: Observable<any> = this._testSource.asObservable();
 
@@ -50,6 +53,7 @@ export class PlaidService {
     );
 
     this.userTransCollections = this.firestore.collection<UserTransaction>('user-transactions');
+    this._demoTransactionsCollection = this.firestore.collection<Transaction>('demo-transactions');
     this._userMonthAmountsCollection = this.firestore.collection<UserMonthlyRecord>('user-monthly-amount');
 
     // this.environment = `sandbox`;
@@ -197,7 +201,7 @@ export class PlaidService {
     });
   }
 
-  public addTransactionRecord(userId, transaction, loved): Promise<void> {
+  public addTransactionRecord(userId, transaction, loved, email): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       let t = {} as UserTransaction;
       t.userId = userId;
@@ -205,6 +209,26 @@ export class PlaidService {
       t.date = new Date(transaction.date);
       t.loved = loved;
       this.userTransCollections.add(t).then(r => resolve()).catch(err => reject(err));
+
+      if (email == `demo@demo.com`) {
+        this.addNewDemoTransaction(transaction);
+      }
+    });
+  }
+
+  public addNewDemoTransaction(transaction): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this._demoTransactionsCollection.add(transaction).then(r => resolve()).catch(err => reject(err));
+    });
+  }
+
+  public getDemoTransactions(): Promise<Transaction[]> {
+    return new Promise<Transaction[]>((resolve, reject) => {
+      this._demoTransactionsCollection.valueChanges().subscribe(transactions => {
+        resolve(transactions);
+      }, err => {
+        reject(err);
+      });
     });
   }
 

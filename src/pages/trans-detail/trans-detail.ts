@@ -142,6 +142,7 @@ export class TransDetailPage {
   private _montthsNumTOString = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   private _userId: string = this.navParams.get("userId");
+  private _userEmail: string = this.navParams.get("userEmail");
   private _public_token: string = "";
   private _access_token: string = this.navParams.get("accessToken");
 
@@ -243,6 +244,31 @@ export class TransDetailPage {
     var y = date.getFullYear();
     let from = new Date(y, m, 1);
     let to = new Date(y, m + 1, 0);
+
+    // Demo User
+    if (this._userEmail == `demo@demo.com`) {
+      this.plaidService.getDemoTransactions().then(res => {
+        res.forEach(t => {
+          trans[t["transaction_id"]] = t;
+        });
+      }).then(() => {
+        this.plaidService.getTransactionRecords(this._userId, from, to).then(r => {
+          this._transactions.length = 0;
+          console.log(r);
+          r.forEach(t => {
+            this.zone.run(() => {
+              let target = trans[t["transactionId"]];
+              if (target != null) {
+                console.log(`love the item? ${t["loved"]}`);
+                target["loved"] = t["loved"];
+                this._transactions.push(target);
+              }
+            });
+          });
+        });
+      });
+      return;
+    }
 
     this.plaidService.getTransactionsWithTimeRange(this._access_token, from, to).then(res => {
       res.forEach(t => {

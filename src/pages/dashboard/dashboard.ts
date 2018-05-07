@@ -71,17 +71,60 @@ export class DashboardPage {
 
   private linkHandler;
 
-  // private fakeData = [
-  //   {
-  //     name: "Today", data: [
-  //       {
-  //         name: "name",
-  //         amount: 123
-  //       }
-  //     ]
-  //   },
-  //   { name: "Yesterday", data: [] },
-  //   { name: "2 Days Ago", data: [] }];
+  private fakeData = [
+    {
+      name: `Today`,
+      data: [
+        { name: `McDonald's`, amount: `10.74`, date: `2017-02-27`, love: false },
+        { name: `Starbucks`, amount: `7.32`, date: `2017-02-27`, love: false },
+        { name: `Uber 063015 SF**POOL**`, amount: `5.40`, date: `2017-02-25`, love: false }
+      ]
+    },
+    {
+      name: `Yesterday`,
+      data: [
+        { name: `United Airlines`, amount: `500.00`, date: `2017-02-23`, love: false },
+        { name: `AmazonPrime Membersh`, amount: `49.00`, date: `2017-02-23`, love: false }
+      ]
+    },
+    {
+      name: `2 days ago`,
+      data: [
+        { name: `TARGET.COM * 800-591-3869`, amount: `42.49`, date: `2017-02-22`, love: false },
+        { name: `AMAZON MKTPLACE`, amount: `27.57`, date: `2017-02-20`, love: false },
+        { name: `#03428 JEWEL EVANSTON IL`, amount: `56.20`, date: `2017-02-19`, love: false },
+        { name: `Nicor Gas NICPayment 1388019270`, amount: `50.00`, date: `2017-02-16`, love: false },
+        { name: `ZARA USA 3697 CHICAGO IL`, amount: `138.21`, date: `2017-02-12`, love: false },
+        { name: `B&H PHOTO`, amount: `298.00`, date: `2017-02-08`, love: false },
+        { name: `LITTLE TOKYO ROSEMONT`, amount: `11.15`, date: `2017-02-03`, love: false },
+        { name: `MICHAEL KORS`, amount: `141.41`, date: `2017-02-08`, love: false },
+        { name: `CALVIN KLEIN`, amount: `26.13`, date: `2017-02-06`, love: false },
+        { name: `USA*CANTEEN VENDING`, amount: `1.25`, date: `2017-02-03`, love: false },
+        { name: `NORRIS CENTER FOOD COUR`, amount: `8.02`, date: `2017-02-02`, love: false },
+        { name: `LIBRARY CAFE BERGSON`, amount: `3.85`, date: `2017-02-08`, love: false }
+      ]
+    }
+  ];
+
+  private fakeTrans = [
+    { name: `TARGET.COM * 800-591-3869`, amount: 42.49, date: `2017-02-22`, love: false },
+    { name: `AMAZON MKTPLACE`, amount: 27.57, date: `2017-02-20`, love: false },
+    { name: `#03428 JEWEL EVANSTON IL`, amount: 56.20, date: `2017-02-19`, love: false },
+    { name: `Nicor Gas NICPayment 1388019270`, amount: 50.00, date: `2017-02-16`, love: false },
+    { name: `ZARA USA 3697 CHICAGO IL`, amount: 138.21, date: `2017-02-12`, love: false },
+    { name: `B&H PHOTO`, amount: 298.00, date: `2017-02-08`, love: false },
+    { name: `LITTLE TOKYO ROSEMONT`, amount: 11.15, date: `2017-02-03`, love: false },
+    { name: `MICHAEL KORS`, amount: 141.41, date: `2017-02-08`, love: false },
+    { name: `CALVIN KLEIN`, amount: 26.13, date: `2017-02-06`, love: false },
+    { name: `USA*CANTEEN VENDING`, amount: 1.25, date: `2017-02-03`, love: false },
+    { name: `NORRIS CENTER FOOD COUR`, amount: 8.02, date: `2017-02-02`, love: false },
+    { name: `LIBRARY CAFE BERGSON`, amount: 3.85, date: `2017-02-08`, love: false },
+    { name: `United Airlines`, amount: 500.00, date: `2017-02-23`, love: false },
+    { name: `AmazonPrime Membersh`, amount: 49.00, date: `2017-02-23`, love: false },
+    { name: `McDonald's`, amount: 10.74, date: `2017-02-27`, love: false },
+    { name: `Starbucks`, amount: 7.32, date: `2017-02-27`, love: false },
+    { name: `Uber 063015 SF**POOL**`, amount: 5.40, date: `2017-02-25`, love: false }
+  ];
 
 
   constructor(
@@ -305,6 +348,7 @@ export class DashboardPage {
     this.afAuth.authState.subscribe(data => {
       this._linkedCredential = false;
       this._user = new User(data);
+
       this.userAccountCollections.ref.where(`userId`, '==', this._user.uid).get().then(res => {
         if (!res.empty) {
           console.log(`found credential`);
@@ -327,6 +371,7 @@ export class DashboardPage {
 
   private getUserInfo(userId) {
     this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${userId}`);
+
     this._uaSubscription = this.userAccount.valueChanges().subscribe(ua => {
       console.log(`received user account`);
       console.log(ua);
@@ -335,6 +380,18 @@ export class DashboardPage {
 
       this._isLoading = false;
       // this.calculateBar();
+
+      // Demo process for demo@demo.com
+
+      if (this._user.email == `demo@demo.com`) {
+        this._isLoading = false;
+        this._linkedCredential = true;
+        this.emptyTransactions = false;
+        this.refreshDemoTransactions();
+        this.plaidService.getMonthlyAmount(this._user.uid);
+        return;
+      }
+
       // get transaction data we have
       let to = new Date();
       let from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 10);
@@ -364,6 +421,39 @@ export class DashboardPage {
     });
     // this.plaidService.refreshTransaction(this.userAccount.);
     // this._isLoading = false;
+  }
+
+  private refreshDemoTransactions() {
+    let trans = [
+      { name: "Today", data: [] },
+      { name: "Yesterday", data: [] },
+      { name: "2 Days Ago", data: [] }];
+    let date = new Date();
+    let dateCounter = 0;
+    trans.forEach(t => {
+      let count = this.getRandomInt(this.fakeTrans.length);
+
+      let thisMonthNum = date.getMonth() + 1;
+      const thisDateNum = date.getDate();
+      const thisMonthStr = thisMonthNum > 10 ? `${thisMonthNum}` : `0${thisMonthNum}`;
+      const thisDateStr = thisDateNum > 10 ? `${thisDateNum}` : `0${thisDateNum}`;
+      const dateStr = `${date.getFullYear()}-${thisMonthStr}-${thisDateStr}`;
+
+      for (let i = 0; i < count; i++) {
+        let index = this.getRandomInt(this.fakeTrans.length);
+        let newTran = JSON.parse(JSON.stringify(this.fakeTrans[index]));
+        newTran.date = dateStr;
+        newTran.transaction_id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 10);
+        t.data.push(newTran);
+      }
+
+      dateCounter++;
+      date = new Date(date.getTime() - 1000 * 60 * 60 * dateCounter);
+    });
+
+    console.log(trans[0].data[0]);
+
+    this._transactions = trans;
   }
 
   private reshapeTransactions(transactions) {
@@ -451,6 +541,10 @@ export class DashboardPage {
     console.log(`Calculated bar!`);
   }
 
+  private getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
+  }
+
   // private pushNotification() {
   //   const newMessage: Notification = {
   //     message: `Tap to view`,
@@ -462,7 +556,7 @@ export class DashboardPage {
   onApprove(ev) {
     this._point += ev.point;
     ev.group.data.forEach(t => {
-      this.plaidService.addTransactionRecord(this._userAccount.userId, t, true)
+      this.plaidService.addTransactionRecord(this._userAccount.userId, t, true, this._user.email)
         .then(() => {
           this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, t.amount);
           this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
@@ -480,7 +574,7 @@ export class DashboardPage {
   }
 
   onFlag(ev) {
-    this.plaidService.addTransactionRecord(this._userAccount.userId, ev.transaction, false)
+    this.plaidService.addTransactionRecord(this._userAccount.userId, ev.transaction, false, this._user.email)
       .then(() => {
         this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, ev.transaction.amount, ev.transaction.amount)
           .then(() => {
@@ -497,7 +591,7 @@ export class DashboardPage {
   }
 
   goToDetail() {
-    this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken });
+    this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken, userEmail: this._user.email });
   }
 
   linkAccount() {
