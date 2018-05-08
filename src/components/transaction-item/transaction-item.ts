@@ -40,4 +40,8 @@ export class TransactionItemComponent {
     });
   }
 
+  abs(x) {
+    return Math.abs(x);
+  }
+
 }

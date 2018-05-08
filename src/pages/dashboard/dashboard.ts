@@ -1,5 +1,6 @@
 import { Component, NgZone, ViewChild } from '@angular/core';
 import { IonicPage, NavController, NavParams, Platform, ActionSheetController } from 'ionic-angular';
+import { MenuController } from 'ionic-angular';
 // import { PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
 // import { Push } from '@ionic-native/push';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
@@ -17,7 +18,7 @@ import { UserTransaction } from '../../models/userTransaction';
 import { PlaidService } from '../../providers/plaid-service/plaid-service';
 
 // declare var cordova;
-// declare var Plaid;
+declare var Plaid;
 
 /**
  * Generated class for the DashboardPage page.
@@ -37,6 +38,8 @@ export class DashboardPage {
   @ViewChild(`exceedLast`) exceedLast: NgProgressComponent;
   @ViewChild(`totalThis`) totalThis: NgProgressComponent;
   @ViewChild(`exceedThis`) exceedThis: NgProgressComponent;
+  @ViewChild(`totalLastBelow`) totalLastBelow: NgProgressComponent;
+  @ViewChild(`totalThisBelow`) totalThisBelow: NgProgressComponent;
 
   private notificationCollections: AngularFirestoreCollection<Notification>;
   private userAccountCollections: AngularFirestoreCollection<UserAccount>;
@@ -61,20 +64,67 @@ export class DashboardPage {
   private _exceedLastV = 0.00;
   private _totalThisV = 0.00;
   private _exceedThisV = 0.00;
+  private _spendingMoreThis = false;
+  private _spendingMoreLast = false;
 
   private _isLoading = true;
 
-  // private fakeData = [
-  //   {
-  //     name: "Today", data: [
-  //       {
-  //         name: "name",
-  //         amount: 123
-  //       }
-  //     ]
-  //   },
-  //   { name: "Yesterday", data: [] },
-  //   { name: "2 Days Ago", data: [] }];
+  private linkHandler;
+
+  private fakeData = [
+    {
+      name: `Today`,
+      data: [
+        { name: `McDonald's`, amount: `10.74`, date: `2017-02-27`, love: false },
+        { name: `Starbucks`, amount: `7.32`, date: `2017-02-27`, love: false },
+        { name: `Uber 063015 SF**POOL**`, amount: `5.40`, date: `2017-02-25`, love: false }
+      ]
+    },
+    {
+      name: `Yesterday`,
+      data: [
+        { name: `United Airlines`, amount: `500.00`, date: `2017-02-23`, love: false },
+        { name: `AmazonPrime Membersh`, amount: `49.00`, date: `2017-02-23`, love: false }
+      ]
+    },
+    {
+      name: `2 days ago`,
+      data: [
+        { name: `TARGET.COM * 800-591-3869`, amount: `42.49`, date: `2017-02-22`, love: false },
+        { name: `AMAZON MKTPLACE`, amount: `27.57`, date: `2017-02-20`, love: false },
+        { name: `#03428 JEWEL EVANSTON IL`, amount: `56.20`, date: `2017-02-19`, love: false },
+        { name: `Nicor Gas NICPayment 1388019270`, amount: `50.00`, date: `2017-02-16`, love: false },
+        { name: `ZARA USA 3697 CHICAGO IL`, amount: `138.21`, date: `2017-02-12`, love: false },
+        { name: `B&H PHOTO`, amount: `298.00`, date: `2017-02-08`, love: false },
+        { name: `LITTLE TOKYO ROSEMONT`, amount: `11.15`, date: `2017-02-03`, love: false },
+        { name: `MICHAEL KORS`, amount: `141.41`, date: `2017-02-08`, love: false },
+        { name: `CALVIN KLEIN`, amount: `26.13`, date: `2017-02-06`, love: false },
+        { name: `USA*CANTEEN VENDING`, amount: `1.25`, date: `2017-02-03`, love: false },
+        { name: `NORRIS CENTER FOOD COUR`, amount: `8.02`, date: `2017-02-02`, love: false },
+        { name: `LIBRARY CAFE BERGSON`, amount: `3.85`, date: `2017-02-08`, love: false }
+      ]
+    }
+  ];
+
+  private fakeTrans = [
+    { name: `TARGET.COM * 800-591-3869`, amount: 42.49, date: `2017-02-22`, love: false },
+    { name: `AMAZON MKTPLACE`, amount: 27.57, date: `2017-02-20`, love: false },
+    { name: `#03428 JEWEL EVANSTON IL`, amount: 56.20, date: `2017-02-19`, love: false },
+    { name: `Nicor Gas NICPayment 1388019270`, amount: 50.00, date: `2017-02-16`, love: false },
+    { name: `ZARA USA 3697 CHICAGO IL`, amount: 138.21, date: `2017-02-12`, love: false },
+    { name: `B&H PHOTO`, amount: 298.00, date: `2017-02-08`, love: false },
+    { name: `LITTLE TOKYO ROSEMONT`, amount: 11.15, date: `2017-02-03`, love: false },
+    { name: `MICHAEL KORS`, amount: 141.41, date: `2017-02-08`, love: false },
+    { name: `CALVIN KLEIN`, amount: 26.13, date: `2017-02-06`, love: false },
+    { name: `USA*CANTEEN VENDING`, amount: 1.25, date: `2017-02-03`, love: false },
+    { name: `NORRIS CENTER FOOD COUR`, amount: 8.02, date: `2017-02-02`, love: false },
+    { name: `LIBRARY CAFE BERGSON`, amount: 3.85, date: `2017-02-08`, love: false },
+    { name: `United Airlines`, amount: 500.00, date: `2017-02-23`, love: false },
+    { name: `AmazonPrime Membersh`, amount: 49.00, date: `2017-02-23`, love: false },
+    { name: `McDonald's`, amount: 10.74, date: `2017-02-27`, love: false },
+    { name: `Starbucks`, amount: 7.32, date: `2017-02-27`, love: false },
+    { name: `Uber 063015 SF**POOL**`, amount: 5.40, date: `2017-02-25`, love: false }
+  ];
 
 
   constructor(
@@ -87,6 +137,7 @@ export class DashboardPage {
     public platform: Platform,
     private afAuth: AngularFireAuth,
     private actionSheetCtrl: ActionSheetController,
+    private menuCtrl: MenuController,
     // private loadingCtrl: LoadingController,
     // private toastCtrl: ToastController,
     private iab: InAppBrowser
@@ -214,6 +265,28 @@ export class DashboardPage {
     //     }
     //   }
     // });
+    this.linkHandler = Plaid.create({
+      clientName: `Coinscious`,
+      // env: `sandbox`,
+      env: `development`,
+      key: `28f2e54388e2f6a1aca59e789d353b`,
+      product: [`transactions`],
+      forceIframe: true,
+      selectAccount: false,
+      onSuccess: (public_token, metadata) => {
+        this.plaidService.getAccessToken(public_token).then(access_token => {
+          let newDoc = {} as UserAccount;
+          newDoc.publicToken = public_token;
+          newDoc.accessToken = access_token;
+          newDoc.userId = this._user.uid;
+          this.userAccountCollections.add(newDoc).then(() => {
+            this.checkCredentials();
+          });
+        });
+        // console.log("Login Succeed");
+        // this._linkedCredential = true;
+      }
+    });
 
     ///// Plaid part end
 
@@ -275,6 +348,7 @@ export class DashboardPage {
     this.afAuth.authState.subscribe(data => {
       this._linkedCredential = false;
       this._user = new User(data);
+
       this.userAccountCollections.ref.where(`userId`, '==', this._user.uid).get().then(res => {
         if (!res.empty) {
           console.log(`found credential`);
@@ -297,6 +371,7 @@ export class DashboardPage {
 
   private getUserInfo(userId) {
     this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${userId}`);
+
     this._uaSubscription = this.userAccount.valueChanges().subscribe(ua => {
       console.log(`received user account`);
       console.log(ua);
@@ -305,6 +380,18 @@ export class DashboardPage {
 
       this._isLoading = false;
       // this.calculateBar();
+
+      // Demo process for demo@demo.com
+
+      if (this._user.email == `demo@demo.com`) {
+        this._isLoading = false;
+        this._linkedCredential = true;
+        this.emptyTransactions = false;
+        this.refreshDemoTransactions();
+        this.plaidService.getMonthlyAmount(this._user.uid);
+        return;
+      }
+
       // get transaction data we have
       let to = new Date();
       let from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 10);
@@ -336,6 +423,39 @@ export class DashboardPage {
     // this._isLoading = false;
   }
 
+  private refreshDemoTransactions() {
+    let trans = [
+      { name: "Today", data: [] },
+      { name: "Yesterday", data: [] },
+      { name: "2 Days Ago", data: [] }];
+    let date = new Date();
+    let dateCounter = 0;
+    trans.forEach(t => {
+      let count = this.getRandomInt(this.fakeTrans.length);
+
+      let thisMonthNum = date.getMonth() + 1;
+      const thisDateNum = date.getDate();
+      const thisMonthStr = thisMonthNum > 10 ? `${thisMonthNum}` : `0${thisMonthNum}`;
+      const thisDateStr = thisDateNum > 10 ? `${thisDateNum}` : `0${thisDateNum}`;
+      const dateStr = `${date.getFullYear()}-${thisMonthStr}-${thisDateStr}`;
+
+      for (let i = 0; i < count; i++) {
+        let index = this.getRandomInt(this.fakeTrans.length);
+        let newTran = JSON.parse(JSON.stringify(this.fakeTrans[index]));
+        newTran.date = dateStr;
+        newTran.transaction_id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 10);
+        t.data.push(newTran);
+      }
+
+      dateCounter++;
+      date = new Date(date.getTime() - 1000 * 60 * 60 * dateCounter);
+    });
+
+    console.log(trans[0].data[0]);
+
+    this._transactions = trans;
+  }
+
   private reshapeTransactions(transactions) {
     if (this._transHistory == null || transactions == null) return;
     console.log(`Calculating Transactions`);
@@ -345,6 +465,7 @@ export class DashboardPage {
       return a.date > b.date ? -1 : 1;
     });
     transactions = transactions.filter(t => !this._transHistory.some(tr => tr.transactionId == t.transaction_id));
+    transactions = transactions.filter(t => t.amount > 0);
     console.log(transactions);
 
     const today = new Date();
@@ -386,16 +507,42 @@ export class DashboardPage {
   private calculateBar() {
     if (!this._signedIn || !this._linkedCredential) return;
 
-    let total = this._totalThisV > this._totalLastV ? this._totalThisV : this._totalLastV;
+    let absTotalThis = Math.abs(this._totalThisV);
+    let absTotalLast = Math.abs(this._totalLastV);
+    let absExceedThis = Math.abs(this._exceedThisV);
+    let absExceedLast = Math.abs(this._exceedLastV);
+
+    let total = absTotalThis > absTotalLast ? absTotalThis : absTotalLast;
+    total = absExceedThis > total ? absExceedThis : total;
+    total = absExceedLast > total ? absExceedLast : total;
+    total = total == 0 ? 0.01 : total;
     console.log(`Calculating bar total: ${total}`);
-    total = total == 0 ? 0.01 : 0;
-    this.totalLast.set(this._totalLastV / total * 100);
-    this.totalThis.set(this._totalThisV / total * 100);
-    this.exceedLast.set(this._exceedLastV / total * 100);
-    this.exceedThis.set(this._exceedThisV / total * 100);
-    if (this.totalLast == null || this.totalThis == null || this.exceedLast == null || this.exceedThis == null)
-      console.log(`Null element!`);
+    if (this.totalLast != null) this.totalLast.set(absTotalLast / total * 100);
+    if (this.totalThis != null) this.totalThis.set(absTotalThis / total * 100);
+    if (this.totalLastBelow != null) this.totalLastBelow.set(absTotalLast / total * 100);
+    if (this.totalThisBelow != null) this.totalThisBelow.set(absTotalThis / total * 100);
+    this.exceedLast.set(absExceedLast / total * 100);
+    this.exceedThis.set(absExceedThis / total * 100);
+    console.log(`${this._totalLastV}, ${this._totalThisV}`);
+    console.log(`${this._exceedLastV}, ${this._exceedThisV}`);
+    console.log(`${this._totalLastV / total * 100}, ${this._totalThisV / total * 100}`);
+    console.log(`${this._exceedLastV / total * 100}, ${this._exceedThisV / total * 100}`);
+
+    this._spendingMoreThis = absExceedThis > absTotalThis;
+    this._spendingMoreLast = absExceedLast > absTotalLast;
+
+    // if (this.totalLast == null ||
+    //   this.totalThis == null ||
+    //   this.exceedLast == null ||
+    //   this.exceedThis == null ||
+    //   this.totalLastBelow == null ||
+    //   this.totalThisBelow == null)
+    //   console.log(`Null element!`);
     console.log(`Calculated bar!`);
+  }
+
+  private getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
   }
 
   // private pushNotification() {
@@ -409,9 +556,10 @@ export class DashboardPage {
   onApprove(ev) {
     this._point += ev.point;
     ev.group.data.forEach(t => {
-      this.plaidService.addTransactionRecord(this._userAccount.userId, t, true)
+      this.plaidService.addTransactionRecord(this._userAccount.userId, t, true, this._user.email)
         .then(() => {
           this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, t.amount);
+          this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
         })
         .catch(err => {
           this._demoText = err.message;
@@ -426,7 +574,7 @@ export class DashboardPage {
   }
 
   onFlag(ev) {
-    this.plaidService.addTransactionRecord(this._userAccount.userId, ev.transaction, false)
+    this.plaidService.addTransactionRecord(this._userAccount.userId, ev.transaction, false, this._user.email)
       .then(() => {
         this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, ev.transaction.amount, ev.transaction.amount)
           .then(() => {
@@ -434,6 +582,7 @@ export class DashboardPage {
             if (ev.group.data.length == 0) {
               this._transactions.splice(this._transactions.indexOf(ev.group), 1);
             }
+            this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
           });
       })
       .catch(err => {
@@ -442,10 +591,15 @@ export class DashboardPage {
   }
 
   goToDetail() {
-    this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken });
+    this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken, userEmail: this._user.email });
   }
 
   linkAccount() {
+    if (this.platform.is('android')) {
+      this.linkHandler.open();
+      return;
+    }
+
     const linkUrl =
       `https://cdn.plaid.com/link/v2/stable/link.html?` +
       `key=28f2e54388e2f6a1aca59e789d353b` + `&` +
@@ -459,6 +613,12 @@ export class DashboardPage {
       `selectAccount=false`;
 
     const browser = this.iab.create(linkUrl, '_blank', 'location=no,toolbar=no');
+    browser.on('loadstop').subscribe(event => {
+      console.log(`[InAppBrowser] On Load Stop : ${event.url}`);
+    });
+    browser.on('loaderror').subscribe(event => {
+      console.log(`[InAppBrowser] On Load Error : ${event.url}`);
+    });
     browser.on('loadstart').subscribe(event => {
       console.log(`[InAppBrowser] On Load Start: ${event.url}`);
       const redirectUrl = event.url;
@@ -505,7 +665,7 @@ export class DashboardPage {
     });
   }
 
-  showMenuActions() {
+  unbindAccount() {
     let actionSheet = this.actionSheetCtrl.create({
       title: 'Unbind Account?',
       buttons: [
@@ -529,6 +689,14 @@ export class DashboardPage {
       ]
     });
     actionSheet.present();
+  }
+
+  abs(x) {
+    return Math.abs(x);
+  }
+
+  openMenu() {
+    this.menuCtrl.open();
   }
 
 }

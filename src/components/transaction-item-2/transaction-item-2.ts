@@ -24,7 +24,7 @@ export class TransactionItem_2Component {
 
   ngAfterViewInit() {
     // console.log(`Transaction Item`);
-    // console.log(this._transaction);
+    console.log(this._transaction);
   }
 
   approve() {
@@ -32,15 +32,19 @@ export class TransactionItem_2Component {
       transaction: this._transaction,
       point: 5,
     });
-    this.onApproveFlag.emit({
-      transaction: this._transaction,
-      point: 5
-    });
+    // this.onApproveFlag.emit({
+    //   transaction: this._transaction,
+    //   point: 5
+    // });
   }
 
   flag() {
     this.onFlag.emit({
       transaction: this._transaction
     });
+  }
+
+  abs(x) {
+    return Math.abs(x);
   }
 }

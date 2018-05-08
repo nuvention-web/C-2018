@@ -19,6 +19,7 @@ import { UserSign } from '../../models/userSign';
 export class LoginPage {
 
   private user = {} as UserSign;
+  errMessage = ``;
 
   constructor(
     public navCtrl: NavController,
@@ -57,6 +58,7 @@ export class LoginPage {
       }
     } catch (e) {
       console.error(e);
+      this.errMessage = e.message;
     }
   }
 

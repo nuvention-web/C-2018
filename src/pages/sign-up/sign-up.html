@@ -22,4 +22,7 @@
     <ion-input type="password" [(ngModel)]="user.password"></ion-input>
   </ion-item>
   <button ion-button block (click)="signUp()">Sign Up</button>
+  <div>
+    {{errMessage}}
+  </div>
 </ion-content>

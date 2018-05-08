@@ -2,7 +2,7 @@
 <div class="trans-item">
   <div class="trans-item-content">
     <div class="trans-item-title">{{_transaction.name}}</div>
-    <div class="trans-item-text">${{_transaction.amount.toFixed(2)}}</div>
+    <div class="trans-item-text">${{abs(_transaction.amount).toFixed(2)}}</div>
   </div>
   <div class="trans-item-buttons">
     <!-- <button ion-button icon-only clear (click)="approve()">
