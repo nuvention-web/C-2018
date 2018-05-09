@@ -2,15 +2,25 @@ transaction-item {
   .trans-item {
     // border-radius: 2px;
     // box-shadow: 0 2px 2px 2px rgba(0, 0, 0, 0.08);
-    margin: -1px -16px;
-    padding: 16px;
+    margin: 0;
+    margin-top: -1px;
+    padding: 0;
+
+    // padding-left: 0 !important;
     border-bottom: 1px solid rgba(205, 205, 205, 1);
-    border-top: 1px solid rgba(205, 205, 205, 1);
+
+    // border-top: 1px solid rgba(205, 205, 205, 1);
     background-color: white;
+
+    .item-inner {
+      border-bottom: 0 !important;
+      padding: 0 !important;
+    }
 
     .trans-item-content {
       display: inline-block;
       width: calc(100% - 80px);
+      padding-left: 16px;
 
       .trans-item-title {
         font-size: 14pt;
@@ -27,10 +37,10 @@ transaction-item {
     .trans-item-buttons {
       display: inline-block;
       position: relative;
-      right: -16px;
-      top: -16px;
-      margin-bottom: -16px;
+      top: 4px;
+      right: 16px;
       text-align: right;
+      float: right;
     }
 
     ion-icon {
@@ -47,5 +57,52 @@ transaction-item {
       font-size: 1.1em;
       margin-top: -.2em;
     }
+  }
+
+  ion-item-options {
+    .break {
+      color: #ff9763;
+    }
+
+    .flash {
+      position: absolute;
+      color: red;
+      font-size: 0.8em;
+      margin-top: -0.8em;
+    }
+  }
+
+  .remove-left {
+    ion-item {
+      transform: translateX(calc(-100%)) !important;
+      transition: all 0.1s linear;
+    }
+  }
+
+  .remove-right {
+    ion-item {
+      transform: translateX(calc(100%)) !important;
+      transition: all 0.1s linear;
+    }
+  }
+
+  .drag-left {
+    background-color: #f53d3d;
+  }
+
+  .drag-right {
+    background-color: #32db64;
+  }
+
+  .close {
+    // transform: scaleY(0) !important;
+    overflow: hidden;
+    max-height: 0;
+    transition: all 0.3s ease-out;
+  }
+
+  ion-item-sliding {
+    height: auto;
+    max-height: 200px;
   }
 }

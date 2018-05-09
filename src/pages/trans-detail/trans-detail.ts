@@ -170,6 +170,8 @@ export class TransDetailPage {
     //更新chart的数据
     this.userMonthlyRecord.ref.where(`userId`, '==', this._userId).get().then(res => {
       res.forEach(t => {
+        console.log(`Transaction`);
+        console.log(t.data());
         let databaseDate = new Date(new Date(t.data().date));
         databaseDate.setHours(24);
         let databaseMonth = databaseDate.getMonth();

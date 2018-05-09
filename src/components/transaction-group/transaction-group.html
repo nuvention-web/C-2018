@@ -1,10 +1,12 @@
 <!-- Generated template for the TransactionGroupComponent component -->
-<div *ngIf="_transactions.data != null && _transactions.data.length != 0">
+<div *ngIf="_transactions.data != null && _transactions.data.length != 0" class="trans-group">
   <h4>
     {{_transactions.name}}
   </h4>
   <button ion-button icon-only clear (click)="approve()" class="approve-all">
     <ion-icon name="md-heart"></ion-icon>
   </button>
-  <transaction-item *ngFor="let t of _transactions.data" [data]=t [isFlag]=false [isInDetail]=false (onApprove)="onApproveItem($event)" (onFlag)="onFlagItem($event)"></transaction-item>
+  <ion-list>
+    <transaction-item *ngFor="let t of _transactions.data" [data]=t [isFlag]=false [isInDetail]=false (onApprove)="onApproveItem($event)" (onFlag)="onFlagItem($event)"></transaction-item>
+  </ion-list>
 </div>

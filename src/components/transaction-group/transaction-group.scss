@@ -1,21 +1,31 @@
 transaction-group {
-  h4 {
+  .trans-group {
     margin: 0 -16px;
-    padding: 8px 16px;
-    font-size: 1.6rem;
+  }
+
+  ion-list {
+    margin-bottom: 0 !important;
     border-top: 1px solid rgba(205, 205, 205, 1);
+  }
+
+  h4 {
+    margin: 0;
+    padding: 16px;
+    font-size: 1.4rem;
+    border-top: 1px solid #cdcdcd;
+    border-bottom: 1px solid #cdcdcd;
     color: #555555;
     font-weight: 700;
-    margin-top: 0 !important;
+    margin-top: -1px !important;
   }
 
   .approve-all {
     float: right;
     position: relative;
-    top: -3.8rem;
-    margin-bottom: -3.8rem;
+    top: -4.4rem;
+    margin-bottom: -4.4rem;
     font-size: 1.2rem;
-    margin-right: 1.3rem;
+    margin-right: 1.7rem;
 
     ion-icon {
       color: #3bc665;

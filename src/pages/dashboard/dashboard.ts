@@ -554,7 +554,25 @@ export class DashboardPage {
   // }
 
   onApprove(ev) {
-    this._point += ev.point;
+    if (ev.transaction != null) {
+      let t = ev.transaction;
+      this.plaidService.addTransactionRecord(this._userAccount.userId, t, true, this._user.email)
+        .then(() => {
+          this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, t.amount);
+          this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
+          ev.item.setElementClass(`close`, true);
+          setTimeout(() => {
+            ev.group.data.splice(ev.index, 1);
+          }, 300);
+        })
+        .catch(err => {
+          this._demoText = err.message;
+        });
+
+      return;
+    }
+
+    // this._point += ev.point;
     ev.group.data.forEach(t => {
       this.plaidService.addTransactionRecord(this._userAccount.userId, t, true, this._user.email)
         .then(() => {
@@ -578,7 +596,10 @@ export class DashboardPage {
       .then(() => {
         this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, ev.transaction.amount, ev.transaction.amount)
           .then(() => {
-            ev.group.data.splice(ev.index, 1);
+            ev.item.setElementClass(`close`, true);
+            setTimeout(() => {
+              ev.group.data.splice(ev.index, 1);
+            }, 300);
             if (ev.group.data.length == 0) {
               this._transactions.splice(this._transactions.indexOf(ev.group), 1);
             }
