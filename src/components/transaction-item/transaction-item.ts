@@ -59,10 +59,10 @@ export class TransactionItemComponent {
   onLike(item, e) {
     // console.log(`Item swiped`);
     this.onLikeAnim(item);
-    console.log(item);
-    // setTimeout(() => {
-    //   this.approveItem(item);
-    // }, 100);
+    // console.log(item);
+    setTimeout(() => {
+      this.approveItem(item);
+    }, 100);
   }
 
   onLikeAnim(item) {
