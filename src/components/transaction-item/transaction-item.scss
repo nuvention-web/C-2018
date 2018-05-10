@@ -24,6 +24,8 @@ transaction-item {
 
       .trans-item-title {
         font-size: 14pt;
+        overflow-x: hidden;
+        text-overflow: ellipsis;
       }
 
       .trans-item-text {

@@ -435,8 +435,8 @@ export class DashboardPage {
 
       let thisMonthNum = date.getMonth() + 1;
       const thisDateNum = date.getDate();
-      const thisMonthStr = thisMonthNum > 10 ? `${thisMonthNum}` : `0${thisMonthNum}`;
-      const thisDateStr = thisDateNum > 10 ? `${thisDateNum}` : `0${thisDateNum}`;
+      const thisMonthStr = thisMonthNum >= 10 ? `${thisMonthNum}` : `0${thisMonthNum}`;
+      const thisDateStr = thisDateNum >= 10 ? `${thisDateNum}` : `0${thisDateNum}`;
       const dateStr = `${date.getFullYear()}-${thisMonthStr}-${thisDateStr}`;
 
       for (let i = 0; i < count; i++) {
@@ -616,6 +616,15 @@ export class DashboardPage {
   }
 
   linkAccount() {
+    if (this._user.email == `demo@demo.com`) {
+      let newDoc = {} as UserAccount;
+      newDoc.userId = this._user.uid;
+      this.userAccountCollections.add(newDoc).then(() => {
+        this.checkCredentials();
+      });
+      return;
+    }
+
     if (this.platform.is('android')) {
       this.linkHandler.open();
       return;

@@ -1,4 +1,5 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChildren, QueryList } from '@angular/core';
+import { TransactionItemComponent } from '../transaction-item/transaction-item';
 
 /**
  * Generated class for the TransactionGroupComponent component.
@@ -16,6 +17,10 @@ export class TransactionGroupComponent {
   @Output() onApprove: EventEmitter<any> = new EventEmitter();
   @Output() onApproveGroup: EventEmitter<any> = new EventEmitter();
   @Output() onFlag: EventEmitter<any> = new EventEmitter();
+
+  @ViewChildren(TransactionItemComponent) transactions: QueryList<TransactionItemComponent>;
+
+  closed = false;
 
   constructor() {
 
@@ -45,10 +50,32 @@ export class TransactionGroupComponent {
   }
 
   approve() {
-    this.onApprove.emit({
-      group: this._transactions,
-      point: 5,
+    let delay = 0;
+    this.transactions.toArray().forEach(t => {
+      delay += 100;
+      setTimeout(() => t.onLikeAnim(t.slider), delay);
     });
+    delay += 100;
+    setTimeout(() => {
+      this.closed = true;
+      this.onApprove.emit({
+        group: this._transactions,
+        point: 5,
+      });
+    }, delay);
+    // console.log();
+  }
+
+  onLike(item, e) {
+    // console.log(`Item swiped`);
+    item.setElementClass("remove-right", true);
+    item.setElementClass("drag-left", false);
+    item.setElementClass("drag-right", true);
+    item.setElementClass("active-slide", true);
+    item.setElementClass("active-options-left", true);
+    setTimeout(() => {
+      this.approve();
+    }, 100);
   }
 
 }

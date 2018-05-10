@@ -63,10 +63,10 @@ export class PlaidService {
   public getMonthlyAmount(userId) {
     const now = new Date();
     let thisMonthNum = now.getMonth() + 1;
-    const thisMonthStr = thisMonthNum > 10 ? `${thisMonthNum}` : `0${thisMonthNum}`;
+    const thisMonthStr = thisMonthNum >= 10 ? `${thisMonthNum}` : `0${thisMonthNum}`;
     const thisMonth = new Date(`${now.getFullYear()}-${thisMonthStr}-01`);
     const lastMonthStr = thisMonthNum == 1 ?
-      `12` : thisMonthNum - 1 > 10 ? `${thisMonthNum - 1}` : `0${thisMonthNum - 1}`;
+      `12` : thisMonthNum - 1 >= 10 ? `${thisMonthNum - 1}` : `0${thisMonthNum - 1}`;
     const lastYrStr = thisMonthNum == 1 ? `${now.getFullYear() - 1}` : `${now.getFullYear()}`;
     const lastMonth = new Date(`${lastYrStr}-${lastMonthStr}-01`);
 

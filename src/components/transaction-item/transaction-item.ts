@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 import { ItemSliding } from 'ionic-angular';
 
 /**
@@ -20,44 +20,57 @@ export class TransactionItemComponent {
   @Output() onApproveFlag: EventEmitter<any> = new EventEmitter();
   @Output() onFlag: EventEmitter<any> = new EventEmitter();
 
+  @ViewChild(`item`) slider: ElementRef;
+
   constructor() {
 
   }
 
-  approve(item) {
+  private approveItem(item) {
     this.onApprove.emit({
       transaction: this._transaction,
       item: item
     });
-    // console.log(`APPROVE!!`);
   }
 
-  flag(item) {
+  private flagItem(item) {
     this.onFlag.emit({
       transaction: this._transaction,
       item: item
     });
-    // console.log(`FLAG!!`);
   }
 
   abs(x) {
     return Math.abs(x);
   }
 
-  onDislikeSwipe(item, e) {
+  onDislike(item, e) {
     // console.log(`Item swiped`);
     item.setElementClass("remove-left", true);
+    item.setElementClass("drag-right", false);
+    item.setElementClass("drag-left", true);
+    item.setElementClass("active-slide", true);
+    item.setElementClass("active-options-right", true);
     setTimeout(() => {
-      this.flag(item);
+      this.flagItem(item);
     }, 100);
   }
 
-  onLikeSwipe(item, e) {
-    console.log(`Item swiped`);
+  onLike(item, e) {
+    // console.log(`Item swiped`);
+    this.onLikeAnim(item);
+    console.log(item);
+    // setTimeout(() => {
+    //   this.approveItem(item);
+    // }, 100);
+  }
+
+  onLikeAnim(item) {
     item.setElementClass("remove-right", true);
-    setTimeout(() => {
-      this.approve(item);
-    }, 100);
+    item.setElementClass("drag-left", false);
+    item.setElementClass("drag-right", true);
+    item.setElementClass("active-slide", true);
+    item.setElementClass("active-options-left", true);
   }
 
   onDrag(item, event) {

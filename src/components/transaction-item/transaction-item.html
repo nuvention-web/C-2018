@@ -7,24 +7,24 @@
       <div class="trans-item-text">${{abs(_transaction.amount).toFixed(2)}}</div>
     </div>
     <div class="trans-item-buttons">
-      <button ion-button icon-only clear (click)="approve(item)" *ngIf=_transaction.love>
+      <button ion-button icon-only clear (click)="onLike(item)">
         <ion-icon name="md-heart"></ion-icon>
       </button>
-      <button ion-button icon-only clear (click)="flag(item)" *ngIf=!_transaction.love>
+      <button ion-button icon-only clear (click)="onDislike(item)">
         <ion-icon name="md-heart" class="break"></ion-icon>
         <ion-icon name="md-flash" class="flash"></ion-icon>
       </button>
     </div>
   </ion-item>
-  <ion-item-options side="left" (ionSwipe)="onLikeSwipe(item, $event)">
-    <button ion-button color="secondary">
+  <ion-item-options side="left" (ionSwipe)="onLike(item, $event)">
+    <button ion-button color="secondary" (click)="onLike(item)">
       <ion-icon name="md-heart"></ion-icon>
       Like
     </button>
   </ion-item-options>
 
-  <ion-item-options side="right" (ionSwipe)="onDislikeSwipe(item, $event)">
-    <button ion-button color="danger">
+  <ion-item-options side="right" (ionSwipe)="onDislike(item, $event)">
+    <button ion-button color="danger" (click)="onDislike(item)">
       <ion-icon name="md-heart" class="break"></ion-icon>
       <ion-icon name="md-flash" class="flash"></ion-icon>
       Dislike
