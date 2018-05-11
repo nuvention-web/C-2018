@@ -70,6 +70,7 @@ export class DashboardPage {
   private _isLoading = true;
 
   private linkHandler;
+  private environment = `development`;
 
   private fakeData = [
     {
@@ -225,70 +226,6 @@ export class DashboardPage {
     //   console.log(`New Transaction Error: ${err.message}`);
     //   this._demoText = `${err.message}`
     // });
-
-
-    ///// plaid part
-
-    // if (this._signedIn && !this._linkedCredential) {
-    // }
-    // this.linkHandler = Plaid.create({
-    //   clientName: `Coinscious`,
-    //   // env: `sandbox`,
-    //   env: `development`,
-    //   key: `28f2e54388e2f6a1aca59e789d353b`,
-    //   product: [`transactions`],
-    //   forceIframe: true,
-    //   selectAccount: false,
-    //   onSuccess: (public_token, metadata) => {
-    //     this.plaidService.getAccessToken(public_token).then(access_token => {
-    //       let newDoc = {} as UserAccount;
-    //       newDoc.publicToken = public_token;
-    //       newDoc.accessToken = access_token;
-    //       newDoc.userId = this._user.uid;
-    //       this.userAccountCollections.add(newDoc).then(() => {
-    //         this.checkCredentials();
-    //       });
-    //     });
-    //     // console.log("Login Succeed");
-    //     // this._linkedCredential = true;
-    //   },
-    //   onLoad: () => {
-    //     // Optional, called when Link loads
-    //     console.log(`Plaid Link loaded`);
-    //   },
-    //   onExit: (err, matadata) => {
-    //     if (err != null) {
-    //       console.log(`ERROR!`);
-    //       console.log(err);
-    //     } else {
-    //       console.log(`Exit with no error`);
-    //     }
-    //   }
-    // });
-    this.linkHandler = Plaid.create({
-      clientName: `Coinscious`,
-      // env: `sandbox`,
-      env: `development`,
-      key: `28f2e54388e2f6a1aca59e789d353b`,
-      product: [`transactions`],
-      forceIframe: true,
-      selectAccount: false,
-      onSuccess: (public_token, metadata) => {
-        this.plaidService.getAccessToken(public_token).then(access_token => {
-          let newDoc = {} as UserAccount;
-          newDoc.publicToken = public_token;
-          newDoc.accessToken = access_token;
-          newDoc.userId = this._user.uid;
-          this.userAccountCollections.add(newDoc).then(() => {
-            this.checkCredentials();
-          });
-        });
-        // console.log("Login Succeed");
-        // this._linkedCredential = true;
-      }
-    });
-
-    ///// Plaid part end
 
     this.plaidService.lastMonthlyAmounts$.subscribe(record => {
       console.log(`[Monthly Record] Got last month record.`);
@@ -617,15 +554,46 @@ export class DashboardPage {
 
   linkAccount() {
     if (this._user.email == `demo@demo.com`) {
-      let newDoc = {} as UserAccount;
-      newDoc.userId = this._user.uid;
-      this.userAccountCollections.add(newDoc).then(() => {
-        this.checkCredentials();
-      });
-      return;
+      this.environment = `sandbox`;
+      // let newDoc = {} as UserAccount;
+      // newDoc.userId = this._user.uid;
+      // this.userAccountCollections.add(newDoc).then(() => {
+      //   this.checkCredentials();
+      // });
+      // return;
     }
 
     if (this.platform.is('android')) {
+      this.linkHandler = Plaid.create({
+        clientName: `Coinscious`,
+        // env: `sandbox`,
+        env: `${this.environment}`,
+        key: `28f2e54388e2f6a1aca59e789d353b`,
+        product: [`transactions`],
+        forceIframe: true,
+        selectAccount: false,
+        onSuccess: (public_token, metadata) => {
+          if (this._user.email == `demo@demo.com`) {
+            let newDoc = {} as UserAccount;
+            newDoc.userId = this._user.uid;
+            this.userAccountCollections.add(newDoc).then(() => {
+              this.checkCredentials();
+            });
+            return;
+          }
+          this.plaidService.getAccessToken(public_token).then(access_token => {
+            let newDoc = {} as UserAccount;
+            newDoc.publicToken = public_token;
+            newDoc.accessToken = access_token;
+            newDoc.userId = this._user.uid;
+            this.userAccountCollections.add(newDoc).then(() => {
+              this.checkCredentials();
+            });
+          });
+          // console.log("Login Succeed");
+          // this._linkedCredential = true;
+        }
+      });
       this.linkHandler.open();
       return;
     }
@@ -634,7 +602,7 @@ export class DashboardPage {
       `https://cdn.plaid.com/link/v2/stable/link.html?` +
       `key=28f2e54388e2f6a1aca59e789d353b` + `&` +
       // `env=sandbox` + `&` +
-      `env=development` + `&` +
+      `env=${this.environment}` + `&` +
       `clientName=Coinscious` + `&` +
       `product=transactions` + `&` +
       `isMobile=true` + `&` +
@@ -671,6 +639,15 @@ export class DashboardPage {
         queries[query[0]] = query[1];
       });
       console.log(`Get public token! Token: ${queries[`public_token`]}`);
+
+      if (this._user.email == `demo@demo.com`) {
+        let newDoc = {} as UserAccount;
+        newDoc.userId = this._user.uid;
+        this.userAccountCollections.add(newDoc).then(() => {
+          this.checkCredentials();
+        });
+        return;
+      }
 
       const public_token = queries[`public_token`];
       this.plaidService.getAccessToken(public_token).then(access_token => {
@@ -719,6 +696,10 @@ export class DashboardPage {
       ]
     });
     actionSheet.present();
+  }
+
+  resetDemoData() {
+    this.plaidService.resetDemoData();
   }
 
   abs(x) {

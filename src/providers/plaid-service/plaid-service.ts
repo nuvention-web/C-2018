@@ -232,6 +232,24 @@ export class PlaidService {
     });
   }
 
+  public resetDemoData(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this._demoTransactionsCollection.ref.get().then(qry => {
+        const batch = this.firestore.firestore.batch();
+        qry.forEach(doc => {
+          batch.delete(doc.ref);
+        });
+        batch.commit().then(() => {
+          // reset this month to zero
+          this._thisMonthAmount.update({ totalAmount: 0, exceedAmount: 0 })
+            .then(() => {
+              resolve();
+            });
+        });
+      });
+    });
+  }
+
   public refreshTransaction(access_token: string) {
     // this.transactionSource.next([access_token]);
     const today = new Date();

@@ -46,6 +46,7 @@ transaction-group {
       ion-item {
         padding: 0;
         background-color: #f3f3f3;
+        border-bottom: 0 !important;
 
         .item-inner {
           border-bottom: 0 !important;
@@ -59,8 +60,7 @@ transaction-group {
               padding: 16px;
               font-size: 1.4rem;
               border-top: 1px solid #cdcdcd;
-
-              // border-bottom: 1px solid #cdcdcd;
+              border-bottom: 1px solid #cdcdcd;
               color: #555555;
               font-weight: 700;
               margin-top: -1px !important;
