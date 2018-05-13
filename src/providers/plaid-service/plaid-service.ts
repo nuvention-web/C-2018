@@ -422,4 +422,38 @@ export class PlaidService {
   public refreshLastLogin(userId, date) {
 
   }
+
+    public changeLoveToTrue(transactionId: string) {
+        this.userTransCollections.ref.where(`transactionId`, "==", transactionId).get().then(ref => {
+            var temp = ref.docs[0].id;
+            this.firestore.doc<any>(`user-transactions/${temp}`).update({loved: true})
+                .catch(error => console.log(error));
+        });
+    }
+
+    public changeLoveToFalse(transactionId: string) {
+        this.userTransCollections.ref.where(`transactionId`, "==", transactionId).get().then(ref => {
+            var temp = ref.docs[0].id;
+            this.firestore.doc<any>(`user-transactions/${temp}`).update({loved: false})
+                .catch(error => console.log(error));
+        });
+    }
+
+    public chagneMonthAmount(userId: string, year, month, amount) {
+        //const now = new Date();
+        let thisMonthNum = month;
+        const thisMonthStr = thisMonthNum > 10 ? `${thisMonthNum}` : `0${thisMonthNum}`;
+        const thisMonth = new Date(`${year}-${thisMonthStr}-01`);
+        console.log("test w: 1 changeMonthAmount");
+        console.log(userId + "   " + month.toString() + "   " +amount.toString());
+        this._userMonthAmountsCollection.ref.where(`userId`, "==", userId).where(`date`, "==", thisMonth).get().then(ref => {
+            if(ref.empty)
+                console.log("empty");
+            var temp = ref.docs[0].id;
+            console.log("test: rid: " + temp);
+            this.firestore.doc<any>(`user-monthly-amount/${temp}`).update({exceedAmount: amount})
+                .catch(error => console.log(error));
+        });
+        console.log("test w: 2 changeMonthAmount");
+    }
 }
