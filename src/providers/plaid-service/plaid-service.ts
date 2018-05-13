@@ -235,12 +235,12 @@ export class PlaidService {
         t.date = new Date(tr.date);
         t.loved = loved;
         batch.set(this.userTransCollections.doc(t.transactionId).ref, t);
-        batch.commit().then(() => {
-          if (email == `demo@demo.com`) {
-            this.addNewDemoTransactions(transactions);
-          }
-        }).catch(err => reject(err));
       });
+      batch.commit().then(() => {
+        if (email == `demo@demo.com`) {
+          this.addNewDemoTransactions(transactions);
+        }
+      }).catch(err => reject(err));
     });
   }
 
