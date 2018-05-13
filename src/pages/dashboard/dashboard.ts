@@ -561,14 +561,15 @@ export class DashboardPage {
     // });
     this.plaidService.addTransactionRecords(this._userAccount.userId, ev.group.data, true, this._user.email)
       .then(() => {
-        this._transactions.splice(this._transactions.indexOf(ev.group), 1);
-
         let sum = 0;
         ev.group.data.forEach(t => {
           sum += t.amount;
+          // this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, t.amount);
         });
-        this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, sum);
+        this._transactions.splice(this._transactions.indexOf(ev.group), 1);
         this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
+        this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, sum);
+        // console.log(`Add sum: ${sum}`);
       }).catch(err => {
         this._demoText = err.message;
       });

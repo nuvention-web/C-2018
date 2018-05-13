@@ -240,6 +240,7 @@ export class PlaidService {
         if (email == `demo@demo.com`) {
           this.addNewDemoTransactions(transactions);
         }
+        resolve();
       }).catch(err => reject(err));
     });
   }
