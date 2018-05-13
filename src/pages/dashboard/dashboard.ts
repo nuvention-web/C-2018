@@ -127,6 +127,47 @@ export class DashboardPage {
     { name: `Uber 063015 SF**POOL**`, amount: 5.40, date: `2017-02-25`, love: false }
   ];
 
+  private demoTrans = [
+    {
+      dateOffset: 1, // yesterday
+      transactions: [
+        { name: `AMAZON MKTPLACE`, amount: 75, love: false },
+        { name: `TKNAMEBAR & RESTAURANT`, amount: 42.63, love: false },
+        { name: `THE SECOND CITY THEATER`, amount: 62, love: false },
+        { name: `Uber 063015 SF**POOL**`, amount: 15, love: false },
+        { name: `LYFT *RIDE LYFT.COM`, amount: 18, love: false }
+      ]
+    },
+    {
+      dateOffset: 24,
+      transactions: [
+        { name: `AMAZON MKTPLACE`, amount: 216, love: true },
+        { name: `Trader Joe's`, amount: 37.57, love: false },
+        { name: `T.K. Foodservice`, amount: 12.84, love: false }
+      ]
+    },
+    {
+      dateOffset: 32,
+      transactions: [
+        { name: `Airbnb`, amount: 100, love: true },
+        { name: `Men's Warehouse`, amount: 40, love: true },
+        { name: `DSW, Inc.`, amount: 20, love: true }
+      ]
+    },
+    {
+      dateOffset: 0,
+      transactions: [
+        { name: `VENTRA WEBSITE 877-669-8368`, amount: 105, love: false },
+        { name: `AMAZON MKTPLACE`, amount: 25, love: false },
+        { name: `Domino's Pizza`, amount: 37.87, love: false },
+        { name: `Sluggers World Class Sports Bar`, amount: 24, love: false },
+        { name: `LYFT *RIDE LYFT.COM`, amount: 18, love: false },
+        { name: `AMAZON MKTPLACE`, amount: 258, love: false },
+        { name: `United Airlines`, amount: 315, love: false }
+      ]
+    }
+  ];
+
 
   constructor(
     // private push: Push,
@@ -367,28 +408,26 @@ export class DashboardPage {
       { name: "2 Days Ago", data: [] }];
     let date = new Date();
     let dateCounter = 0;
-    trans.forEach(t => {
-      let count = this.getRandomInt(this.fakeTrans.length);
 
-      let thisMonthNum = date.getMonth() + 1;
-      const thisDateNum = date.getDate();
+    this.demoTrans.forEach(dayTran => {
+      let dateOffset = dayTran.dateOffset;
+      if (dateOffset > 3) return;
+
+      const target = new Date(date.getTime() - 1000 * 60 * 60 * 24 * dateOffset);
+
+      let thisMonthNum = target.getMonth() + 1;
+      const thisDateNum = target.getDate();
       const thisMonthStr = thisMonthNum >= 10 ? `${thisMonthNum}` : `0${thisMonthNum}`;
       const thisDateStr = thisDateNum >= 10 ? `${thisDateNum}` : `0${thisDateNum}`;
-      const dateStr = `${date.getFullYear()}-${thisMonthStr}-${thisDateStr}`;
+      const dateStr = `${target.getFullYear()}-${thisMonthStr}-${thisDateStr}`;
 
-      for (let i = 0; i < count; i++) {
-        let index = this.getRandomInt(this.fakeTrans.length);
-        let newTran = JSON.parse(JSON.stringify(this.fakeTrans[index]));
+      dayTran.transactions.forEach(t => {
+        let newTran = JSON.parse(JSON.stringify(t));
         newTran.date = dateStr;
         newTran.transaction_id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 10);
-        t.data.push(newTran);
-      }
-
-      dateCounter++;
-      date = new Date(date.getTime() - 1000 * 60 * 60 * dateCounter);
+        trans[dateOffset].data.push(newTran);
+      })
     });
-
-    console.log(trans[0].data[0]);
 
     this._transactions = trans;
   }
@@ -496,10 +535,10 @@ export class DashboardPage {
       this.plaidService.addTransactionRecord(this._userAccount.userId, t, true, this._user.email)
         .then(() => {
           this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, t.amount);
-          this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
           ev.item.setElementClass(`close`, true);
           setTimeout(() => {
             ev.group.data.splice(ev.index, 1);
+            this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
           }, 300);
         })
         .catch(err => {
@@ -510,17 +549,29 @@ export class DashboardPage {
     }
 
     // this._point += ev.point;
-    ev.group.data.forEach(t => {
-      this.plaidService.addTransactionRecord(this._userAccount.userId, t, true, this._user.email)
-        .then(() => {
-          this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, t.amount);
-          this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
-        })
-        .catch(err => {
-          this._demoText = err.message;
+    // ev.group.data.forEach(t => {
+    //   this.plaidService.addTransactionRecord(this._userAccount.userId, t, true, this._user.email)
+    //     .then(() => {
+    //       this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, t.amount);
+    //       this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
+    //     })
+    //     .catch(err => {
+    //       this._demoText = err.message;
+    //     });
+    // });
+    this.plaidService.addTransactionRecords(this._userAccount.userId, ev.group.data, true, this._user.email)
+      .then(() => {
+        this._transactions.splice(this._transactions.indexOf(ev.group), 1);
+
+        let sum = 0;
+        ev.group.data.forEach(t => {
+          sum += t.amount;
         });
-    });
-    this._transactions.splice(this._transactions.indexOf(ev.group), 1);
+        this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, sum);
+        this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
+      }).catch(err => {
+        this._demoText = err.message;
+      });
   }
 
   onApproveFlag(ev) {
@@ -539,8 +590,8 @@ export class DashboardPage {
             }, 300);
             if (ev.group.data.length == 0) {
               this._transactions.splice(this._transactions.indexOf(ev.group), 1);
+              this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
             }
-            this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
           });
       })
       .catch(err => {
@@ -699,7 +750,51 @@ export class DashboardPage {
   }
 
   resetDemoData() {
-    this.plaidService.resetDemoData();
+    this.plaidService.resetDemoData().then(() => {
+      let transactions = [];
+      let date = new Date();
+      let dateCounter = 0;
+
+      this.demoTrans.forEach(dayTran => {
+        let dateOffset = dayTran.dateOffset;
+        if (dateOffset < 3) return;
+
+        const target = new Date(date.getTime() - 1000 * 60 * 60 * 24 * dateOffset);
+
+        let thisMonthNum = target.getMonth() + 1;
+        const thisDateNum = target.getDate();
+        const thisMonthStr = thisMonthNum >= 10 ? `${thisMonthNum}` : `0${thisMonthNum}`;
+        const thisDateStr = thisDateNum >= 10 ? `${thisDateNum}` : `0${thisDateNum}`;
+        const dateStr = `${target.getFullYear()}-${thisMonthStr}-${thisDateStr}`;
+
+        dayTran.transactions.forEach(t => {
+          let newTran = JSON.parse(JSON.stringify(t));
+          newTran.date = dateStr;
+          newTran.transaction_id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 10);
+          transactions.push(newTran);
+        })
+      });
+
+      console.log(`adding records`);
+      console.log(transactions);
+
+      this.plaidService.addDemoTransactionRecords(this._userAccount.userId, transactions)
+        .then(() => {
+          console.log(`added records`);
+          let sum = 0;
+          let sumExceed = 0;
+          transactions.forEach(t => {
+            sum += t.amount;
+            if (!t.love) {
+              sumExceed += t.amount;
+            }
+          });
+          this.plaidService.addLastMonthlyAmount(this._totalThisV, this._exceedThisV, sum, sumExceed)
+            .then(() => { console.log(`added last monthly amount`) });
+        }).catch(err => {
+          console.log(err.message);
+        });
+    });
   }
 
   abs(x) {
