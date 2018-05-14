@@ -30,6 +30,7 @@ export class TransDetailPage {
     private chart: Chart = [];
     private _tempMonth = 0;
     private _tempYear = 0;
+    private _tempClickElement = 0;
     private _chartVisible = true;
     private chartOptions = {
         type: `bar`,
@@ -217,6 +218,7 @@ export class TransDetailPage {
     private generateNewTransactions(clickedElement) {
         //更新点击后表显示页的数据
         //console.log("public toke end: " + this._public_token.toString());
+        this._tempClickElement = clickedElement;
         var tempMonth = new Date().getMonth() + 1;
         this._tempMonth = tempMonth - (11 - clickedElement);
         this._tempYear = new Date().getFullYear();
@@ -305,8 +307,13 @@ export class TransDetailPage {
 
     onFlag(ev) {
         console.log("test w: onFlag");
-        this._monthHappy += ev.transaction.amount;
-        this._monthUnhappy -= ev.transaction.amount;
+        console.log("test w: monthHappy: " + this._monthHappy.toString() + "  monthunhappy: " + this._monthUnhappy.toString() + "  amount: " + this.abs(ev.transaction.amount).toString());
+        this._monthHappy =  this._monthHappy - this.abs(ev.transaction.amount);
+        this._monthUnhappy = this._monthUnhappy + this.abs(ev.transaction.amount);
+        console.log("test w: monthHappy: " + this._monthHappy.toString() + "  monthunhappy: " + this._monthUnhappy.toString() + "  amount: " + this.abs(ev.transaction.amount).toString());
+        this.chartOptions.data.datasets[0].data[this._tempClickElement] = this._monthUnhappy;
+        this.chartOptions.data.datasets[1].data[this._tempClickElement] = this._monthHappy;
+        this.chart = new Chart(`chart-canvas`, this.chartOptions);
         ev.transaction.loved = !ev.transaction.loved;
         console.log(ev.transaction.transaction_id.toString());
         this.plaidService.changeLoveToFalse(ev.transaction.transaction_id);
@@ -315,8 +322,11 @@ export class TransDetailPage {
 
     onApprove(ev) {
         console.log("test w: onApprove");
-        this._monthHappy -= ev.transaction.amount;
-        this._monthUnhappy += ev.transaction.amount;
+        this._monthHappy =  this._monthHappy + this.abs(ev.transaction.amount);
+        this._monthUnhappy = this._monthUnhappy - this.abs(ev.transaction.amount);
+        this.chartOptions.data.datasets[0].data[this._tempClickElement] = this._monthUnhappy;
+        this.chartOptions.data.datasets[1].data[this._tempClickElement] = this._monthHappy;
+        this.chart = new Chart(`chart-canvas`, this.chartOptions);
         ev.transaction.loved = !ev.transaction.loved;
         console.log(ev.transaction.transaction_id.toString());
         this.plaidService.changeLoveToTrue(ev.transaction.transaction_id);
