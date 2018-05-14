@@ -73,9 +73,9 @@
       ${{abs(_totalThisV - _exceedThisV).toFixed(2)}}
     </span>
    </h4>
-    <ng-progress id="total-this" #totalThis color="#11b245" [min]="1" *ngIf="!_spendingMoreThis"></ng-progress>
-    <ng-progress id="exceed-this" #exceedThis color="#ff9763" [min]="0"></ng-progress>
-    <ng-progress id="total-this-below" #totalThisBelow color="#11b245" [min]="1" *ngIf="_spendingMoreThis"></ng-progress>
+    <ng-progress id="total-this" #totalThis color="#00E676" [min]="1" *ngIf="!_spendingMoreThis"></ng-progress>
+    <ng-progress id="exceed-this" #exceedThis color="#FF7043" [min]="0"></ng-progress>
+    <ng-progress id="total-this-below" #totalThisBelow color="#00E676" [min]="1" *ngIf="_spendingMoreThis"></ng-progress>
     <h4 class="last-month-label">
      Last Month
      <span>
@@ -90,9 +90,9 @@
       ${{abs(_totalLastV - _exceedLastV).toFixed(2)}}
      </span>
     </h4>
-    <ng-progress id="total-last" #totalLast color="#11b245" class="lastMonth" [min]="1" *ngIf="!_spendingMoreLast"></ng-progress>
-    <ng-progress id="exceed-last" #exceedLast color="#ff9763" class="lastMonth" [min]="0"></ng-progress>
-    <ng-progress id="total-last-below" #totalLastBelow color="#11b245" class="lastMonth" [min]="1" *ngIf="_spendingMoreLast"></ng-progress>
+    <ng-progress id="total-last" #totalLast color="#00E676" class="lastMonth" [min]="1" *ngIf="!_spendingMoreLast"></ng-progress>
+    <ng-progress id="exceed-last" #exceedLast color="#FF7043" class="lastMonth" [min]="0"></ng-progress>
+    <ng-progress id="total-last-below" #totalLastBelow color="#00E676" class="lastMonth" [min]="1" *ngIf="_spendingMoreLast"></ng-progress>
     <div class="button-wrapper">
       <button ion-button clear small> View Details </button>
     </div>

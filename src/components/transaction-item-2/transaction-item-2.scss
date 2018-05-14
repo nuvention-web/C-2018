@@ -38,12 +38,12 @@ transaction-item-2 {
     }
 
     ion-icon {
-      color: #5ced87;
+      color: #00E676;
       margin-right: .2em;
     }
 
     .break {
-      color: #ff9763;
+      color: #FF7043;
     }
 
     .flash {
@@ -53,6 +53,15 @@ transaction-item-2 {
       top: -0.35em;
       left: -1.32em;
       margin-right: -.6em;
+    }
+
+    .flash-btn {
+      position: relative;
+      color: white;
+      font-size: 1.2em;
+      top: -.2em;
+      left: -2.3em;
+      margin-right: -2.3em;
     }
   }
 }
