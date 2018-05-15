@@ -8,6 +8,14 @@ page-dashboard {
       align-items: center;
       font-size: 16pt;
     }
+
+    .toolbar-title {
+      overflow: visible;
+    }
+
+    ion-icon {
+      color: #F4511E;
+    }
   }
 
   .dashboard-content {
@@ -123,13 +131,13 @@ page-dashboard {
       }
 
       .brief-heart {
-        color: #5ced87;
+        color: #00E676;
         font-size: 1em;
         margin-right: .2rem;
       }
 
       .brief-heart-break {
-        color: #ff9763;
+        color: #FF7043;
         font-size: 1em;
         margin-right: .2rem;
       }
@@ -153,6 +161,7 @@ page-dashboard {
       h2 {
         font-weight: 300;
         font-size: 2.2rem;
+        margin-top: .2rem;
       }
     }
 

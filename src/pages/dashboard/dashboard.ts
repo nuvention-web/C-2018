@@ -70,6 +70,7 @@ export class DashboardPage {
   private _isLoading = true;
 
   private linkHandler;
+  private environment = `development`;
 
   private fakeData = [
     {
@@ -124,6 +125,47 @@ export class DashboardPage {
     { name: `McDonald's`, amount: 10.74, date: `2017-02-27`, love: false },
     { name: `Starbucks`, amount: 7.32, date: `2017-02-27`, love: false },
     { name: `Uber 063015 SF**POOL**`, amount: 5.40, date: `2017-02-25`, love: false }
+  ];
+
+  private demoTrans = [
+    {
+      dateOffset: 1, // yesterday
+      transactions: [
+        { name: `AMAZON MKTPLACE`, amount: 75, love: false },
+        { name: `TKNAMEBAR & RESTAURANT`, amount: 42.63, love: false },
+        { name: `THE SECOND CITY THEATER`, amount: 62, love: false },
+        { name: `Uber 063015 SF**POOL**`, amount: 15, love: false },
+        { name: `LYFT *RIDE LYFT.COM`, amount: 18, love: false }
+      ]
+    },
+    {
+      dateOffset: 24,
+      transactions: [
+        { name: `AMAZON MKTPLACE`, amount: 216, love: true },
+        { name: `Trader Joe's`, amount: 37.57, love: false },
+        { name: `T.K. Foodservice`, amount: 12.84, love: false }
+      ]
+    },
+    {
+      dateOffset: 32,
+      transactions: [
+        { name: `Airbnb`, amount: 100, love: true },
+        { name: `Men's Warehouse`, amount: 40, love: true },
+        { name: `DSW, Inc.`, amount: 20, love: true }
+      ]
+    },
+    {
+      dateOffset: 0,
+      transactions: [
+        { name: `VENTRA WEBSITE 877-669-8368`, amount: 105, love: false },
+        { name: `AMAZON MKTPLACE`, amount: 25, love: false },
+        { name: `Domino's Pizza`, amount: 37.87, love: false },
+        { name: `Sluggers World Class Sports Bar`, amount: 24, love: false },
+        { name: `LYFT *RIDE LYFT.COM`, amount: 18, love: false },
+        { name: `AMAZON MKTPLACE`, amount: 258, love: false },
+        { name: `United Airlines`, amount: 315, love: false }
+      ]
+    }
   ];
 
 
@@ -225,70 +267,6 @@ export class DashboardPage {
     //   console.log(`New Transaction Error: ${err.message}`);
     //   this._demoText = `${err.message}`
     // });
-
-
-    ///// plaid part
-
-    // if (this._signedIn && !this._linkedCredential) {
-    // }
-    // this.linkHandler = Plaid.create({
-    //   clientName: `Coinscious`,
-    //   // env: `sandbox`,
-    //   env: `development`,
-    //   key: `28f2e54388e2f6a1aca59e789d353b`,
-    //   product: [`transactions`],
-    //   forceIframe: true,
-    //   selectAccount: false,
-    //   onSuccess: (public_token, metadata) => {
-    //     this.plaidService.getAccessToken(public_token).then(access_token => {
-    //       let newDoc = {} as UserAccount;
-    //       newDoc.publicToken = public_token;
-    //       newDoc.accessToken = access_token;
-    //       newDoc.userId = this._user.uid;
-    //       this.userAccountCollections.add(newDoc).then(() => {
-    //         this.checkCredentials();
-    //       });
-    //     });
-    //     // console.log("Login Succeed");
-    //     // this._linkedCredential = true;
-    //   },
-    //   onLoad: () => {
-    //     // Optional, called when Link loads
-    //     console.log(`Plaid Link loaded`);
-    //   },
-    //   onExit: (err, matadata) => {
-    //     if (err != null) {
-    //       console.log(`ERROR!`);
-    //       console.log(err);
-    //     } else {
-    //       console.log(`Exit with no error`);
-    //     }
-    //   }
-    // });
-    this.linkHandler = Plaid.create({
-      clientName: `Coinscious`,
-      // env: `sandbox`,
-      env: `development`,
-      key: `28f2e54388e2f6a1aca59e789d353b`,
-      product: [`transactions`],
-      forceIframe: true,
-      selectAccount: false,
-      onSuccess: (public_token, metadata) => {
-        this.plaidService.getAccessToken(public_token).then(access_token => {
-          let newDoc = {} as UserAccount;
-          newDoc.publicToken = public_token;
-          newDoc.accessToken = access_token;
-          newDoc.userId = this._user.uid;
-          this.userAccountCollections.add(newDoc).then(() => {
-            this.checkCredentials();
-          });
-        });
-        // console.log("Login Succeed");
-        // this._linkedCredential = true;
-      }
-    });
-
-    ///// Plaid part end
 
     this.plaidService.lastMonthlyAmounts$.subscribe(record => {
       console.log(`[Monthly Record] Got last month record.`);
@@ -430,28 +408,26 @@ export class DashboardPage {
       { name: "2 Days Ago", data: [] }];
     let date = new Date();
     let dateCounter = 0;
-    trans.forEach(t => {
-      let count = this.getRandomInt(this.fakeTrans.length);
 
-      let thisMonthNum = date.getMonth() + 1;
-      const thisDateNum = date.getDate();
-      const thisMonthStr = thisMonthNum > 10 ? `${thisMonthNum}` : `0${thisMonthNum}`;
-      const thisDateStr = thisDateNum > 10 ? `${thisDateNum}` : `0${thisDateNum}`;
-      const dateStr = `${date.getFullYear()}-${thisMonthStr}-${thisDateStr}`;
+    this.demoTrans.forEach(dayTran => {
+      let dateOffset = dayTran.dateOffset;
+      if (dateOffset > 3) return;
 
-      for (let i = 0; i < count; i++) {
-        let index = this.getRandomInt(this.fakeTrans.length);
-        let newTran = JSON.parse(JSON.stringify(this.fakeTrans[index]));
+      const target = new Date(date.getTime() - 1000 * 60 * 60 * 24 * dateOffset);
+
+      let thisMonthNum = target.getMonth() + 1;
+      const thisDateNum = target.getDate();
+      const thisMonthStr = thisMonthNum >= 10 ? `${thisMonthNum}` : `0${thisMonthNum}`;
+      const thisDateStr = thisDateNum >= 10 ? `${thisDateNum}` : `0${thisDateNum}`;
+      const dateStr = `${target.getFullYear()}-${thisMonthStr}-${thisDateStr}`;
+
+      dayTran.transactions.forEach(t => {
+        let newTran = JSON.parse(JSON.stringify(t));
         newTran.date = dateStr;
         newTran.transaction_id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 10);
-        t.data.push(newTran);
-      }
-
-      dateCounter++;
-      date = new Date(date.getTime() - 1000 * 60 * 60 * dateCounter);
+        trans[dateOffset].data.push(newTran);
+      })
     });
-
-    console.log(trans[0].data[0]);
 
     this._transactions = trans;
   }
@@ -554,18 +530,49 @@ export class DashboardPage {
   // }
 
   onApprove(ev) {
-    this._point += ev.point;
-    ev.group.data.forEach(t => {
+    if (ev.transaction != null) {
+      let t = ev.transaction;
       this.plaidService.addTransactionRecord(this._userAccount.userId, t, true, this._user.email)
         .then(() => {
           this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, t.amount);
-          this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
+          ev.item.setElementClass(`close`, true);
+          setTimeout(() => {
+            ev.group.data.splice(ev.index, 1);
+            this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
+          }, 300);
         })
         .catch(err => {
           this._demoText = err.message;
         });
-    });
-    this._transactions.splice(this._transactions.indexOf(ev.group), 1);
+
+      return;
+    }
+
+    // this._point += ev.point;
+    // ev.group.data.forEach(t => {
+    //   this.plaidService.addTransactionRecord(this._userAccount.userId, t, true, this._user.email)
+    //     .then(() => {
+    //       this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, t.amount);
+    //       this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
+    //     })
+    //     .catch(err => {
+    //       this._demoText = err.message;
+    //     });
+    // });
+    this.plaidService.addTransactionRecords(this._userAccount.userId, ev.group.data, true, this._user.email)
+      .then(() => {
+        let sum = 0;
+        ev.group.data.forEach(t => {
+          sum += t.amount;
+          // this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, t.amount);
+        });
+        this._transactions.splice(this._transactions.indexOf(ev.group), 1);
+        this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
+        this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, sum);
+        // console.log(`Add sum: ${sum}`);
+      }).catch(err => {
+        this._demoText = err.message;
+      });
   }
 
   onApproveFlag(ev) {
@@ -578,11 +585,14 @@ export class DashboardPage {
       .then(() => {
         this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, ev.transaction.amount, ev.transaction.amount)
           .then(() => {
-            ev.group.data.splice(ev.index, 1);
+            ev.item.setElementClass(`close`, true);
+            setTimeout(() => {
+              ev.group.data.splice(ev.index, 1);
+            }, 300);
             if (ev.group.data.length == 0) {
               this._transactions.splice(this._transactions.indexOf(ev.group), 1);
+              this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
             }
-            this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
           });
       })
       .catch(err => {
@@ -595,7 +605,47 @@ export class DashboardPage {
   }
 
   linkAccount() {
+    if (this._user.email == `demo@demo.com`) {
+      this.environment = `sandbox`;
+      // let newDoc = {} as UserAccount;
+      // newDoc.userId = this._user.uid;
+      // this.userAccountCollections.add(newDoc).then(() => {
+      //   this.checkCredentials();
+      // });
+      // return;
+    }
+
     if (this.platform.is('android')) {
+      this.linkHandler = Plaid.create({
+        clientName: `Coinscious`,
+        // env: `sandbox`,
+        env: `${this.environment}`,
+        key: `28f2e54388e2f6a1aca59e789d353b`,
+        product: [`transactions`],
+        forceIframe: true,
+        selectAccount: false,
+        onSuccess: (public_token, metadata) => {
+          if (this._user.email == `demo@demo.com`) {
+            let newDoc = {} as UserAccount;
+            newDoc.userId = this._user.uid;
+            this.userAccountCollections.add(newDoc).then(() => {
+              this.checkCredentials();
+            });
+            return;
+          }
+          this.plaidService.getAccessToken(public_token).then(access_token => {
+            let newDoc = {} as UserAccount;
+            newDoc.publicToken = public_token;
+            newDoc.accessToken = access_token;
+            newDoc.userId = this._user.uid;
+            this.userAccountCollections.add(newDoc).then(() => {
+              this.checkCredentials();
+            });
+          });
+          // console.log("Login Succeed");
+          // this._linkedCredential = true;
+        }
+      });
       this.linkHandler.open();
       return;
     }
@@ -604,7 +654,7 @@ export class DashboardPage {
       `https://cdn.plaid.com/link/v2/stable/link.html?` +
       `key=28f2e54388e2f6a1aca59e789d353b` + `&` +
       // `env=sandbox` + `&` +
-      `env=development` + `&` +
+      `env=${this.environment}` + `&` +
       `clientName=Coinscious` + `&` +
       `product=transactions` + `&` +
       `isMobile=true` + `&` +
@@ -641,6 +691,15 @@ export class DashboardPage {
         queries[query[0]] = query[1];
       });
       console.log(`Get public token! Token: ${queries[`public_token`]}`);
+
+      if (this._user.email == `demo@demo.com`) {
+        let newDoc = {} as UserAccount;
+        newDoc.userId = this._user.uid;
+        this.userAccountCollections.add(newDoc).then(() => {
+          this.checkCredentials();
+        });
+        return;
+      }
 
       const public_token = queries[`public_token`];
       this.plaidService.getAccessToken(public_token).then(access_token => {
@@ -689,6 +748,54 @@ export class DashboardPage {
       ]
     });
     actionSheet.present();
+  }
+
+  resetDemoData() {
+    this.plaidService.resetDemoData().then(() => {
+      let transactions = [];
+      let date = new Date();
+      let dateCounter = 0;
+
+      this.demoTrans.forEach(dayTran => {
+        let dateOffset = dayTran.dateOffset;
+        if (dateOffset < 3) return;
+
+        const target = new Date(date.getTime() - 1000 * 60 * 60 * 24 * dateOffset);
+
+        let thisMonthNum = target.getMonth() + 1;
+        const thisDateNum = target.getDate();
+        const thisMonthStr = thisMonthNum >= 10 ? `${thisMonthNum}` : `0${thisMonthNum}`;
+        const thisDateStr = thisDateNum >= 10 ? `${thisDateNum}` : `0${thisDateNum}`;
+        const dateStr = `${target.getFullYear()}-${thisMonthStr}-${thisDateStr}`;
+
+        dayTran.transactions.forEach(t => {
+          let newTran = JSON.parse(JSON.stringify(t));
+          newTran.date = dateStr;
+          newTran.transaction_id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 10);
+          transactions.push(newTran);
+        })
+      });
+
+      console.log(`adding records`);
+      console.log(transactions);
+
+      this.plaidService.addDemoTransactionRecords(this._userAccount.userId, transactions)
+        .then(() => {
+          console.log(`added records`);
+          let sum = 0;
+          let sumExceed = 0;
+          transactions.forEach(t => {
+            sum += t.amount;
+            if (!t.love) {
+              sumExceed += t.amount;
+            }
+          });
+          this.plaidService.addLastMonthlyAmount(this._totalThisV, this._exceedThisV, sum, sumExceed)
+            .then(() => { console.log(`added last monthly amount`) });
+        }).catch(err => {
+          console.log(err.message);
+        });
+    });
   }
 
   abs(x) {

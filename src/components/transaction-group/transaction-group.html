@@ -1,10 +1,24 @@
 <!-- Generated template for the TransactionGroupComponent component -->
-<div *ngIf="_transactions.data != null && _transactions.data.length != 0">
-  <h4>
-    {{_transactions.name}}
-  </h4>
-  <button ion-button icon-only clear (click)="approve()" class="approve-all">
-    <ion-icon name="md-heart"></ion-icon>
-  </button>
-  <transaction-item *ngFor="let t of _transactions.data" [data]=t [isFlag]=false [isInDetail]=false (onApprove)="onApproveItem($event)" (onFlag)="onFlagItem($event)"></transaction-item>
+<div *ngIf="_transactions.data != null && _transactions.data.length != 0" class="trans-group" [class.close]="closed">
+  <ion-list class="title-slider">
+    <ion-item-sliding #title>
+      <ion-item>
+        <h4>
+          {{_transactions.name}}
+        </h4>
+        <button ion-button icon-only clear (click)="onLike(title)" class="approve-all">
+          <ion-icon name="md-heart"></ion-icon>
+        </button>
+      </ion-item>
+      <ion-item-options side="left" (ionSwipe)="onLike(title)">
+        <button ion-button color="secondary" (click)="onLike(title)">
+          <ion-icon name="md-heart"></ion-icon>
+          Like
+        </button>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+  <ion-list>
+    <transaction-item *ngFor="let t of _transactions.data" [data]=t [isFlag]=false [isInDetail]=false (onApprove)="onApproveItem($event)" (onFlag)="onFlagItem($event)"></transaction-item>
+  </ion-list>
 </div>

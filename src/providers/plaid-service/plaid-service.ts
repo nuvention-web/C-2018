@@ -63,10 +63,10 @@ export class PlaidService {
   public getMonthlyAmount(userId) {
     const now = new Date();
     let thisMonthNum = now.getMonth() + 1;
-    const thisMonthStr = thisMonthNum > 10 ? `${thisMonthNum}` : `0${thisMonthNum}`;
+    const thisMonthStr = thisMonthNum >= 10 ? `${thisMonthNum}` : `0${thisMonthNum}`;
     const thisMonth = new Date(`${now.getFullYear()}-${thisMonthStr}-01`);
     const lastMonthStr = thisMonthNum == 1 ?
-      `12` : thisMonthNum - 1 > 10 ? `${thisMonthNum - 1}` : `0${thisMonthNum - 1}`;
+      `12` : thisMonthNum - 1 >= 10 ? `${thisMonthNum - 1}` : `0${thisMonthNum - 1}`;
     const lastYrStr = thisMonthNum == 1 ? `${now.getFullYear() - 1}` : `${now.getFullYear()}`;
     const lastMonth = new Date(`${lastYrStr}-${lastMonthStr}-01`);
 
@@ -150,6 +150,15 @@ export class PlaidService {
     });
   }
 
+  public addLastMonthlyAmount(totalAmount, exceedAmount, totalAdd = 0, exceedAdd = 0): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this._lastMonthAmount.update({ totalAmount: totalAmount + totalAdd, exceedAmount: exceedAmount + exceedAdd })
+        .then(() => {
+          resolve();
+        });
+    });
+  }
+
   public getAccessToken(public_token: string): Promise<string> {
     return new Promise<string>((resolve) => {
       console.log(`getting access token, ${public_token}`);
@@ -216,9 +225,71 @@ export class PlaidService {
     });
   }
 
+  public addTransactionRecords(userId, transactions, loved, email): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      let batch = this.firestore.firestore.batch();
+      transactions.forEach(tr => {
+        let t = {} as UserTransaction;
+        t.userId = userId;
+        t.transactionId = tr.transaction_id;
+        t.date = new Date(tr.date);
+        t.loved = loved;
+        batch.set(this.userTransCollections.doc(t.transactionId).ref, t);
+      });
+      batch.commit().then(() => {
+        if (email == `demo@demo.com`) {
+          this.addNewDemoTransactions(transactions);
+        }
+        resolve();
+      }).catch(err => reject(err));
+    });
+  }
+
+  public addDemoTransactionRecords(userId, transactions): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      let batch = this.firestore.firestore.batch();
+      transactions.forEach(tr => {
+        let t = {} as UserTransaction;
+        t.userId = userId;
+        t.transactionId = tr.transaction_id;
+        t.date = new Date(tr.date);
+        t.loved = tr.love;
+        batch.set(this.userTransCollections.doc(t.transactionId).ref, t);
+      });
+      batch.commit().then(() => {
+        console.log(`added demo records`);
+        this.addNewDemoTransactions(transactions).then(() => {
+          console.log(`got callback transactions`);
+          resolve();
+        });
+      }).catch(err => {
+        console.log(`add demo records error`);
+        reject(err);
+      });
+    });
+  }
+
   public addNewDemoTransaction(transaction): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this._demoTransactionsCollection.add(transaction).then(r => resolve()).catch(err => reject(err));
+    });
+  }
+
+  public addNewDemoTransactions(transactions): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      let batch = this.firestore.firestore.batch();
+      transactions.forEach(tr => {
+        batch.set(this._demoTransactionsCollection.doc(tr.transaction_id).ref, tr);
+      });
+      console.log(`add new transactions`);
+      batch.commit().then(() => {
+        console.log(`added new transactions`);
+        resolve();
+      }).catch(err => {
+        console.log(`add new transactions error`);
+        reject(err);
+      });
+      // this._demoTransactionsCollection.add(transactions).then(r => resolve()).catch(err => reject(err));
     });
   }
 
@@ -228,6 +299,23 @@ export class PlaidService {
         resolve(transactions);
       }, err => {
         reject(err);
+      });
+    });
+  }
+
+  public resetDemoData(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this._demoTransactionsCollection.ref.get().then(qry => {
+        let batch = this.firestore.firestore.batch();
+        qry.forEach(doc => {
+          batch.delete(doc.ref);
+        });
+        batch.update(this._thisMonthAmount.ref, { totalAmount: 0, exceedAmount: 0 });
+        batch.update(this._lastMonthAmount.ref, { totalAmount: 0, exceedAmount: 0 });
+        batch.commit().then(() => {
+          // reset this month to zero
+          resolve();
+        });
       });
     });
   }
@@ -334,4 +422,38 @@ export class PlaidService {
   public refreshLastLogin(userId, date) {
 
   }
+
+    public changeLoveToTrue(transactionId: string) {
+        this.userTransCollections.ref.where(`transactionId`, "==", transactionId).get().then(ref => {
+            var temp = ref.docs[0].id;
+            this.firestore.doc<any>(`user-transactions/${temp}`).update({loved: true})
+                .catch(error => console.log(error));
+        });
+    }
+
+    public changeLoveToFalse(transactionId: string) {
+        this.userTransCollections.ref.where(`transactionId`, "==", transactionId).get().then(ref => {
+            var temp = ref.docs[0].id;
+            this.firestore.doc<any>(`user-transactions/${temp}`).update({loved: false})
+                .catch(error => console.log(error));
+        });
+    }
+
+    public chagneMonthAmount(userId: string, year, month, amount) {
+        //const now = new Date();
+        let thisMonthNum = month;
+        const thisMonthStr = thisMonthNum > 10 ? `${thisMonthNum}` : `0${thisMonthNum}`;
+        const thisMonth = new Date(`${year}-${thisMonthStr}-01`);
+        console.log("test w: 1 changeMonthAmount");
+        console.log(userId + "   " + month.toString() + "   " +amount.toString());
+        this._userMonthAmountsCollection.ref.where(`userId`, "==", userId).where(`date`, "==", thisMonth).get().then(ref => {
+            if(ref.empty)
+                console.log("empty");
+            var temp = ref.docs[0].id;
+            console.log("test: rid: " + temp);
+            this.firestore.doc<any>(`user-monthly-amount/${temp}`).update({exceedAmount: amount})
+                .catch(error => console.log(error));
+        });
+        console.log("test w: 2 changeMonthAmount");
+    }
 }

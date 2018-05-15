@@ -1,19 +1,33 @@
 <!-- Generated template for the TransactionItemComponent component -->
-<div class="trans-item">
-  <div class="trans-item-content">
-    <div class="trans-item-title">{{_transaction.name}}</div>
-    <div class="trans-item-text">${{abs(_transaction.amount).toFixed(2)}}</div>
-  </div>
-  <div class="trans-item-buttons">
-    <!-- <button ion-button icon-only clear (click)="approve()">
-      <ion-icon name="thumbs-up"></ion-icon>
-    </button> -->
-    <button ion-button icon-only clear (click)="flag()" *ngIf=_transaction.love>
+
+<ion-item-sliding #item (ionDrag)="onDrag(item, $event)">
+  <ion-item class="trans-item">
+    <div class="trans-item-content">
+      <div class="trans-item-title">{{_transaction.name}}</div>
+      <div class="trans-item-text">${{abs(_transaction.amount).toFixed(2)}}</div>
+    </div>
+    <div class="trans-item-buttons">
+      <button ion-button icon-only clear (click)="onLike(item)">
+        <ion-icon name="md-heart"></ion-icon>
+      </button>
+      <button ion-button icon-only clear (click)="onDislike(item)">
+        <ion-icon name="md-heart" class="break"></ion-icon>
+        <ion-icon name="md-flash" class="flash"></ion-icon>
+      </button>
+    </div>
+  </ion-item>
+  <ion-item-options side="left" (ionSwipe)="onLike(item, $event)">
+    <button ion-button color="secondary" (click)="onLike(item)">
       <ion-icon name="md-heart"></ion-icon>
+      Like
     </button>
-    <button ion-button icon-only clear (click)="flag()" *ngIf=!_transaction.love>
+  </ion-item-options>
+
+  <ion-item-options side="right" (ionSwipe)="onDislike(item, $event)">
+    <button ion-button color="danger" (click)="onDislike(item)">
       <ion-icon name="md-heart" class="break"></ion-icon>
       <ion-icon name="md-flash" class="flash"></ion-icon>
+      Dislike
     </button>
-  </div>
-</div>
+  </ion-item-options>
+</ion-item-sliding>
