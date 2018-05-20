@@ -3,4 +3,5 @@ export interface UserTransaction {
   transactionId: string;
   date: Date;
   loved: boolean;
+  flagged: boolean;
 }

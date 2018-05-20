@@ -367,33 +367,39 @@ export class DashboardPage {
         this.emptyTransactions = false;
         this.refreshDemoTransactions();
         this.plaidService.getMonthlyAmount(this._user.uid);
+        this.userAccount.update({ lastSignIn: new Date() });
         return;
+      }
+
+      if (this._userAccount.unflaggedCount == null) {
+        this.userAccount.update({ unflaggedCount: 0 });
+        this._userAccount.unflaggedCount = 0;
       }
 
       // get transaction data we have
       let to = new Date();
-      let from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 10);
+      let from = this._userAccount.lastSignIn;
+      if (from == null) from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 3);
 
-      // TODO
-
-      this.plaidService.refreshTransaction(ua.accessToken).then(
-        res => {
-          this.plaidService.getTransactionRecords(ua.userId, from, to)
-            .then(transactions => {
-              // this._demoText = `Received Transaction Records`;
-              console.log(`Received Transaction Records`);
-              // console.log(transactions);
-              this._transHistory = transactions;
-              console.log(`plaid transactions`);
-              // console.log(res);
-              this.reshapeTransactions(res);
+      // Get new transactions from last login
+      this.plaidService.getTransactionsWithTimeRange(ua.accessToken, from, to).then(newTransactions => {
+        // Add those new transactions into database
+        console.log(`[Unflagged Transactions] Got new Transactions`);
+        this.plaidService.addNewTransactions(ua.userId, newTransactions.filter(t => t.amount > 0)).then(() => {
+          console.log(`[Unflagged Transactions] Added new Transactions`);
+          this.plaidService.getUnflaggedTransactions(ua.userId).then(unflaggedTransactions => {
+            // Calc the oldest time & get transactions from plaid
+            console.log(`[Unflagged Transactions] Got unflagged Transactions`);
+            // console.log(unflaggedTransactions);
+            let fromTime = new Date(unflaggedTransactions[unflaggedTransactions.length - 1].date);
+            // Get old transactions unflagged (How???)
+            this.plaidService.getTransactionsWithTimeRange(ua.accessToken, fromTime, to).then(transactions => {
+              this.shapeTransactions(transactions.filter(t => unflaggedTransactions.some(ut => ut.transactionId == t.transaction_id)));
               this.userAccount.update({ lastSignIn: to });
-            }).catch(err => {
-              // this._demoText = err.message;
-              console.log(`Error Receiving Transaction Records, ${err.message}`);
             });
-        }
-      ).catch();
+          }).catch(err => console.log(`get unflagged transactions error`));
+        }).catch(err => console.log(`add new transactions error`));
+      }).catch(err => console.log(`get new transactions error`));
 
       this.plaidService.getMonthlyAmount(ua.userId);
     });
@@ -429,6 +435,30 @@ export class DashboardPage {
       })
     });
 
+    this._transactions = trans;
+  }
+
+  private shapeTransactions(transactions) {
+    let trans = [], dates = {};
+    let nowTime = new Date().getTime();
+    const today = new Date((Math.floor(nowTime / 86400000) - 1) * 86400000).getTime();
+    transactions.forEach(t => {
+      if (dates[t.date] == null) {
+        dates[t.date] = trans.length;
+        let name = `${this.months[parseInt(t.date.substring(5, 7)) - 1]} ${t.date.substring(8, 10)}`;
+        let diff = (today - new Date(t.date).getTime()) / 86400000;
+        if (diff < 1) {
+          name = `Today`;
+        } else if (diff < 2) {
+          name = `Yesterday`;
+        } else if (diff < 3) {
+          name = `2 days ago`;
+        }
+        trans.push({ name: `${name}`, data: [] });
+      }
+      trans[dates[t.date]].data.push(t);
+    });
+    this.emptyTransactions = !trans.some(tr => tr.data.length > 0);
     this._transactions = trans;
   }
 
@@ -531,8 +561,9 @@ export class DashboardPage {
 
   onApprove(ev) {
     if (ev.transaction != null) {
+      // single transaction
       let t = ev.transaction;
-      this.plaidService.addTransactionRecord(this._userAccount.userId, t, true, this._user.email)
+      this.plaidService.flagTransaction(this._userAccount.userId, t, true, this._user.email)
         .then(() => {
           this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, t.amount);
           ev.item.setElementClass(`close`, true);
@@ -540,48 +571,28 @@ export class DashboardPage {
             ev.group.data.splice(ev.index, 1);
             this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
           }, 300);
-        })
-        .catch(err => {
+        }).catch(err => {
           this._demoText = err.message;
         });
 
       return;
     }
-
-    // this._point += ev.point;
-    // ev.group.data.forEach(t => {
-    //   this.plaidService.addTransactionRecord(this._userAccount.userId, t, true, this._user.email)
-    //     .then(() => {
-    //       this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, t.amount);
-    //       this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
-    //     })
-    //     .catch(err => {
-    //       this._demoText = err.message;
-    //     });
-    // });
-    this.plaidService.addTransactionRecords(this._userAccount.userId, ev.group.data, true, this._user.email)
+    this.plaidService.flagTransaction(this._userAccount.userId, ev.group.data, true, this._user.email)
       .then(() => {
         let sum = 0;
         ev.group.data.forEach(t => {
           sum += t.amount;
-          // this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, t.amount);
         });
         this._transactions.splice(this._transactions.indexOf(ev.group), 1);
         this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
         this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, sum);
-        // console.log(`Add sum: ${sum}`);
       }).catch(err => {
         this._demoText = err.message;
       });
   }
 
-  onApproveFlag(ev) {
-    this._point += ev.point;
-    this._flaggedTransactions.splice(this._flaggedTransactions.indexOf(ev.transaction), 1);
-  }
-
   onFlag(ev) {
-    this.plaidService.addTransactionRecord(this._userAccount.userId, ev.transaction, false, this._user.email)
+    this.plaidService.flagTransaction(this._userAccount.userId, ev.transaction, false, this._user.email)
       .then(() => {
         this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, ev.transaction.amount, ev.transaction.amount)
           .then(() => {
@@ -594,8 +605,7 @@ export class DashboardPage {
               this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
             }
           });
-      })
-      .catch(err => {
+      }).catch(err => {
         this._demoText = err.message;
       });
   }
@@ -628,6 +638,7 @@ export class DashboardPage {
           if (this._user.email == `demo@demo.com`) {
             let newDoc = {} as UserAccount;
             newDoc.userId = this._user.uid;
+            newDoc.unflaggedCount = 0;
             this.userAccountCollections.add(newDoc).then(() => {
               this.checkCredentials();
             });
@@ -638,6 +649,7 @@ export class DashboardPage {
             newDoc.publicToken = public_token;
             newDoc.accessToken = access_token;
             newDoc.userId = this._user.uid;
+            newDoc.unflaggedCount = 0;
             this.userAccountCollections.add(newDoc).then(() => {
               this.checkCredentials();
             });
@@ -695,6 +707,7 @@ export class DashboardPage {
       if (this._user.email == `demo@demo.com`) {
         let newDoc = {} as UserAccount;
         newDoc.userId = this._user.uid;
+        newDoc.unflaggedCount = 0;
         this.userAccountCollections.add(newDoc).then(() => {
           this.checkCredentials();
         });
@@ -708,6 +721,7 @@ export class DashboardPage {
         newDoc.publicToken = public_token;
         newDoc.accessToken = access_token;
         newDoc.userId = this._user.uid;
+        newDoc.unflaggedCount = 0;
         this.userAccountCollections.add(newDoc).then(() => {
           this.checkCredentials();
         });
@@ -751,6 +765,7 @@ export class DashboardPage {
   }
 
   resetDemoData() {
+    if (this._user.email != `demo@demo.com`) return;
     this.plaidService.resetDemoData().then(() => {
       let transactions = [];
       let date = new Date();

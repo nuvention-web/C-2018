@@ -3,4 +3,5 @@ export interface UserAccount {
   publicToken: string;
   accessToken: string;
   lastSignIn: Date;
+  unflaggedCount: number;
 }
