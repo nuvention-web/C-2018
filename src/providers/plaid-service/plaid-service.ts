@@ -366,94 +366,95 @@ export class PlaidService {
     });
   }
 
-  public refreshThisMonthTransaction(public_token: string) {
-    this.getAccessToken(public_token).then(access_token => {
-      const today = new Date();
-      const daysAgo = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 30);
-      this.plaidClient.getTransactions(
-        access_token,
-        `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`,
-        `${daysAgo.getFullYear()}-${daysAgo.getMonth()}-${daysAgo.getDate()}`,
-        // `2017-04-01`,
-        // `2017-05-01`,
-        (err, res) => {
-          this._transactions = res.transactions;
-          this.transactionSource.next(this._transactions);
+  public addNewTransactions(userId, transactions): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      let batch = this.firestore.firestore.batch();
+      transactions.forEach(tr => {
+        let t = {} as UserTransaction;
+        t.userId = userId;
+        t.transactionId = tr.transaction_id;
+        t.date = new Date(tr.date);
+        t.flagged = false;
+        batch.set(this.userTransCollections.doc(t.transactionId).ref, t);
+      });
+      batch.commit().then(() => {
+        console.log(`added demo records`);
+        this.addNewDemoTransactions(transactions).then(() => {
+          console.log(`got callback transactions`);
+          resolve();
+        });
+      }).catch(err => {
+        console.log(`add demo records error`);
+        reject(err);
+      });
+    });
+  }
+
+  public getUnflaggedTransactions(userId): Promise<UserTransaction[]> {
+    return new Promise<UserTransaction[]>((resolve, reject) => {
+      this.userTransCollections.ref.where(`userId`, "==", userId).where(`flagged`, "==", false).orderBy("date", "desc").get()
+        .then(ref => {
+          if (ref.empty) reject();
+          let result: UserTransaction[] = [];
+          ref.forEach(t => {
+            result.push(t.data() as UserTransaction);
+          });
+          resolve(result);
+        }).catch(err => {
+          console.log(err.message);
         });
     });
   }
 
-
-
-  public refreshLastMonthTransaction(public_token: string) {
-    this.getAccessToken(public_token).then(access_token => {
-      const today = new Date();
-      const daysAgo = new Date(today.getTime() - 1000 * 60 * 60 * 24 * 2);
-      this.plaidClient.getTransactions(
-        access_token,
-        `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`,
-        `${daysAgo.getFullYear()}-${daysAgo.getMonth()}-${daysAgo.getDate()}`,
-        // `2017-03-01`,
-        // `2017-04-01`,
-        (err, res) => {
-          this._transactions = res.transactions;
-          this.transactionSource.next(this._transactions);
-        });
+  public flagTransaction(userId, transaction, loved, email): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      let batch = this.firestore.firestore.batch();
+      batch.update(this.userTransCollections.doc(`${transaction.transaction_id}`).ref, { loved: loved, flagged: true });
+      batch.commit().then(() => resolve()).catch(err => reject(err));
     });
   }
 
-  public getAllTransactions(public_token: string, from, to) {
-    this.getAccessToken(public_token).then(access_token => {
-      this.plaidClient.getTransactions(
-        access_token,
-        `${from.getFullYear()}-${from.getMonth()}-${from.getDate()}`,
-        `${to.getFullYear()}-${to.getMonth()}-${to.getDate()}`,
-        // `2017-03-01`,
-        // `2017-04-01`,
-        (err, res) => {
-          this._transactions = res.transactions;
-          this.transactionSource.next(this._transactions);
-          console.log("getAllTransactions length 2: " + this._transactions.length.toString());
-        });
-      console.log("getAllTransactions length 1: " + this._transactions.length.toString());
+  public flagTransactions(userId, transactions, loved, email): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      let batch = this.firestore.firestore.batch();
+      transactions.forEach(t => {
+        batch.update(this.userTransCollections.doc(`${t.transaction_id}`).ref, { loved: loved, flagged: true });
+      });
+      batch.commit().then(() => resolve()).catch(err => reject(err));
     });
   }
 
-  public refreshLastLogin(userId, date) {
-
+  public changeLoveToTrue(transactionId: string) {
+    this.userTransCollections.ref.where(`transactionId`, "==", transactionId).get().then(ref => {
+      var temp = ref.docs[0].id;
+      this.firestore.doc<any>(`user-transactions/${temp}`).update({ loved: true })
+        .catch(error => console.log(error));
+    });
   }
 
-    public changeLoveToTrue(transactionId: string) {
-        this.userTransCollections.ref.where(`transactionId`, "==", transactionId).get().then(ref => {
-            var temp = ref.docs[0].id;
-            this.firestore.doc<any>(`user-transactions/${temp}`).update({loved: true})
-                .catch(error => console.log(error));
-        });
-    }
+  public changeLoveToFalse(transactionId: string) {
+    this.userTransCollections.ref.where(`transactionId`, "==", transactionId).get().then(ref => {
+      var temp = ref.docs[0].id;
+      this.firestore.doc<any>(`user-transactions/${temp}`).update({ loved: false })
+        .catch(error => console.log(error));
+    });
+  }
 
-    public changeLoveToFalse(transactionId: string) {
-        this.userTransCollections.ref.where(`transactionId`, "==", transactionId).get().then(ref => {
-            var temp = ref.docs[0].id;
-            this.firestore.doc<any>(`user-transactions/${temp}`).update({loved: false})
-                .catch(error => console.log(error));
-        });
-    }
-
-    public chagneMonthAmount(userId: string, year, month, amount) {
-        //const now = new Date();
-        let thisMonthNum = month;
-        const thisMonthStr = thisMonthNum > 10 ? `${thisMonthNum}` : `0${thisMonthNum}`;
-        const thisMonth = new Date(`${year}-${thisMonthStr}-01`);
-        console.log("test w: 1 changeMonthAmount");
-        console.log(userId + "   " + month.toString() + "   " +amount.toString());
-        this._userMonthAmountsCollection.ref.where(`userId`, "==", userId).where(`date`, "==", thisMonth).get().then(ref => {
-            if(ref.empty)
-                console.log("empty");
-            var temp = ref.docs[0].id;
-            console.log("test: rid: " + temp);
-            this.firestore.doc<any>(`user-monthly-amount/${temp}`).update({exceedAmount: amount})
-                .catch(error => console.log(error));
-        });
-        console.log("test w: 2 changeMonthAmount");
-    }
+  public chagneMonthAmount(userId: string, year, month, amount) {
+    //const now = new Date();
+    let thisMonthNum = month;
+    const thisMonthStr = thisMonthNum > 10 ? `${thisMonthNum}` : `0${thisMonthNum}`;
+    const thisMonth = new Date(`${year}-${thisMonthStr}-01`);
+    console.log("test w: 1 changeMonthAmount");
+    console.log(userId + "   " + month.toString() + "   " + amount.toString());
+    this._userMonthAmountsCollection.ref.where(`userId`, "==", userId).where(`date`, "==", thisMonth).get().then(ref => {
+      if (ref.empty)
+        console.log("empty");
+      var temp = ref.docs[0].id;
+      console.log("test: rid: " + temp);
+      this.firestore.doc<any>(`user-monthly-amount/${temp}`).update({ exceedAmount: amount })
+        .catch(error => console.log(error));
+    });
+    console.log("test w: 2 changeMonthAmount");
+  }
 }
