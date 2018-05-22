@@ -447,11 +447,12 @@ export class DashboardPage {
         dates[t.date] = trans.length;
         let name = `${this.months[parseInt(t.date.substring(5, 7)) - 1]} ${t.date.substring(8, 10)}`;
         let diff = (today - new Date(t.date).getTime()) / 86400000;
-        if (diff < 1) {
+        if (diff < 0) {
           name = `Today`;
-        } else if (diff < 2) {
+          // console.log(`diff: ${diff}, today: ${today}, date: ${new Date(t.date).getTime()}`);
+        } else if (diff < 1) {
           name = `Yesterday`;
-        } else if (diff < 3) {
+        } else if (diff < 2) {
           name = `2 days ago`;
         }
         trans.push({ name: `${name}`, data: [] });
