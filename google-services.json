@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:618786705474:android:85e5fcf843e645f7",
+        "mobilesdk_app_id": "1:618786705474:android:686a410378d237d2",
         "android_client_info": {
-          "package_name": "com.nuvention.coinscious"
+          "package_name": "edu.nuvention.coinscious"
         }
       },
       "oauth_client": [

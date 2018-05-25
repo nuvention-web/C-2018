@@ -1,8 +1,8 @@
 import { Component, NgZone, ViewChild } from '@angular/core';
 import { IonicPage, NavController, NavParams, Platform, ActionSheetController } from 'ionic-angular';
 import { MenuController } from 'ionic-angular';
-// import { PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
-// import { Push } from '@ionic-native/push';
+import { PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
+import { Push } from '@ionic-native/push';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
@@ -17,7 +17,7 @@ import { Transaction } from '../../models/transaction';
 import { UserTransaction } from '../../models/userTransaction';
 import { PlaidService } from '../../providers/plaid-service/plaid-service';
 
-// declare var cordova;
+declare var cordova;
 declare var Plaid;
 
 /**
@@ -170,7 +170,7 @@ export class DashboardPage {
 
 
   constructor(
-    // private push: Push,
+    private push: Push,
     private firestore: AngularFirestore,
     public navCtrl: NavController,
     public navParams: NavParams,
@@ -211,51 +211,71 @@ export class DashboardPage {
     //   }
     // );
 
-    // const options: PushOptions = {
-    //   android: {
-    //     senderID: `618786705474`,
-    //     topics: [
-    //       `coincious.general`
-    //     ]
-    //   },
-    //   ios: {
-    //     alert: 'true',
-    //     badge: true,
-    //     sound: 'false'
-    //   },
-    //   windows: {},
-    //   browser: {
-    //     pushServiceURL: 'http://push.api.phonegap.com/v1/push'
-    //   }
-    // };
+    const options: PushOptions = {
+      android: {
+        senderID: `618786705474`,
+        topics: [
+          `coincious.general`
+        ]
+      },
+      ios: {
+        alert: true,
+        badge: false,
+        sound: true,
+        fcmSandbox: true,
+        // topics: [
+        //   `coincious.general`
+        // ]
+      },
+      windows: {},
+      browser: {
+        pushServiceURL: 'http://push.api.phonegap.com/v1/push'
+      }
+    };
 
-    // const pushObject: PushObject = this.push.init(options);
+    const pushObject: PushObject = this.push.init(options);
 
-    // pushObject.on('notification').subscribe((notification: NotificationEventResponse) => {
-    //   cordova.plugins.notification.local.schedule([
-    //     {
-    //       id: 1,
-    //       title: notification.title,
-    //       text: notification.message
-    //       // ,actions: [
-    //       //   { id: 'yes', title: 'Yes' },
-    //       //   { id: 'no', title: 'No' },
-    //       //   { id: 'edit', title: 'Edit' }
-    //       // ]
-    //     }
-    //   ]);
-    //   // cordova.plugins.notification.local.on('yes', () => {
-    //   //   this.demoText = `You clicked Yes!`;
-    //   // });
-    //   // cordova.plugins.notification.local.on('no', () => {
-    //   //   this.demoText = `You clicked No!`;
-    //   // });
-    //   // cordova.plugins.notification.local.on('edit', () => {
-    //   //   this.demoText = `You clicked Edit!`;
-    //   // });
-    // });
-    // pushObject.on('registration').subscribe((registration: any) => console.log('Device registered', registration));
-    // pushObject.on('error').subscribe(error => console.error('Error with Push plugin', error));
+    pushObject.on('notification').subscribe((notification: NotificationEventResponse) => {
+      console.log('[Push] received message');
+      cordova.plugins.notification.local.schedule([
+        {
+          id: 1,
+          title: notification.title,
+          text: notification.message
+          // ,actions: [
+          //   { id: 'yes', title: 'Yes' },
+          //   { id: 'no', title: 'No' },
+          //   { id: 'edit', title: 'Edit' }
+          // ]
+        }
+      ]);
+      // cordova.plugins.notification.local.on('yes', () => {
+      //   this.demoText = `You clicked Yes!`;
+      // });
+      // cordova.plugins.notification.local.on('no', () => {
+      //   this.demoText = `You clicked No!`;
+      // });
+      // cordova.plugins.notification.local.on('edit', () => {
+      //   this.demoText = `You clicked Edit!`;
+      // });
+    });
+    pushObject.on('registration').subscribe((registration: any) => {
+      console.log('[Push] Device registered', registration);
+      cordova.plugins.notification.local.schedule([
+        {
+          id: 1,
+          title: `Registration`,
+          text: `Registered`,
+          foreground: true
+          // ,actions: [
+          //   { id: 'yes', title: 'Yes' },
+          //   { id: 'no', title: 'No' },
+          //   { id: 'edit', title: 'Edit' }
+          // ]
+        }
+      ]);
+    });
+    pushObject.on('error').subscribe(error => console.error('[Push] Error with Push plugin', error));
 
     // this.plaidService.transactions$.subscribe(transactions => {
     //   if (transactions) {
