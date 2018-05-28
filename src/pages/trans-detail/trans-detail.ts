@@ -181,8 +181,8 @@ export class TransDetailPage {
         let thisYear = thisDate.getFullYear();
         let distance = (thisYear - databaseYear) * 12 + (thisMonth - databaseMonth);
         if (distance < 12) {
-          this.chartOptions.data.datasets[0].data[11 - distance] = t.data().exceedAmount;
-          this.chartOptions.data.datasets[1].data[11 - distance] = t.data().totalAmount - t.data().exceedAmount;
+          this.chartOptions.data.datasets[0].data[11 - distance] = this.round(t.data().exceedAmount);
+          this.chartOptions.data.datasets[1].data[11 - distance] = this.round(t.data().totalAmount - t.data().exceedAmount);
         }
       });
     }).then(() => {
@@ -313,8 +313,8 @@ export class TransDetailPage {
     this._monthHappy = this._monthHappy - this.abs(ev.transaction.amount);
     this._monthUnhappy = this._monthUnhappy + this.abs(ev.transaction.amount);
     console.log("test w: monthHappy: " + this._monthHappy.toString() + "  monthunhappy: " + this._monthUnhappy.toString() + "  amount: " + this.abs(ev.transaction.amount).toString());
-    this.chartOptions.data.datasets[0].data[this._tempClickElement] = this._monthUnhappy;
-    this.chartOptions.data.datasets[1].data[this._tempClickElement] = this._monthHappy;
+    this.chartOptions.data.datasets[0].data[this._tempClickElement] = this.round(this._monthUnhappy);
+    this.chartOptions.data.datasets[1].data[this._tempClickElement] = this.round(this._monthHappy);
     this.chart = new Chart(`chart-canvas`, this.chartOptions);
     ev.transaction.loved = !ev.transaction.loved;
     console.log(ev.transaction.transaction_id.toString());
@@ -326,13 +326,17 @@ export class TransDetailPage {
     console.log("test w: onApprove");
     this._monthHappy = this._monthHappy + this.abs(ev.transaction.amount);
     this._monthUnhappy = this._monthUnhappy - this.abs(ev.transaction.amount);
-    this.chartOptions.data.datasets[0].data[this._tempClickElement] = this._monthUnhappy;
-    this.chartOptions.data.datasets[1].data[this._tempClickElement] = this._monthHappy;
+    this.chartOptions.data.datasets[0].data[this._tempClickElement] = this.round(this._monthUnhappy);
+    this.chartOptions.data.datasets[1].data[this._tempClickElement] = this.round(this._monthHappy);
     this.chart = new Chart(`chart-canvas`, this.chartOptions);
     ev.transaction.loved = !ev.transaction.loved;
     console.log(ev.transaction.transaction_id.toString());
     this.plaidService.changeLoveToTrue(ev.transaction.transaction_id);
     this.plaidService.chagneMonthAmount(this._userId, this._tempYear, this._tempMonth, this._monthUnhappy);
+  }
+
+  round(x) {
+    return Math.round(x * 100) / 100;
   }
 
 
