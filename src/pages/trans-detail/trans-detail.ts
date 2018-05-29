@@ -340,5 +340,4 @@ export class TransDetailPage {
   }
 
 
-
 }

@@ -1,8 +1,8 @@
 import { Component, NgZone, ViewChild } from '@angular/core';
 import { IonicPage, NavController, NavParams, Platform, ActionSheetController } from 'ionic-angular';
 import { MenuController } from 'ionic-angular';
-// import { PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
-// import { Push } from '@ionic-native/push';
+import { PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
+import { Push } from '@ionic-native/push';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
@@ -17,8 +17,9 @@ import { Transaction } from '../../models/transaction';
 import { UserTransaction } from '../../models/userTransaction';
 import { PlaidService } from '../../providers/plaid-service/plaid-service';
 
-// declare var cordova;
+declare var cordova;
 declare var Plaid;
+declare var PushNotification;
 
 /**
  * Generated class for the DashboardPage page.
@@ -170,7 +171,7 @@ export class DashboardPage {
 
 
   constructor(
-    // private push: Push,
+    private push: Push,
     private firestore: AngularFirestore,
     public navCtrl: NavController,
     public navParams: NavParams,
@@ -211,32 +212,55 @@ export class DashboardPage {
     //   }
     // );
 
-    // const options: PushOptions = {
-    //   android: {
-    //     senderID: `618786705474`,
-    //     topics: [
-    //       `coincious.general`
-    //     ]
-    //   },
-    //   ios: {
-    //     alert: 'true',
-    //     badge: true,
-    //     sound: 'false'
-    //   },
-    //   windows: {},
-    //   browser: {
-    //     pushServiceURL: 'http://push.api.phonegap.com/v1/push'
+    const options: PushOptions = {
+      android: {
+        senderID: `618786705474`,
+        topics: [
+          `coincious.general`
+        ]
+      },
+      ios: {
+        alert: true,
+        badge: false,
+        sound: true
+        // fcmSandbox: true,
+        // topics: [
+        //   `coincious.general`
+        // ]
+      },
+      windows: {},
+      browser: {
+        pushServiceURL: 'http://push.api.phonegap.com/v1/push'
+      }
+    };
+
+    // cordova.plugins.notification.local.schedule([
+    //   {
+    //     id: 1,
+    //     title: 'Registration',
+    //     text: 'Registered',
+    //     foreground: true
+    //     // ,actions: [
+    //     //   { id: 'yes', title: 'Yes' },
+    //     //   { id: 'no', title: 'No' },
+    //     //   { id: 'edit', title: 'Edit' }
+    //     // ]
     //   }
-    // };
+    // ]);
 
     // const pushObject: PushObject = this.push.init(options);
+    const pushObject = PushNotification.init(options);
 
-    // pushObject.on('notification').subscribe((notification: NotificationEventResponse) => {
+    pushObject.unregister(() => console.log(`[Push] unregistered`), () => console.log(`[Push] unregister error`));
+
+    // pushObject.on('notification', notification => {
+    //   console.log(`[Push] received message, title: ${notification.title}, message: ${notification.message}`);
     //   cordova.plugins.notification.local.schedule([
     //     {
     //       id: 1,
     //       title: notification.title,
-    //       text: notification.message
+    //       text: notification.message,
+    //       foreground: true
     //       // ,actions: [
     //       //   { id: 'yes', title: 'Yes' },
     //       //   { id: 'no', title: 'No' },
@@ -254,8 +278,23 @@ export class DashboardPage {
     //   //   this.demoText = `You clicked Edit!`;
     //   // });
     // });
-    // pushObject.on('registration').subscribe((registration: any) => console.log('Device registered', registration));
-    // pushObject.on('error').subscribe(error => console.error('Error with Push plugin', error));
+    // pushObject.on('registration', registration => {
+    //   console.log(`[Push] Device registered, id: ${registration.registrationId}, type: ${registration.registrationType}`);
+    //   cordova.plugins.notification.local.schedule([
+    //     {
+    //       id: 1,
+    //       title: 'Registration',
+    //       text: 'Registered',
+    //       foreground: true
+    //       // ,actions: [
+    //       //   { id: 'yes', title: 'Yes' },
+    //       //   { id: 'no', title: 'No' },
+    //       //   { id: 'edit', title: 'Edit' }
+    //       // ]
+    //     }
+    //   ]);
+    // });
+    // pushObject.on('error', error => console.error(`[Push] Error with Push plugin: ${error.message}`));
 
     // this.plaidService.transactions$.subscribe(transactions => {
     //   if (transactions) {
@@ -447,11 +486,12 @@ export class DashboardPage {
         dates[t.date] = trans.length;
         let name = `${this.months[parseInt(t.date.substring(5, 7)) - 1]} ${t.date.substring(8, 10)}`;
         let diff = (today - new Date(t.date).getTime()) / 86400000;
-        if (diff < 1) {
+        if (diff < 0) {
           name = `Today`;
-        } else if (diff < 2) {
+          // console.log(`diff: ${diff}, today: ${today}, date: ${new Date(t.date).getTime()}`);
+        } else if (diff < 1) {
           name = `Yesterday`;
-        } else if (diff < 3) {
+        } else if (diff < 2) {
           name = `2 days ago`;
         }
         trans.push({ name: `${name}`, data: [] });

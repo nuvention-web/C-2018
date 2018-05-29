@@ -33,3 +33,8 @@ $RECYCLE.BIN/
 .DS_Store
 Thumbs.db
 UserInterfaceState.xcuserstate
+
+*.cer
+*.certSigningRequest
+*.p12
+*.p8
