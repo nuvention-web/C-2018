@@ -19,6 +19,7 @@ import { PlaidService } from '../../providers/plaid-service/plaid-service';
 
 declare var cordova;
 declare var Plaid;
+declare var PushNotification;
 
 /**
  * Generated class for the DashboardPage page.
@@ -221,8 +222,8 @@ export class DashboardPage {
       ios: {
         alert: true,
         badge: false,
-        sound: true,
-        fcmSandbox: true,
+        sound: true
+        // fcmSandbox: true,
         // topics: [
         //   `coincious.general`
         // ]
@@ -233,49 +234,67 @@ export class DashboardPage {
       }
     };
 
-    const pushObject: PushObject = this.push.init(options);
+    // cordova.plugins.notification.local.schedule([
+    //   {
+    //     id: 1,
+    //     title: 'Registration',
+    //     text: 'Registered',
+    //     foreground: true
+    //     // ,actions: [
+    //     //   { id: 'yes', title: 'Yes' },
+    //     //   { id: 'no', title: 'No' },
+    //     //   { id: 'edit', title: 'Edit' }
+    //     // ]
+    //   }
+    // ]);
 
-    pushObject.on('notification').subscribe((notification: NotificationEventResponse) => {
-      console.log('[Push] received message');
-      cordova.plugins.notification.local.schedule([
-        {
-          id: 1,
-          title: notification.title,
-          text: notification.message
-          // ,actions: [
-          //   { id: 'yes', title: 'Yes' },
-          //   { id: 'no', title: 'No' },
-          //   { id: 'edit', title: 'Edit' }
-          // ]
-        }
-      ]);
-      // cordova.plugins.notification.local.on('yes', () => {
-      //   this.demoText = `You clicked Yes!`;
-      // });
-      // cordova.plugins.notification.local.on('no', () => {
-      //   this.demoText = `You clicked No!`;
-      // });
-      // cordova.plugins.notification.local.on('edit', () => {
-      //   this.demoText = `You clicked Edit!`;
-      // });
-    });
-    pushObject.on('registration').subscribe((registration: any) => {
-      console.log('[Push] Device registered', registration);
-      cordova.plugins.notification.local.schedule([
-        {
-          id: 1,
-          title: `Registration`,
-          text: `Registered`,
-          foreground: true
-          // ,actions: [
-          //   { id: 'yes', title: 'Yes' },
-          //   { id: 'no', title: 'No' },
-          //   { id: 'edit', title: 'Edit' }
-          // ]
-        }
-      ]);
-    });
-    pushObject.on('error').subscribe(error => console.error('[Push] Error with Push plugin', error));
+    // const pushObject: PushObject = this.push.init(options);
+    const pushObject = PushNotification.init(options);
+
+    pushObject.unregister(() => console.log(`[Push] unregistered`), () => console.log(`[Push] unregister error`));
+
+    // pushObject.on('notification', notification => {
+    //   console.log(`[Push] received message, title: ${notification.title}, message: ${notification.message}`);
+    //   cordova.plugins.notification.local.schedule([
+    //     {
+    //       id: 1,
+    //       title: notification.title,
+    //       text: notification.message,
+    //       foreground: true
+    //       // ,actions: [
+    //       //   { id: 'yes', title: 'Yes' },
+    //       //   { id: 'no', title: 'No' },
+    //       //   { id: 'edit', title: 'Edit' }
+    //       // ]
+    //     }
+    //   ]);
+    //   // cordova.plugins.notification.local.on('yes', () => {
+    //   //   this.demoText = `You clicked Yes!`;
+    //   // });
+    //   // cordova.plugins.notification.local.on('no', () => {
+    //   //   this.demoText = `You clicked No!`;
+    //   // });
+    //   // cordova.plugins.notification.local.on('edit', () => {
+    //   //   this.demoText = `You clicked Edit!`;
+    //   // });
+    // });
+    // pushObject.on('registration', registration => {
+    //   console.log(`[Push] Device registered, id: ${registration.registrationId}, type: ${registration.registrationType}`);
+    //   cordova.plugins.notification.local.schedule([
+    //     {
+    //       id: 1,
+    //       title: 'Registration',
+    //       text: 'Registered',
+    //       foreground: true
+    //       // ,actions: [
+    //       //   { id: 'yes', title: 'Yes' },
+    //       //   { id: 'no', title: 'No' },
+    //       //   { id: 'edit', title: 'Edit' }
+    //       // ]
+    //     }
+    //   ]);
+    // });
+    // pushObject.on('error', error => console.error(`[Push] Error with Push plugin: ${error.message}`));
 
     // this.plaidService.transactions$.subscribe(transactions => {
     //   if (transactions) {
