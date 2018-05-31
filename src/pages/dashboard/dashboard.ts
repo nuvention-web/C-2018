@@ -1,8 +1,8 @@
 import { Component, NgZone, ViewChild } from '@angular/core';
 import { IonicPage, NavController, NavParams, Platform, ActionSheetController } from 'ionic-angular';
 import { MenuController } from 'ionic-angular';
-import { PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
-import { Push } from '@ionic-native/push';
+// import { PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
+// import { Push } from '@ionic-native/push';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
@@ -16,6 +16,8 @@ import { User } from '../../models/user';
 import { Transaction } from '../../models/transaction';
 import { UserTransaction } from '../../models/userTransaction';
 import { PlaidService } from '../../providers/plaid-service/plaid-service';
+
+import * as Shepherd from "tether-shepherd";
 
 declare var cordova;
 declare var Plaid;
@@ -171,7 +173,7 @@ export class DashboardPage {
 
 
   constructor(
-    private push: Push,
+    // private push: Push,
     private firestore: AngularFirestore,
     public navCtrl: NavController,
     public navParams: NavParams,
@@ -212,7 +214,7 @@ export class DashboardPage {
     //   }
     // );
 
-    const options: PushOptions = {
+    const options = {
       android: {
         senderID: `618786705474`,
         topics: [
@@ -222,8 +224,8 @@ export class DashboardPage {
       ios: {
         alert: true,
         badge: false,
-        sound: true
-        // fcmSandbox: true,
+        sound: true,
+        fcmSandbox: true,
         // topics: [
         //   `coincious.general`
         // ]
@@ -233,6 +235,22 @@ export class DashboardPage {
         pushServiceURL: 'http://push.api.phonegap.com/v1/push'
       }
     };
+
+    cordova.plugins.notification.local.getIds(ids => {
+      if (ids.length == 0) return;
+      cordova.plugins.notification.local.clearAll(ids);
+    })
+
+    cordova.plugins.notification.local.schedule({
+      title: 'Time to check your payments',
+      text: 'Click me and see details',
+      trigger: { every: { weekday: 5, hour: 20, minute: 0 } }
+      // ,actions: [
+      //   { id: 'yes', title: 'Yes' },
+      //   { id: 'no', title: 'No' },
+      //   { id: 'edit', title: 'Edit' }
+      // ]
+    });
 
     // cordova.plugins.notification.local.schedule([
     //   {
@@ -249,9 +267,9 @@ export class DashboardPage {
     // ]);
 
     // const pushObject: PushObject = this.push.init(options);
-    const pushObject = PushNotification.init(options);
+    // const pushObject = PushNotification.init(options);
 
-    pushObject.unregister(() => console.log(`[Push] unregistered`), () => console.log(`[Push] unregister error`));
+    // pushObject.unregister(() => console.log(`[Push] unregistered`), () => console.log(`[Push] unregister error`));
 
     // pushObject.on('notification', notification => {
     //   console.log(`[Push] received message, title: ${notification.title}, message: ${notification.message}`);
@@ -407,6 +425,7 @@ export class DashboardPage {
         this.refreshDemoTransactions();
         this.plaidService.getMonthlyAmount(this._user.uid);
         this.userAccount.update({ lastSignIn: new Date() });
+        this.showTour();
         return;
       }
 
@@ -500,6 +519,8 @@ export class DashboardPage {
     });
     this.emptyTransactions = !trans.some(tr => tr.data.length > 0);
     this._transactions = trans;
+
+    this.showTour();
   }
 
   private reshapeTransactions(transactions) {
@@ -585,6 +606,26 @@ export class DashboardPage {
     //   this.totalThisBelow == null)
     //   console.log(`Null element!`);
     console.log(`Calculated bar!`);
+  }
+
+  private showTour() {
+    //**************TOUR***************//
+
+    // let tour = new Shepherd.Tour({
+    //   defaults: {
+    //     classes: 'shepherd-theme-arrows'
+    //   }
+    // });
+    //
+    // tour.addStep('example', {
+    //   title: 'Tour Start',
+    //   text: 'Welcome to Coinscious!',
+    //   attachTo: '.purchases-wrapper h2 bottom',
+    //   // advanceOn: '.docs-link click'
+    // });
+    //
+    // tour.start();
+    //************TOUR END*************//
   }
 
   private getRandomInt(max) {

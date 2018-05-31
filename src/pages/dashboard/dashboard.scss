@@ -1,3 +1,5 @@
+// @import "../../../node_modules/tether-shepherd/dist/css/shepherd-theme-arrows.css";
+
 page-dashboard {
   background-color: #f3f3f3;
 
@@ -214,5 +216,10 @@ page-dashboard {
         margin-right: 1rem;
       }
     }
+  }
+
+  .tour {
+    background-color: black;
+    color: white;
   }
 }
