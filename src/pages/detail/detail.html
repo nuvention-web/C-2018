@@ -20,7 +20,7 @@
 
     <ion-item>
         <ion-label>Date</ion-label>
-        <ion-select [(ngModel)]="month">
+        <ion-select [(ngModel)]="month" (ionChange)="getData()">
             <ion-option value=0>January</ion-option>
             <ion-option value=1>February</ion-option>
             <ion-option value=2>March</ion-option>
@@ -41,12 +41,15 @@
             <ion-option value=2018>2018</ion-option>
         </ion-select>
     </ion-item>
-
+  <br>
+  <br>
   <div class="chart">
     <div class="chart-wrapper">
       <canvas id="chart-canvas"></canvas>
     </div>
   </div>
+  <br>
+  <br>
   <br>
   <br>
   <br>

@@ -700,7 +700,7 @@ export class DashboardPage {
     }
 
     goToDetailPage() {
-        this.navCtrl.push(`DetailPage`, {accessToken: this._userAccount.accessToken});
+        this.navCtrl.push(`DetailPage`, {accessToken: this._userAccount.accessToken, userId: this._userAccount.userId});
         //this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken, userEmail: this._user.email });
     }
 
