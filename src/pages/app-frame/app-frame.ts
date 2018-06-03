@@ -21,7 +21,6 @@ import { PlaidService } from '../../providers/plaid-service/plaid-service';
   templateUrl: 'app-frame.html',
 })
 export class AppFramePage {
-  // rootPage: any = `AppFramePage`;
   @ViewChild(`appNav`) appNav: Nav;
 
   private _isLoading = true;

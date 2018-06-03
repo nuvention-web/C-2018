@@ -327,17 +327,6 @@ export class DashboardPage {
     // });
     // pushObject.on('error', error => console.error(`[Push] Error with Push plugin: ${error.message}`));
 
-    // this.plaidService.transactions$.subscribe(transactions => {
-    //   if (transactions) {
-    //     console.log(`New Transactions arrived`);
-    //     console.log(transactions);
-    //     this.reshapeTransactions(transactions);
-    //   }
-    // }, err => {
-    //   console.log(`New Transaction Error: ${err.message}`);
-    //   this._demoText = `${err.message}`
-    // });
-
     this.plaidService.lastMonthlyAmounts$.subscribe(record => {
       console.log(`[Monthly Record] Got last month record.`);
       console.log(record);
@@ -367,115 +356,6 @@ export class DashboardPage {
         this._demoText = s;
       });
     });
-
-    // this._transactions = this.fakeData;
-    // this.emptyTransactions = false;
-  }
-
-  private checkAuthState() {
-    this._isLoading = true;
-    this._signedIn = false;
-    this.afAuth.auth.onAuthStateChanged(user => {
-      if (user) {
-        // user logged in
-        console.log("logged in");
-
-        this._linkedCredential = false;
-        this._signedIn = true;
-        this.checkCredentials();
-      } else {
-        // user logged out
-        console.log("logged out");
-        this.navCtrl.setRoot(`LoginPage`);
-      }
-    });
-  }
-
-  private checkCredentials() {
-    this._isLoading = true;
-    this.afAuth.authState.subscribe(data => {
-      this._linkedCredential = false;
-      this._user = new User(data);
-
-      this.userAccountCollections.ref.where(`userId`, '==', this._user.uid).get().then(res => {
-        if (!res.empty) {
-          console.log(`found credential`);
-          this._isLoading = false;
-          this._linkedCredential = true;
-          this.getUserInfo(res.docs[0].id);
-          // this._userAccount = res[0].data();
-          // this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${res[0].id}`);
-        } else {
-          this._isLoading = false;
-          this._linkedCredential = false;
-        }
-      }, err => {
-        console.log(`error`);
-        this._isLoading = false;
-        this._linkedCredential = false;
-      });
-    });
-  }
-
-  private getUserInfo(userId) {
-    this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${userId}`);
-
-    this._uaSubscription = this.userAccount.valueChanges().subscribe(ua => {
-      console.log(`received user account`);
-      console.log(ua);
-      this._userAccount = ua;
-      this._uaSubscription.unsubscribe();
-
-      this._isLoading = false;
-      // this.calculateBar();
-
-      // Demo process for demo@demo.com
-
-      if (this._user.email == `demo@demo.com`) {
-        this._isLoading = false;
-        this._linkedCredential = true;
-        this.emptyTransactions = false;
-        this.refreshDemoTransactions();
-        this.plaidService.getMonthlyAmount(this._user.uid);
-        this.userAccount.update({ lastSignIn: new Date() });
-        this.showTour();
-        return;
-      }
-
-      if (this._userAccount.unflaggedCount == null) {
-        this.userAccount.update({ unflaggedCount: 0 });
-        this._userAccount.unflaggedCount = 0;
-      }
-
-      // get transaction data we have
-      let to = new Date();
-      let from = this._userAccount.lastSignIn;
-      if (from == null) from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 3);
-
-      // Get new transactions from last login
-      this.plaidService.getTransactionsWithTimeRange(ua.accessToken, from, to).then(newTransactions => {
-        // Add those new transactions into database
-        console.log(`[Unflagged Transactions] Got new Transactions`);
-        this.plaidService.addNewTransactions(ua.userId, newTransactions.filter(t => t.amount > 0)).then(() => {
-          console.log(`[Unflagged Transactions] Added new Transactions`);
-          this.plaidService.getUnflaggedTransactions(ua.userId).then(unflaggedTransactions => {
-            // Calc the oldest time & get transactions from plaid
-            console.log(`[Unflagged Transactions] Got unflagged Transactions`);
-            // console.log(unflaggedTransactions);
-            let fromTime = new Date(unflaggedTransactions[unflaggedTransactions.length - 1].date);
-            // Get old transactions unflagged (How???)
-            this.plaidService.getTransactionsWithTimeRange(ua.accessToken, fromTime, to).then(transactions => {
-              this.shapeTransactions(transactions.filter(t => unflaggedTransactions.some(ut => ut.transactionId == t.transaction_id)));
-              this.userAccount.update({ lastSignIn: to });
-            });
-          }).catch(err => console.log(`get unflagged transactions error`));
-        }).catch(err => console.log(`add new transactions error`));
-      }).catch(err => console.log(`get new transactions error`));
-
-      this.plaidService.getMonthlyAmount(ua.userId);
-    });
-    // this.plaidService.refreshTransaction(this.userAccount.);
-    // this._isLoading = false;
   }
 
   private initPage() {
