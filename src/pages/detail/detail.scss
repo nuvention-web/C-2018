@@ -1,0 +1,85 @@
+page-detail {
+  // .scroll-content {
+  //   margin-top: 290px !important;
+  // }
+
+  ion-navbar {
+    height: 60px !important;
+
+    ion-title {
+      height: 60px !important;
+    }
+  }
+
+  ion-content {
+    background-color: #f3f3f3 !important;
+  }
+
+  .chart-wrapper {
+    height: 170px;
+  }
+
+  .chart {
+    padding: 1.6rem;
+    border-bottom: 1px solid #cccccc;
+
+    // margin: -16px -16px;
+    margin-top: 60px;
+    position: fixed;
+    background-color: white;
+    width: 100%;
+    z-index: 5;
+    box-shadow: 0 0 3px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 6px 6px;
+    height: 230px;
+    min-height: 230px;
+    margin: -16px;
+  }
+
+  .month {
+    background-color: white;
+    z-index: 100;
+
+    h2 {
+      font-size: 2rem;
+      margin: 0 !important;
+
+      span {
+        font-size: 1.4rem;
+        margin-left: 0.4rem;
+        font-weight: 300;
+        color: #222222;
+      }
+    }
+
+    .brief-heart {
+      color: #00E676;
+      font-size: 1em;
+      margin-right: .2rem;
+    }
+
+    .brief-heart-break {
+      color: #FF7043;
+      font-size: 1em;
+      margin-right: .2rem;
+    }
+
+    .brief-heart-flash {
+      color: white;
+      font-size: .6em;
+      position: relative;
+      right: 1.3rem;
+      top: -.3rem;
+      margin-right: -.7rem;
+    }
+  }
+
+  .purchase_wrap {
+    background-color: #f3f3f3;
+    margin: -16px;
+    margin-top: 214px;
+
+    // padding: 16px;
+
+  }
+}

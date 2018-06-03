@@ -695,6 +695,52 @@ export class DashboardPage {
     this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken, userEmail: this._user.email });
   }
 
+    goToDashboardPage() {
+        this.navCtrl.push(`DashboardPage`, {accessToken: this._userAccount.accessToken});
+    }
+
+    goToDetailPage() {
+        this.navCtrl.push(`DetailPage`, {accessToken: this._userAccount.accessToken});
+        //this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken, userEmail: this._user.email });
+    }
+
+    goToTransDetailPage() {
+        //this.navCtrl.push(`DetailPage`, {accessToken: this._userAccount.accessToken});
+        this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken, userEmail: this._user.email });
+    }
+
+    unbindAccount() {
+        let actionSheet = this.actionSheetCtrl.create({
+            title: 'Unbind Account?',
+            buttons: [
+                {
+                    text: 'Unbind',
+                    role: 'unbind',
+                    handler: () => {
+                        // console.log('Destructive clicked');
+                        this._isLoading = true;
+                        this.userAccount.delete().then(() => {
+                            this.checkCredentials();
+                        });
+                    }
+                }, {
+                    text: 'Cancel',
+                    role: 'cancel',
+                    handler: () => {
+                        console.log('Cancel clicked');
+                    }
+                }
+            ]
+        });
+        actionSheet.present();
+    }
+
+    signOut() {
+        this.afAuth.auth.signOut().then(() => {
+            this.navCtrl.setRoot(`LoginPage`);
+        });
+    }
+
   linkAccount() {
     if (this._user.email == `demo@demo.com`) {
       this.environment = `sandbox`;
@@ -813,37 +859,7 @@ export class DashboardPage {
     // });
   }
 
-  signOut() {
-    this.afAuth.auth.signOut().then(() => {
-      this.navCtrl.setRoot(`LoginPage`);
-    });
-  }
 
-  unbindAccount() {
-    let actionSheet = this.actionSheetCtrl.create({
-      title: 'Unbind Account?',
-      buttons: [
-        {
-          text: 'Unbind',
-          role: 'unbind',
-          handler: () => {
-            // console.log('Destructive clicked');
-            this._isLoading = true;
-            this.userAccount.delete().then(() => {
-              this.checkCredentials();
-            });
-          }
-        }, {
-          text: 'Cancel',
-          role: 'cancel',
-          handler: () => {
-            console.log('Cancel clicked');
-          }
-        }
-      ]
-    });
-    actionSheet.present();
-  }
 
   resetDemoData() {
     if (this._user.email != `demo@demo.com`) return;

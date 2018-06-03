@@ -101,8 +101,8 @@
         <variable name="ANDROID_SUPPORT_V13_VERSION" value="27.+" />
         <variable name="FCM_VERSION" value="11.6.2" />
     </plugin>
+    <allow-navigation href="http://10.105.80.17:8100" />
     <engine name="browser" spec="5.0.3" />
     <engine name="android" spec="7.1.0" />
-    <engine name="ios" spec="^4.5.4" />
-    <allow-navigation href="http://10.105.80.17:8100" />
+    <engine name="ios" spec="4.5.4" />
 </widget>

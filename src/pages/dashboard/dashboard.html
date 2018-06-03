@@ -17,6 +17,30 @@
         </ion-avatar>
         Unbind Account
       </button>
+
+        <button ion-item (click)="goToTransDetailPage()" *ngIf="_linkedCredential">
+            <ion-avatar item-start>
+                <ion-icon name="remove-circle"></ion-icon>
+            </ion-avatar>
+            Analysis
+        </button>
+
+        <button ion-item (click)="goToDetailPage()" *ngIf="_linkedCredential">
+            <ion-avatar item-start>
+                <ion-icon name="remove-circle"></ion-icon>
+            </ion-avatar>
+            Summary
+        </button>
+
+        <button ion-item (click)="goToDashboardPage()" *ngIf="_linkedCredential">
+            <ion-avatar item-start>
+                <ion-icon name="remove-circle"></ion-icon>
+            </ion-avatar>
+            Inbox
+        </button>
+
+
+
       <button ion-item (click)="signOut()">
         <ion-avatar item-start>
           <ion-icon name="log-out"></ion-icon>
