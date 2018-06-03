@@ -104,5 +104,9 @@
     <allow-navigation href="http://10.105.80.17:8100" />
     <engine name="browser" spec="5.0.3" />
     <engine name="android" spec="7.1.0" />
+<<<<<<< HEAD
     <engine name="ios" spec="4.5.4" />
+=======
+    <engine name="ios" spec="^4.5.4" />
+>>>>>>> 35265f70a9e20dcf3aa155a8cbd32bb7abcaea5f
 </widget>
