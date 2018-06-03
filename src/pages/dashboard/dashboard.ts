@@ -1,5 +1,5 @@
 import { Component, NgZone, ViewChild } from '@angular/core';
-import { IonicPage, NavController, NavParams, Platform, ActionSheetController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, Platform, ActionSheetController, Events } from 'ionic-angular';
 import { MenuController } from 'ionic-angular';
 // import { PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
 // import { Push } from '@ionic-native/push';
@@ -185,12 +185,25 @@ export class DashboardPage {
     private menuCtrl: MenuController,
     // private loadingCtrl: LoadingController,
     // private toastCtrl: ToastController,
-    private iab: InAppBrowser
+    private iab: InAppBrowser,
+    private events: Events
   ) {
     this.notificationCollections = this.firestore.collection<Notification>('notifications');
     this.userAccountCollections = this.firestore.collection<UserAccount>('user-accounts');
 
-    this.checkAuthState();
+    // this.events.subscribe('user:linkStatusChanged', linked => this._linkedCredential = linked);
+
+    // this.checkAuthState();
+    if (this.navParams.get(`user`)) {
+      this._user = this.navParams.get(`user`);
+    }
+    if (this.navParams.get(`userAccount`)) {
+      this._userAccount = this.navParams.get(`userAccount`);
+    }
+    if (this.navParams.get(`userAccountId`)) {
+      this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${this.navParams.get(`userAccountId`)}`);
+    }
+    this.initPage();
   }
 
   ionViewWillEnter() {
@@ -465,6 +478,56 @@ export class DashboardPage {
     // this._isLoading = false;
   }
 
+  private initPage() {
+    console.log(`received user account`);
+    console.log(this._userAccount);
+    // this._userAccount = ua;
+    // Demo process for demo@demo.com
+
+    if (this._user.email == `demo@demo.com`) {
+      this._isLoading = false;
+      this._linkedCredential = true;
+      this.emptyTransactions = false;
+      this.refreshDemoTransactions();
+      this.plaidService.getMonthlyAmount(this._user.uid);
+      this.userAccount.update({ lastSignIn: new Date() });
+      this.showTour();
+      return;
+    }
+
+    if (this._userAccount.unflaggedCount == null) {
+      this.userAccount.update({ unflaggedCount: 0 });
+      this._userAccount.unflaggedCount = 0;
+    }
+
+    // get transaction data we have
+    let to = new Date();
+    let from = this._userAccount.lastSignIn;
+    if (from == null) from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 3);
+
+    // Get new transactions from last login
+    this.plaidService.getTransactionsWithTimeRange(this._userAccount.accessToken, from, to).then(newTransactions => {
+      // Add those new transactions into database
+      console.log(`[Unflagged Transactions] Got new Transactions`);
+      this.plaidService.addNewTransactions(this._userAccount.userId, newTransactions.filter(t => t.amount > 0)).then(() => {
+        console.log(`[Unflagged Transactions] Added new Transactions`);
+        this.plaidService.getUnflaggedTransactions(this._userAccount.userId).then(unflaggedTransactions => {
+          // Calc the oldest time & get transactions from plaid
+          console.log(`[Unflagged Transactions] Got unflagged Transactions`);
+          // console.log(unflaggedTransactions);
+          let fromTime = new Date(unflaggedTransactions[unflaggedTransactions.length - 1].date);
+          // Get old transactions unflagged (How???)
+          this.plaidService.getTransactionsWithTimeRange(this._userAccount.accessToken, fromTime, to).then(transactions => {
+            this.shapeTransactions(transactions.filter(t => unflaggedTransactions.some(ut => ut.transactionId == t.transaction_id)));
+            this.userAccount.update({ lastSignIn: to });
+          });
+        }).catch(err => console.log(`get unflagged transactions error`));
+      }).catch(err => console.log(`add new transactions error`));
+    }).catch(err => console.log(`get new transactions error`));
+
+    this.plaidService.getMonthlyAmount(this._userAccount.userId);
+  }
+
   private refreshDemoTransactions() {
     let trans = [
       { name: "Today", data: [] },
@@ -692,174 +755,9 @@ export class DashboardPage {
   }
 
   goToDetail() {
-    this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken, userEmail: this._user.email });
+    // this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken, userEmail: this._user.email });
+    this.events.publish(`nav:go-to-archive`);
   }
-
-    goToDashboardPage() {
-        this.navCtrl.push(`DashboardPage`, {accessToken: this._userAccount.accessToken});
-    }
-
-    goToDetailPage() {
-        this.navCtrl.push(`DetailPage`, {accessToken: this._userAccount.accessToken});
-        //this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken, userEmail: this._user.email });
-    }
-
-    goToTransDetailPage() {
-        //this.navCtrl.push(`DetailPage`, {accessToken: this._userAccount.accessToken});
-        this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken, userEmail: this._user.email });
-    }
-
-    unbindAccount() {
-        let actionSheet = this.actionSheetCtrl.create({
-            title: 'Unbind Account?',
-            buttons: [
-                {
-                    text: 'Unbind',
-                    role: 'unbind',
-                    handler: () => {
-                        // console.log('Destructive clicked');
-                        this._isLoading = true;
-                        this.userAccount.delete().then(() => {
-                            this.checkCredentials();
-                        });
-                    }
-                }, {
-                    text: 'Cancel',
-                    role: 'cancel',
-                    handler: () => {
-                        console.log('Cancel clicked');
-                    }
-                }
-            ]
-        });
-        actionSheet.present();
-    }
-
-    signOut() {
-        this.afAuth.auth.signOut().then(() => {
-            this.navCtrl.setRoot(`LoginPage`);
-        });
-    }
-
-  linkAccount() {
-    if (this._user.email == `demo@demo.com`) {
-      this.environment = `sandbox`;
-      // let newDoc = {} as UserAccount;
-      // newDoc.userId = this._user.uid;
-      // this.userAccountCollections.add(newDoc).then(() => {
-      //   this.checkCredentials();
-      // });
-      // return;
-    }
-
-    if (this.platform.is('android')) {
-      this.linkHandler = Plaid.create({
-        clientName: `Coinscious`,
-        // env: `sandbox`,
-        env: `${this.environment}`,
-        key: `28f2e54388e2f6a1aca59e789d353b`,
-        product: [`transactions`],
-        forceIframe: true,
-        selectAccount: false,
-        onSuccess: (public_token, metadata) => {
-          if (this._user.email == `demo@demo.com`) {
-            let newDoc = {} as UserAccount;
-            newDoc.userId = this._user.uid;
-            newDoc.unflaggedCount = 0;
-            this.userAccountCollections.add(newDoc).then(() => {
-              this.checkCredentials();
-            });
-            return;
-          }
-          this.plaidService.getAccessToken(public_token).then(access_token => {
-            let newDoc = {} as UserAccount;
-            newDoc.publicToken = public_token;
-            newDoc.accessToken = access_token;
-            newDoc.userId = this._user.uid;
-            newDoc.unflaggedCount = 0;
-            this.userAccountCollections.add(newDoc).then(() => {
-              this.checkCredentials();
-            });
-          });
-          // console.log("Login Succeed");
-          // this._linkedCredential = true;
-        }
-      });
-      this.linkHandler.open();
-      return;
-    }
-
-    const linkUrl =
-      `https://cdn.plaid.com/link/v2/stable/link.html?` +
-      `key=28f2e54388e2f6a1aca59e789d353b` + `&` +
-      // `env=sandbox` + `&` +
-      `env=${this.environment}` + `&` +
-      `clientName=Coinscious` + `&` +
-      `product=transactions` + `&` +
-      `isMobile=true` + `&` +
-      `isWebview=true` + `&` +
-      `apiVersion=v2` + `&` +
-      `selectAccount=false`;
-
-    const browser = this.iab.create(linkUrl, '_blank', 'location=no,toolbar=no');
-    browser.on('loadstop').subscribe(event => {
-      console.log(`[InAppBrowser] On Load Stop : ${event.url}`);
-    });
-    browser.on('loaderror').subscribe(event => {
-      console.log(`[InAppBrowser] On Load Error : ${event.url}`);
-    });
-    browser.on('loadstart').subscribe(event => {
-      console.log(`[InAppBrowser] On Load Start: ${event.url}`);
-      const redirectUrl = event.url;
-      const url = redirectUrl.split(`://`);
-      // const protocol = url[0];
-      const path = url[1].split(`?`);
-      const ev = path[0];
-
-      if (ev == `exit`) browser.close();
-      if (ev != `connected`) return;
-
-      // this._isLoading = true;
-      browser.close();
-
-      const queryArr = path[1].split(`&`);
-      let queries = {};
-      queryArr.forEach(q => {
-        if (q.indexOf(`=`) < 0) return;
-        let query = q.split(`=`);
-        queries[query[0]] = query[1];
-      });
-      console.log(`Get public token! Token: ${queries[`public_token`]}`);
-
-      if (this._user.email == `demo@demo.com`) {
-        let newDoc = {} as UserAccount;
-        newDoc.userId = this._user.uid;
-        newDoc.unflaggedCount = 0;
-        this.userAccountCollections.add(newDoc).then(() => {
-          this.checkCredentials();
-        });
-        return;
-      }
-
-      const public_token = queries[`public_token`];
-      this.plaidService.getAccessToken(public_token).then(access_token => {
-        console.log(`Get access token! Token: ${access_token}`);
-        let newDoc = {} as UserAccount;
-        newDoc.publicToken = public_token;
-        newDoc.accessToken = access_token;
-        newDoc.userId = this._user.uid;
-        newDoc.unflaggedCount = 0;
-        this.userAccountCollections.add(newDoc).then(() => {
-          this.checkCredentials();
-        });
-      });
-    });
-    // browser.on('loaderror').subscribe(event => {
-    //   console.log(`[InAppBrowser] On Load Error: What happened?, ${event.url}`);
-    // });
-  }
-
-
 
   resetDemoData() {
     if (this._user.email != `demo@demo.com`) return;

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, Events } from 'ionic-angular';
 import { AngularFireAuth } from 'angularfire2/auth';
 // import * as firebase from 'firebase/app';
 import { UserSign } from '../../models/userSign';
@@ -24,7 +24,9 @@ export class LoginPage {
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
-    private afAuth: AngularFireAuth) {
+    private afAuth: AngularFireAuth,
+    private events: Events
+  ) {
 
     if (this.navParams.get(`from_sign_up`)) {
       this.signInWithData(
@@ -37,7 +39,7 @@ export class LoginPage {
         if (user) {
           // user logged in
           console.log("logged in");
-          this.navCtrl.setRoot(`DashboardPage`, { signed_in: true, linked_credential: false, need_refresh: true });
+          this.events.publish('nav:go-to-inbox');
         } else {
           // user logged out
           console.log("logged out");
@@ -54,7 +56,7 @@ export class LoginPage {
     try {
       const result = await this.afAuth.auth.signInWithEmailAndPassword(email, password);
       if (result) {
-        this.navCtrl.setRoot(`DashboardPage`, { signed_in: true, linked_credential: false, need_refresh: true });
+        this.events.publish('nav:go-to-inbox');
       }
     } catch (e) {
       console.error(e);
@@ -67,7 +69,7 @@ export class LoginPage {
   }
 
   goToSignUp() {
-    this.navCtrl.push(`SignUpPage`);
+    this.events.publish('nav:go-to-sign-up');
   }
 
 }

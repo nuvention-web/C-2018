@@ -3,23 +3,6 @@
 page-dashboard {
   background-color: #f3f3f3;
 
-  .menu {
-    ion-avatar {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 16pt;
-    }
-
-    .toolbar-title {
-      overflow: visible;
-    }
-
-    ion-icon {
-      color: #F4511E;
-    }
-  }
-
   .dashboard-content {
     ion-content {
       background-color: #f3f3f3;
@@ -28,36 +11,8 @@ page-dashboard {
     .inbox {
       .scroll-content {
         padding: 0 !important;
-        margin-top: 210px !important;
+        margin-top: 150px !important;
         background-color: #f3f3f3;
-      }
-    }
-
-    ion-navbar {
-      min-height: 60px !important;
-
-      ion-title {
-        min-height: 60px !important;
-        left: 0;
-        top: 0;
-        padding: 0 90px 1px;
-        position: absolute;
-        width: 100%;
-      }
-
-      .toolbar-content {
-        text-align: center;
-      }
-
-      h3 {
-        font-size: 2.2rem;
-        position: absolute;
-        bottom: 0;
-        top: 0;
-        left: 0;
-        right: 0;
-        text-align: center;
-        line-height: 40px;
       }
     }
 
@@ -102,7 +57,7 @@ page-dashboard {
       border-bottom: 1px solid #cccccc;
       display: block;
       position: fixed;
-      top: 60px;
+      top: 0;
       left: 0;
       background-color: white;
       width: 100%;
@@ -164,42 +119,6 @@ page-dashboard {
         font-weight: 300;
         font-size: 2.2rem;
         margin-top: .2rem;
-      }
-    }
-
-    // .linked {
-    //   margin-top: 18.5rem;
-    // }
-
-    .unlinked-wrapper {
-      display: -webkit-flex;
-      display: -moz-box;
-      display: -ms-flexbox;
-      display: -webkit-box;
-      display: flex;
-      -webkit-box-align: center;
-      -moz-box-align: center;
-      -ms-flex-align: center;
-      -webkit-align-items: center;
-      align-items: center;
-      -webkit-box-pack: center;
-      -moz-box-pack: center;
-      -ms-flex-pack: center;
-      -webkit-justify-content: center;
-      justify-content: center;
-      height: 100%;
-      margin-top: -150px;
-
-      .unlinked {
-        width: auto;
-        height: auto;
-        max-width: 90%;
-        max-height: 90%;
-
-        p {
-          text-align: center;
-          font-size: 12pt;
-        }
       }
     }
 
