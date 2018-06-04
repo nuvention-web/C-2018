@@ -37,6 +37,10 @@ page-dashboard {
     .ng-progress-bar {
       position: relative;
       margin-left: 16px;
+
+      .ng-spinner {
+        display: none;
+      }
     }
 
     .ng-bar-placeholder {

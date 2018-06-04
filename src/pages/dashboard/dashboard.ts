@@ -58,8 +58,8 @@ export class DashboardPage {
   private _point: number = 100;
   // private _platformSubscriber;
   // private _count = 0;
-  private _linkedCredential = false;
-  private _signedIn = false;
+  // private _linkedCredential = false;
+  // private _signedIn = false;
   private _user: User;
   public emptyTransactions = true;
 
@@ -70,7 +70,7 @@ export class DashboardPage {
   private _spendingMoreThis = false;
   private _spendingMoreLast = false;
 
-  private _isLoading = true;
+  // private _isLoading = true;
 
   private linkHandler;
   private environment = `development`;
@@ -203,7 +203,6 @@ export class DashboardPage {
     if (this.navParams.get(`userAccountId`)) {
       this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${this.navParams.get(`userAccountId`)}`);
     }
-    this.initPage();
   }
 
   ionViewWillEnter() {
@@ -217,6 +216,64 @@ export class DashboardPage {
   }
 
   ionViewDidLoad() {
+    this.initPage();
+  }
+
+  private initPage() {
+    if (this._userAccount == null) return;
+    console.log(`received user account`);
+    console.log(this._userAccount);
+    // this._userAccount = ua;
+    // Demo process for demo@demo.com
+
+    this.initOthers();
+
+    if (this._user.email == `demo@demo.com`) {
+      // this._isLoading = false;
+      // this._linkedCredential = true;
+      this.emptyTransactions = false;
+      this.refreshDemoTransactions();
+      this.plaidService.getMonthlyAmount(this._user.uid);
+      this.userAccount.update({ lastSignIn: new Date() });
+      this.showTour();
+      return;
+    }
+
+    if (this._userAccount.unflaggedCount == null) {
+      this.userAccount.update({ unflaggedCount: 0 });
+      this._userAccount.unflaggedCount = 0;
+    }
+
+    // get transaction data we have
+    let to = new Date();
+    let from = this._userAccount.lastSignIn;
+    if (from == null) from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 3);
+
+    // Get new transactions from last login
+    this.plaidService.getTransactionsWithTimeRange(this._userAccount.accessToken, from, to).then(newTransactions => {
+      // Add those new transactions into database
+      console.log(`[Unflagged Transactions] Got new Transactions`);
+      this.plaidService.addNewTransactions(this._userAccount.userId, newTransactions.filter(t => t.amount > 0)).then(() => {
+        console.log(`[Unflagged Transactions] Added new Transactions`);
+        this.plaidService.getUnflaggedTransactions(this._userAccount.userId).then(unflaggedTransactions => {
+          // Calc the oldest time & get transactions from plaid
+          console.log(`[Unflagged Transactions] Got unflagged Transactions`);
+          // console.log(unflaggedTransactions);
+          let fromTime = new Date(unflaggedTransactions[unflaggedTransactions.length - 1].date);
+          // Get old transactions unflagged (How???)
+          this.plaidService.getTransactionsWithTimeRange(this._userAccount.accessToken, fromTime, to).then(transactions => {
+            this.shapeTransactions(transactions.filter(t => unflaggedTransactions.some(ut => ut.transactionId == t.transaction_id)));
+            this.userAccount.update({ lastSignIn: to });
+          });
+        }).catch(err => console.log(`get unflagged transactions error`));
+      }).catch(err => console.log(`add new transactions error`));
+    }).catch(err => console.log(`get new transactions error`));
+
+    this.plaidService.getMonthlyAmount(this._userAccount.userId);
+  }
+
+  private initOthers() {
+
     // this.push.hasPermission().then(
     //   (res: any) => {
     //     if (res.isEnabled) {
@@ -330,6 +387,7 @@ export class DashboardPage {
     this.plaidService.lastMonthlyAmounts$.subscribe(record => {
       console.log(`[Monthly Record] Got last month record.`);
       console.log(record);
+      if (record == null) return;
       // this.zone.run(() => {
       // });
       if (record != null) {
@@ -342,6 +400,7 @@ export class DashboardPage {
     this.plaidService.thisMonthlyAmounts$.subscribe(record => {
       console.log(`[Monthly Record] Got this month record.`);
       console.log(record);
+      if (record == null) return;
       // this.zone.run(() => {
       // });
       if (record != null) {
@@ -356,56 +415,6 @@ export class DashboardPage {
         this._demoText = s;
       });
     });
-  }
-
-  private initPage() {
-    console.log(`received user account`);
-    console.log(this._userAccount);
-    // this._userAccount = ua;
-    // Demo process for demo@demo.com
-
-    if (this._user.email == `demo@demo.com`) {
-      this._isLoading = false;
-      this._linkedCredential = true;
-      this.emptyTransactions = false;
-      this.refreshDemoTransactions();
-      this.plaidService.getMonthlyAmount(this._user.uid);
-      this.userAccount.update({ lastSignIn: new Date() });
-      this.showTour();
-      return;
-    }
-
-    if (this._userAccount.unflaggedCount == null) {
-      this.userAccount.update({ unflaggedCount: 0 });
-      this._userAccount.unflaggedCount = 0;
-    }
-
-    // get transaction data we have
-    let to = new Date();
-    let from = this._userAccount.lastSignIn;
-    if (from == null) from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 3);
-
-    // Get new transactions from last login
-    this.plaidService.getTransactionsWithTimeRange(this._userAccount.accessToken, from, to).then(newTransactions => {
-      // Add those new transactions into database
-      console.log(`[Unflagged Transactions] Got new Transactions`);
-      this.plaidService.addNewTransactions(this._userAccount.userId, newTransactions.filter(t => t.amount > 0)).then(() => {
-        console.log(`[Unflagged Transactions] Added new Transactions`);
-        this.plaidService.getUnflaggedTransactions(this._userAccount.userId).then(unflaggedTransactions => {
-          // Calc the oldest time & get transactions from plaid
-          console.log(`[Unflagged Transactions] Got unflagged Transactions`);
-          // console.log(unflaggedTransactions);
-          let fromTime = new Date(unflaggedTransactions[unflaggedTransactions.length - 1].date);
-          // Get old transactions unflagged (How???)
-          this.plaidService.getTransactionsWithTimeRange(this._userAccount.accessToken, fromTime, to).then(transactions => {
-            this.shapeTransactions(transactions.filter(t => unflaggedTransactions.some(ut => ut.transactionId == t.transaction_id)));
-            this.userAccount.update({ lastSignIn: to });
-          });
-        }).catch(err => console.log(`get unflagged transactions error`));
-      }).catch(err => console.log(`add new transactions error`));
-    }).catch(err => console.log(`get new transactions error`));
-
-    this.plaidService.getMonthlyAmount(this._userAccount.userId);
   }
 
   private refreshDemoTransactions() {
@@ -515,8 +524,6 @@ export class DashboardPage {
   }
 
   private calculateBar() {
-    if (!this._signedIn || !this._linkedCredential) return;
-
     let absTotalThis = Math.abs(this._totalThisV);
     let absTotalLast = Math.abs(this._totalLastV);
     let absExceedThis = Math.abs(this._exceedThisV);
@@ -531,8 +538,8 @@ export class DashboardPage {
     if (this.totalThis != null) this.totalThis.set(absTotalThis / total * 100);
     if (this.totalLastBelow != null) this.totalLastBelow.set(absTotalLast / total * 100);
     if (this.totalThisBelow != null) this.totalThisBelow.set(absTotalThis / total * 100);
-    this.exceedLast.set(absExceedLast / total * 100);
-    this.exceedThis.set(absExceedThis / total * 100);
+    if (this.exceedLast != null) this.exceedLast.set(absExceedLast / total * 100);
+    if (this.exceedThis != null) this.exceedThis.set(absExceedThis / total * 100);
     console.log(`${this._totalLastV}, ${this._totalThisV}`);
     console.log(`${this._exceedLastV}, ${this._exceedThisV}`);
     console.log(`${this._totalLastV / total * 100}, ${this._totalThisV / total * 100}`);
