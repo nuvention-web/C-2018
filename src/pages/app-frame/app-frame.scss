@@ -1,3 +1,20 @@
+.shepherd-step {
+  max-width: calc(100% - 100px) !important;
+
+  .shepherd-title {
+    font-size: 13pt !important;
+    font-weight: 700 !important;
+  }
+
+  .shepherd-text > p {
+    font-size: 10pt !important;
+  }
+}
+
+.move-right {
+  margin-right: -16px !important;
+}
+
 page-app-frame {
   .menu {
     ion-avatar {

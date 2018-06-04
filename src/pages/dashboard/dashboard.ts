@@ -17,8 +17,6 @@ import { Transaction } from '../../models/transaction';
 import { UserTransaction } from '../../models/userTransaction';
 import { PlaidService } from '../../providers/plaid-service/plaid-service';
 
-import * as Shepherd from "tether-shepherd";
-
 declare var cordova;
 declare var Plaid;
 declare var PushNotification;
@@ -171,7 +169,9 @@ export class DashboardPage {
       this.refreshDemoTransactions();
       this.plaidService.getMonthlyAmount(this._user.uid);
       this.userAccount.update({ lastSignIn: new Date() });
-      this.showTour();
+
+      this.events.publish(`app:inboxTourReady`);
+
       return;
     }
 
@@ -199,7 +199,7 @@ export class DashboardPage {
           // Get old transactions unflagged (How???)
           this.plaidService.getTransactionsWithTimeRange(this._userAccount.accessToken, fromTime, to).then(transactions => {
             this.shapeTransactions(transactions.filter(t => unflaggedTransactions.some(ut => ut.transactionId == t.transaction_id)));
-            this.userAccount.update({ lastSignIn: to });
+            this.userAccount.update({ lastSignIn: to }).then(() => this.events.publish(`app:inboxTourReady`));
           });
         }).catch(err => console.log(`get unflagged transactions error`));
       }).catch(err => console.log(`add new transactions error`));
@@ -412,8 +412,6 @@ export class DashboardPage {
     });
     this.emptyTransactions = !trans.some(tr => tr.data.length > 0);
     this._transactions = trans;
-
-    this.showTour();
   }
 
   private reshapeTransactions(transactions) {
@@ -497,26 +495,6 @@ export class DashboardPage {
     //   this.totalThisBelow == null)
     //   console.log(`Null element!`);
     console.log(`Calculated bar!`);
-  }
-
-  private showTour() {
-    //**************TOUR***************//
-
-    // let tour = new Shepherd.Tour({
-    //   defaults: {
-    //     classes: 'shepherd-theme-arrows'
-    //   }
-    // });
-    //
-    // tour.addStep('example', {
-    //   title: 'Tour Start',
-    //   text: 'Welcome to Coinscious!',
-    //   attachTo: '.purchases-wrapper h2 bottom',
-    //   // advanceOn: '.docs-link click'
-    // });
-    //
-    // tour.start();
-    //************TOUR END*************//
   }
 
   private getRandomInt(max) {

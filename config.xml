@@ -107,4 +107,5 @@
     <engine name="ios" spec="4.5.4" />
     <allow-navigation href="http://192.168.1.112:8101" />
     <allow-navigation href="http://192.168.1.112:8100" />
+    <plugin name="cordova-plugin-secure-storage" spec="^2.6.8" />
 </widget>

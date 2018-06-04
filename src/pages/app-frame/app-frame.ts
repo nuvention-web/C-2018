@@ -3,10 +3,13 @@ import { App, IonicPage, ActionSheetController, MenuController, Nav, Events } fr
 import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
 import { ISubscription } from "rxjs/Subscription";
+import { SecureStorage } from '@ionic-native/secure-storage';
 
 import { User } from '../../models/user';
 import { UserAccount } from '../../models/userAccount';
 import { PlaidService } from '../../providers/plaid-service/plaid-service';
+
+import * as Shepherd from "tether-shepherd";
 
 /**
  * Generated class for the AppFramePage page.
@@ -38,6 +41,8 @@ export class AppFramePage {
   public emptyTransactions = true;
   public titleText = `Coinscious`;
 
+  private _store;
+
   constructor(
     private firestore: AngularFirestore,
     private app: App,
@@ -45,7 +50,8 @@ export class AppFramePage {
     private afAuth: AngularFireAuth,
     private actionSheetCtrl: ActionSheetController,
     private menuCtrl: MenuController,
-    private events: Events
+    private events: Events,
+    private storage: SecureStorage
   ) {
     this.userAccountCollections = this.firestore.collection<UserAccount>('user-accounts');
 
@@ -64,12 +70,141 @@ export class AppFramePage {
       console.log(`page loaded`);
       this._isLoading = false;
     });
+
+    this.events.subscribe(`app:inboxTourReady`, () => {
+      this._store.get(`inboxTour`).then(
+        data => { },
+        error => {
+          this.showInboxTour();
+          this._store.set(`inboxTour`, `true`);
+        }
+      );
+    });
+    this.events.subscribe(`app:archiveTourReady`, () => {
+      this._store.get(`archiveTour`).then(
+        data => { },
+        error => {
+          this.showArchiveTour();
+          this._store.set(`archiveTour`, `true`);
+        }
+      );
+    });
+
+    // this.events.subscribe(`app:inboxTourReady`, () => this.showInboxTour());
+    // this.events.subscribe(`app:archiveTourReady`, () => this.showArchiveTour());
   }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad AppFramePage');
 
     this.checkAuthState();
+
+    this.storage.create(`edu.nuvention.coinscious`).then(store => {
+      this._store = store;
+    });
+  }
+
+  private showInboxTour() {
+    //**************TOUR***************//
+    let tour = new Shepherd.Tour({
+      defaults: {
+        classes: 'shepherd-theme-arrows'
+      }
+    });
+
+    tour.addStep('00', {
+      title: 'Tutorial',
+      text: 'Welcome to Coinscious!',
+      // attachTo: '.purchases-wrapper h2 right',
+      // advanceOn: '.docs-link click'
+    });
+
+    tour.addStep('01', {
+      title: 'Tutorial',
+      text: `New Purchases will show here. Categorize by clicking on Heart/Swiping left.`,
+      attachTo: '.trans-item top'
+    });
+
+    tour.addStep('01-2', {
+      title: 'Tutorial',
+      text: `Click/Swipe left on Green Heart to categorize it as Good purchase`,
+      attachTo: '.trans-item-buttons left'
+    });
+
+    tour.addStep('01-3', {
+      title: 'Tutorial',
+      text: `Click/Swipe left on Broken Heart to categorize it as Bad purchase`,
+      attachTo: '.trans-item-buttons .dislike left'
+    });
+
+    tour.addStep('02', {
+      title: 'Tutorial',
+      text: `Orange bar depicts bad purchases. Green bar depicts good purchases.`,
+      attachTo: '#total-this .ng-bar-placeholder bottom'
+    });
+
+    tour.addStep('03', {
+      title: 'Tutorial',
+      text: `Click on Green Heart/Swipe left to categorize all the purchases for that day as Good.`,
+      attachTo: '.approve-all left'
+    });
+
+    tour.addStep('03-2', {
+      title: 'Tutorial',
+      text: `Click on view details to go to Archive page.`,
+      attachTo: '.view-details .button-inner left',
+      when: {
+        hide: () => {
+          this.goToArchive(null);
+        }
+      }
+    });
+
+    // tour.addStep('04', {
+    //   title: 'Tutorial',
+    //   text: `Click on Green Heart/Swipe left to categorize all the purchases for that day as Good.`,
+    //   attachTo: '.approve-all left'
+    // });
+    //
+    // tour.addStep('04', {
+    //   title: 'Tutorial',
+    //   text: `Click on Green Heart/Swipe left to categorize all the purchases for that day as Good.`,
+    //   attachTo: '.approve-all left'
+    // });
+
+    tour.start();
+    //************TOUR END*************//
+  }
+
+  private showArchiveTour() {
+    //**************TOUR***************//
+    let tour = new Shepherd.Tour({
+      defaults: {
+        classes: 'shepherd-theme-arrows'
+      }
+    });
+
+    // tour.addStep('00', {
+    //   title: 'Tutorial',
+    //   text: 'Welcome to Coinscious!',
+    //   // attachTo: '.purchases-wrapper h2 right',
+    //   // advanceOn: '.docs-link click'
+    // });
+
+    tour.addStep('04', {
+      title: 'Tutorial',
+      text: `Click on Bar to know about expenses per month.`,
+      attachTo: '#chart-canvas bottom'
+    });
+
+    tour.addStep('04-2', {
+      title: 'Tutorial',
+      text: `Long Press on the tile to edit the purchases.`,
+      attachTo: '.trans-item top'
+    });
+
+    tour.start();
+    //************TOUR END*************//
   }
 
   private checkAuthState() {

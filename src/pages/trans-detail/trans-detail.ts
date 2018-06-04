@@ -277,6 +277,7 @@ export class TransDetailPage {
               }
             });
           });
+          this.events.publish(`app:archiveTourReady`);
         });
       });
       return;
@@ -301,6 +302,7 @@ export class TransDetailPage {
             }
           });
         });
+        this.events.publish(`app:archiveTourReady`);
       });
     });
 
