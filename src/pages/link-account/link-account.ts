@@ -50,6 +50,7 @@ export class LinkAccountPage {
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad PushDemoPage');
+    this.events.publish(`app:pageLoaded`);
   }
 
   linkAccount() {

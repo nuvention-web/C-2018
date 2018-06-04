@@ -55,7 +55,7 @@
           <h2>New Purchases</h2>
         </div>
         <div class="empty-msg" *ngIf="!_transactions || _transactions.length == 0 || emptyTransactions">
-          No transactions.
+          Congrats! You have reflected on all of your recent purchases -- check back later when you have new purchases to reflect on.
         </div>
         <transaction-group *ngFor="let t of _transactions" [transactions]=t (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-group>
       </div>

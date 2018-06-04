@@ -8,7 +8,7 @@ import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument 
 import { AngularFireAuth } from 'angularfire2/auth';
 import { NgProgressComponent } from '@ngx-progressbar/core';
 // import { Observable } from "rxjs/Observable";
-import { ISubscription } from "rxjs/Subscription";
+import { ISubscription, Subscription } from "rxjs/Subscription";
 
 import { Notification } from '../../models/notification';
 import { UserAccount } from '../../models/userAccount';
@@ -44,22 +44,12 @@ export class DashboardPage {
   @ViewChild(`totalLastBelow`) totalLastBelow: NgProgressComponent;
   @ViewChild(`totalThisBelow`) totalThisBelow: NgProgressComponent;
 
-  private notificationCollections: AngularFirestoreCollection<Notification>;
-  private userAccountCollections: AngularFirestoreCollection<UserAccount>;
   private userAccount: AngularFirestoreDocument<UserAccount>;
-  private _uaSubscription: ISubscription;
   private _userAccount: UserAccount;
   public _demoText: string = `No message.`;
   private months = [`Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`, `Jul`, `Aug`, `Sep`, `Oct`, `Nov`, `Dec`];
   private _transactions: any = [];
   private _transHistory: UserTransaction[] = null;
-  private _flaggedTransactions: any = [];
-  // private public_token: string;
-  private _point: number = 100;
-  // private _platformSubscriber;
-  // private _count = 0;
-  // private _linkedCredential = false;
-  // private _signedIn = false;
   private _user: User;
   public emptyTransactions = true;
 
@@ -70,65 +60,10 @@ export class DashboardPage {
   private _spendingMoreThis = false;
   private _spendingMoreLast = false;
 
-  // private _isLoading = true;
+  private _subscriptions = [];
 
   private linkHandler;
   private environment = `development`;
-
-  private fakeData = [
-    {
-      name: `Today`,
-      data: [
-        { name: `McDonald's`, amount: `10.74`, date: `2017-02-27`, love: false },
-        { name: `Starbucks`, amount: `7.32`, date: `2017-02-27`, love: false },
-        { name: `Uber 063015 SF**POOL**`, amount: `5.40`, date: `2017-02-25`, love: false }
-      ]
-    },
-    {
-      name: `Yesterday`,
-      data: [
-        { name: `United Airlines`, amount: `500.00`, date: `2017-02-23`, love: false },
-        { name: `AmazonPrime Membersh`, amount: `49.00`, date: `2017-02-23`, love: false }
-      ]
-    },
-    {
-      name: `2 days ago`,
-      data: [
-        { name: `TARGET.COM * 800-591-3869`, amount: `42.49`, date: `2017-02-22`, love: false },
-        { name: `AMAZON MKTPLACE`, amount: `27.57`, date: `2017-02-20`, love: false },
-        { name: `#03428 JEWEL EVANSTON IL`, amount: `56.20`, date: `2017-02-19`, love: false },
-        { name: `Nicor Gas NICPayment 1388019270`, amount: `50.00`, date: `2017-02-16`, love: false },
-        { name: `ZARA USA 3697 CHICAGO IL`, amount: `138.21`, date: `2017-02-12`, love: false },
-        { name: `B&H PHOTO`, amount: `298.00`, date: `2017-02-08`, love: false },
-        { name: `LITTLE TOKYO ROSEMONT`, amount: `11.15`, date: `2017-02-03`, love: false },
-        { name: `MICHAEL KORS`, amount: `141.41`, date: `2017-02-08`, love: false },
-        { name: `CALVIN KLEIN`, amount: `26.13`, date: `2017-02-06`, love: false },
-        { name: `USA*CANTEEN VENDING`, amount: `1.25`, date: `2017-02-03`, love: false },
-        { name: `NORRIS CENTER FOOD COUR`, amount: `8.02`, date: `2017-02-02`, love: false },
-        { name: `LIBRARY CAFE BERGSON`, amount: `3.85`, date: `2017-02-08`, love: false }
-      ]
-    }
-  ];
-
-  private fakeTrans = [
-    { name: `TARGET.COM * 800-591-3869`, amount: 42.49, date: `2017-02-22`, love: false },
-    { name: `AMAZON MKTPLACE`, amount: 27.57, date: `2017-02-20`, love: false },
-    { name: `#03428 JEWEL EVANSTON IL`, amount: 56.20, date: `2017-02-19`, love: false },
-    { name: `Nicor Gas NICPayment 1388019270`, amount: 50.00, date: `2017-02-16`, love: false },
-    { name: `ZARA USA 3697 CHICAGO IL`, amount: 138.21, date: `2017-02-12`, love: false },
-    { name: `B&H PHOTO`, amount: 298.00, date: `2017-02-08`, love: false },
-    { name: `LITTLE TOKYO ROSEMONT`, amount: 11.15, date: `2017-02-03`, love: false },
-    { name: `MICHAEL KORS`, amount: 141.41, date: `2017-02-08`, love: false },
-    { name: `CALVIN KLEIN`, amount: 26.13, date: `2017-02-06`, love: false },
-    { name: `USA*CANTEEN VENDING`, amount: 1.25, date: `2017-02-03`, love: false },
-    { name: `NORRIS CENTER FOOD COUR`, amount: 8.02, date: `2017-02-02`, love: false },
-    { name: `LIBRARY CAFE BERGSON`, amount: 3.85, date: `2017-02-08`, love: false },
-    { name: `United Airlines`, amount: 500.00, date: `2017-02-23`, love: false },
-    { name: `AmazonPrime Membersh`, amount: 49.00, date: `2017-02-23`, love: false },
-    { name: `McDonald's`, amount: 10.74, date: `2017-02-27`, love: false },
-    { name: `Starbucks`, amount: 7.32, date: `2017-02-27`, love: false },
-    { name: `Uber 063015 SF**POOL**`, amount: 5.40, date: `2017-02-25`, love: false }
-  ];
 
   private demoTrans = [
     {
@@ -188,10 +123,6 @@ export class DashboardPage {
     private iab: InAppBrowser,
     private events: Events
   ) {
-    this.notificationCollections = this.firestore.collection<Notification>('notifications');
-    this.userAccountCollections = this.firestore.collection<UserAccount>('user-accounts');
-
-    // this.events.subscribe('user:linkStatusChanged', linked => this._linkedCredential = linked);
 
     // this.checkAuthState();
     if (this.navParams.get(`user`)) {
@@ -210,12 +141,17 @@ export class DashboardPage {
 
   ionViewWillLeave() {
     // this._platformSubscriber.unsubscribe();
+    this._subscriptions.forEach((s: Subscription) => {
+      s.unsubscribe();
+    });
   }
 
   ionViewDidEnter() {
   }
 
   ionViewDidLoad() {
+    console.log(`Dashboard loaded`);
+    this.events.publish(`app:pageLoaded`);
     this.initPage();
   }
 
@@ -284,43 +220,43 @@ export class DashboardPage {
     //   }
     // );
 
-    const options = {
-      android: {
-        senderID: `618786705474`,
-        topics: [
-          `coincious.general`
-        ]
-      },
-      ios: {
-        alert: true,
-        badge: false,
-        sound: true,
-        fcmSandbox: true,
-        // topics: [
-        //   `coincious.general`
-        // ]
-      },
-      windows: {},
-      browser: {
-        pushServiceURL: 'http://push.api.phonegap.com/v1/push'
-      }
-    };
-
-    cordova.plugins.notification.local.getIds(ids => {
-      if (ids.length == 0) return;
-      cordova.plugins.notification.local.clearAll(ids);
-    })
-
-    cordova.plugins.notification.local.schedule({
-      title: 'Time to check your payments',
-      text: 'Click me and see details',
-      trigger: { every: { weekday: 5, hour: 20, minute: 0 } }
-      // ,actions: [
-      //   { id: 'yes', title: 'Yes' },
-      //   { id: 'no', title: 'No' },
-      //   { id: 'edit', title: 'Edit' }
-      // ]
-    });
+    // const options = {
+    //   android: {
+    //     senderID: `618786705474`,
+    //     topics: [
+    //       `coincious.general`
+    //     ]
+    //   },
+    //   ios: {
+    //     alert: true,
+    //     badge: false,
+    //     sound: true,
+    //     fcmSandbox: true,
+    //     // topics: [
+    //     //   `coincious.general`
+    //     // ]
+    //   },
+    //   windows: {},
+    //   browser: {
+    //     pushServiceURL: 'http://push.api.phonegap.com/v1/push'
+    //   }
+    // };
+    //
+    // cordova.plugins.notification.local.getIds(ids => {
+    //   if (ids.length == 0) return;
+    //   cordova.plugins.notification.local.clearAll(ids);
+    // })
+    //
+    // cordova.plugins.notification.local.schedule({
+    //   title: 'Time to check your payments',
+    //   text: 'Click me and see details',
+    //   trigger: { every: { weekday: 5, hour: 20, minute: 0 } }
+    //   // ,actions: [
+    //   //   { id: 'yes', title: 'Yes' },
+    //   //   { id: 'no', title: 'No' },
+    //   //   { id: 'edit', title: 'Edit' }
+    //   // ]
+    // });
 
     // cordova.plugins.notification.local.schedule([
     //   {
@@ -384,37 +320,42 @@ export class DashboardPage {
     // });
     // pushObject.on('error', error => console.error(`[Push] Error with Push plugin: ${error.message}`));
 
-    this.plaidService.lastMonthlyAmounts$.subscribe(record => {
-      console.log(`[Monthly Record] Got last month record.`);
-      console.log(record);
-      if (record == null) return;
-      // this.zone.run(() => {
-      // });
-      if (record != null) {
-        this._totalLastV = record.totalAmount;
-        this._exceedLastV = record.exceedAmount;
-      }
-      this.calculateBar();
-    });
+    this._subscriptions.push(
+      this.plaidService.lastMonthlyAmounts$.subscribe(record => {
+        console.log(`[Monthly Record] Got last month record.`);
+        console.log(record);
+        if (record == null) return;
+        // this.zone.run(() => {
+        // });
+        if (record != null) {
+          this._totalLastV = record.totalAmount;
+          this._exceedLastV = record.exceedAmount;
+        }
+        this.calculateBar();
+      })
+    );
+    this._subscriptions.push(
+      this.plaidService.thisMonthlyAmounts$.subscribe(record => {
+        console.log(`[Monthly Record] Got this month record.`);
+        console.log(record);
+        if (record == null) return;
+        // this.zone.run(() => {
+        // });
+        if (record != null) {
+          this._totalThisV = record.totalAmount;
+          this._exceedThisV = record.exceedAmount;
+        }
+        this.calculateBar();
+      })
+    );
 
-    this.plaidService.thisMonthlyAmounts$.subscribe(record => {
-      console.log(`[Monthly Record] Got this month record.`);
-      console.log(record);
-      if (record == null) return;
-      // this.zone.run(() => {
-      // });
-      if (record != null) {
-        this._totalThisV = record.totalAmount;
-        this._exceedThisV = record.exceedAmount;
-      }
-      this.calculateBar();
-    });
-
-    this.plaidService.testString$.subscribe(s => {
-      this.zone.run(() => {
-        this._demoText = s;
-      });
-    });
+    this._subscriptions.push(
+      this.plaidService.testString$.subscribe(s => {
+        this.zone.run(() => {
+          this._demoText = s;
+        });
+      })
+    );
   }
 
   private refreshDemoTransactions() {
@@ -593,10 +534,10 @@ export class DashboardPage {
   onApprove(ev) {
     if (ev.transaction != null) {
       // single transaction
-      let t = ev.transaction;
+      let t: Transaction = ev.transaction;
       this.plaidService.flagTransaction(this._userAccount.userId, t, true, this._user.email)
         .then(() => {
-          this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, t.amount);
+          this.plaidService.addMonthlyAmount(this._userAccount.userId, t, t.amount);
           ev.item.setElementClass(`close`, true);
           setTimeout(() => {
             ev.group.data.splice(ev.index, 1);
@@ -608,7 +549,7 @@ export class DashboardPage {
 
       return;
     }
-    this.plaidService.flagTransaction(this._userAccount.userId, ev.group.data, true, this._user.email)
+    this.plaidService.flagTransactions(this._userAccount.userId, ev.group.data, true, this._user.email)
       .then(() => {
         let sum = 0;
         ev.group.data.forEach(t => {
@@ -616,7 +557,7 @@ export class DashboardPage {
         });
         this._transactions.splice(this._transactions.indexOf(ev.group), 1);
         this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
-        this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, sum);
+        this.plaidService.addMonthlyAmount(this._userAccount.userId, ev.group.data[0], sum);
       }).catch(err => {
         this._demoText = err.message;
       });
@@ -625,7 +566,7 @@ export class DashboardPage {
   onFlag(ev) {
     this.plaidService.flagTransaction(this._userAccount.userId, ev.transaction, false, this._user.email)
       .then(() => {
-        this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, ev.transaction.amount, ev.transaction.amount)
+        this.plaidService.addMonthlyAmount(this._userAccount.userId, ev.transaction, ev.transaction.amount, ev.transaction.amount)
           .then(() => {
             ev.item.setElementClass(`close`, true);
             setTimeout(() => {

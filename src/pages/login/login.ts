@@ -34,30 +34,34 @@ export class LoginPage {
         this.navParams.get(`password`)
       );
     }
-    else {
-      this.afAuth.auth.onAuthStateChanged(user => {
-        if (user) {
-          // user logged in
-          console.log("logged in");
-          this.events.publish('nav:go-to-inbox');
-        } else {
-          // user logged out
-          console.log("logged out");
-        }
-      });
-    }
+    // else {
+    //   let unsubscribe = this.afAuth.auth.onAuthStateChanged(user => {
+    //     console.log(`on auth state changed in subscriber`);
+    //     if (user) {
+    //       // user logged in
+    //       console.log("logged in");
+    //       this.events.publish('nav:go-to-inbox');
+    //     } else {
+    //       // user logged out
+    //       console.log("logged out");
+    //     }
+    //     unsubscribe();
+    //   });
+    // }
   }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad LoginPage');
+    this.events.publish(`app:pageLoaded`);
   }
 
   private async signInWithData(email, password) {
     try {
       const result = await this.afAuth.auth.signInWithEmailAndPassword(email, password);
-      if (result) {
-        this.events.publish('nav:go-to-inbox');
-      }
+      // if (result) {
+      //   console.log(`on auth state changed in action`);
+      //   this.events.publish('nav:go-to-inbox');
+      // }
     } catch (e) {
       console.error(e);
       this.errMessage = e.message;

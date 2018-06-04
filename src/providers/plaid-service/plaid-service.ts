@@ -141,12 +141,40 @@ export class PlaidService {
     );
   }
 
-  public addMonthlyAmount(totalAmount, exceedAmount, totalAdd = 0, exceedAdd = 0): Promise<void> {
+  public addMonthlyAmount(userId, transaction: Transaction, totalAdd = 0, exceedAdd = 0): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      this._thisMonthAmount.update({ totalAmount: totalAmount + totalAdd, exceedAmount: exceedAmount + exceedAdd })
-        .then(() => {
-          resolve();
-        });
+
+      let monthStr = `${transaction.date.substr(0, 8)}01`;
+      let month = new Date(monthStr);
+
+      this._userMonthAmountsCollection.ref.where(`userId`, "==", userId)
+        .where(`date`, "==", month).get().then(ref => {
+          if (ref.empty) {
+            console.log(`create month`);
+            // create one!
+            let item = {} as UserMonthlyRecord;
+            item.date = month;
+            item.exceedAmount = 0;
+            item.totalAmount = 0;
+            item.userId = userId;
+            this._userMonthAmountsCollection.add(item).then(r => {
+              let doc = this.firestore.doc<UserMonthlyRecord>(`user-monthly-amount/${r.id}`);
+              doc.ref.get().then(r => {
+                doc.update(
+                  { totalAmount: r.data().totalAmount + totalAdd, exceedAmount: r.data().exceedAmount + exceedAdd }
+                ).then(() => resolve());
+              });
+            });
+          } else {
+            console.log(`found month`);
+            let doc = this.firestore.doc<UserMonthlyRecord>(`user-monthly-amount/${ref.docs[0].id}`);
+            doc.ref.get().then(r => {
+              doc.update(
+                { totalAmount: r.data().totalAmount + totalAdd, exceedAmount: r.data().exceedAmount + exceedAdd }
+              ).then(() => resolve());
+            });
+          }
+        }).catch(err => { console.log(`error: ${err.message}`) });
     });
   }
 

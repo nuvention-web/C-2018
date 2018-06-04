@@ -30,6 +30,7 @@ export class SignUpPage {
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad SignUpPage');
+    this.events.publish(`app:pageLoaded`);
   }
 
   async signUp() {

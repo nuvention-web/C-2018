@@ -15,23 +15,23 @@
 
       <button ion-item (click)="goToInbox()" *ngIf="_linkedCredential">
           <ion-avatar item-start>
-              <ion-icon name="remove-circle"></ion-icon>
+              <ion-icon name="md-list"></ion-icon>
           </ion-avatar>
           Inbox
       </button>
 
-      <button ion-item (click)="goToArchive()" *ngIf="_linkedCredential">
-          <ion-avatar item-start>
-              <ion-icon name="remove-circle"></ion-icon>
-          </ion-avatar>
-          Archive
-      </button>
-
       <button ion-item (click)="goToSummary()" *ngIf="_linkedCredential">
           <ion-avatar item-start>
-              <ion-icon name="remove-circle"></ion-icon>
+              <ion-icon name="paper"></ion-icon>
           </ion-avatar>
           Summary
+      </button>
+
+      <button ion-item (click)="goToArchive()" *ngIf="_linkedCredential">
+          <ion-avatar item-start>
+              <ion-icon name="archive"></ion-icon>
+          </ion-avatar>
+          Archive
       </button>
 
       <button ion-item (click)="unbindAccount()" *ngIf="_linkedCredential">

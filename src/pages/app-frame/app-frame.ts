@@ -59,6 +59,11 @@ export class AppFramePage {
     this.events.subscribe(`nav:sign-out`, () => this.signOut());
 
     this.events.subscribe(`user:linkStatusChanged`, () => this.checkCredentials());
+
+    this.events.subscribe(`app:pageLoaded`, () => {
+      console.log(`page loaded`);
+      this._isLoading = false;
+    });
   }
 
   ionViewDidLoad() {
@@ -71,7 +76,8 @@ export class AppFramePage {
     this._isLoading = true;
     this._signedIn = false;
 
-    this.afAuth.auth.onAuthStateChanged(user => {
+    let unsubscribe = this.afAuth.auth.onAuthStateChanged(user => {
+      console.log(`check auth state changed`);
       if (user) {
         // user logged in
         console.log("logged in");
@@ -85,12 +91,13 @@ export class AppFramePage {
         console.log("logged out");
         this.goToLogin({});
       }
+      // unsubscribe();
     });
   }
 
   private checkCredentials() {
     this._isLoading = true;
-    this.afAuth.authState.subscribe(data => {
+    let s = this.afAuth.authState.subscribe(data => {
       this._linkedCredential = false;
       this._user = new User(data);
 
@@ -110,6 +117,8 @@ export class AppFramePage {
         this._linkedCredential = false;
         this.goToLinkAccount({ user: this._user });
       });
+
+      s.unsubscribe();
     });
   }
 
@@ -128,6 +137,8 @@ export class AppFramePage {
   }
 
   goToInbox(data) {
+    console.log(`Go To Inbox!!`);
+    this._isLoading = true;
     if (data == null) data = {};
     data.userAccount = this._userAccount;
     data.user = this._user;
@@ -138,12 +149,14 @@ export class AppFramePage {
   }
 
   goToSummary(data) {
+    this._isLoading = true;
     this.menuCtrl.close();
     this.appNav.setRoot(`DetailPage`, data);
     this.titleText = `Summary`;
   }
 
   goToArchive(data) {
+    this._isLoading = true;
     data = { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken, userEmail: this._user.email };
     this.menuCtrl.close();
     this.appNav.setRoot(`TransDetailPage`, data);
@@ -151,18 +164,21 @@ export class AppFramePage {
   }
 
   goToSignUp(data) {
+    this._isLoading = true;
     this.menuCtrl.close();
     this.appNav.setRoot(`SignUpPage`, data);
     this.titleText = `Sign Up`;
   }
 
   goToLogin(data) {
+    this._isLoading = true;
     this.menuCtrl.close();
     this.appNav.setRoot(`LoginPage`, data);
     this.titleText = 'Login';
   }
 
   goToLinkAccount(data) {
+    this._isLoading = true;
     this.menuCtrl.close();
     this.appNav.setRoot(`LinkAccountPage`, data);
     this.titleText = `Link Account`;
@@ -197,7 +213,7 @@ export class AppFramePage {
   signOut() {
     this.afAuth.auth.signOut().then(() => {
       this._signedIn = false;
-      this.goToLogin(null);
+      // this.goToLogin(null);
     });
   }
 
