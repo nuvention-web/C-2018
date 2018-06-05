@@ -13,4 +13,5 @@ export class Transaction {
   transaction_id: string;
   transaction_type: string;
   love: boolean;
+  isDemo: boolean;
 }

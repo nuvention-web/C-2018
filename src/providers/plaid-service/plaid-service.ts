@@ -437,7 +437,18 @@ export class PlaidService {
   public flagTransaction(userId, transaction, loved, email): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       let batch = this.firestore.firestore.batch();
-      batch.update(this.userTransCollections.doc(`${transaction.transaction_id}`).ref, { loved: loved, flagged: true });
+      if (email == `demo@demo.com`) {
+        let t = {} as UserTransaction;
+        t.userId = userId;
+        t.transactionId = transaction.transaction_id;
+        t.date = new Date(transaction.date);
+        t.flagged = true;
+        t.loved = loved;
+        batch.set(this.userTransCollections.doc(t.transactionId).ref, t);
+        batch.set(this._demoTransactionsCollection.doc(transaction.transaction_id).ref, transaction);
+      } else {
+        batch.update(this.userTransCollections.doc(`${transaction.transaction_id}`).ref, { loved: loved, flagged: true });
+      }
       batch.commit().then(() => resolve()).catch(err => reject(err));
     });
   }
@@ -446,7 +457,18 @@ export class PlaidService {
     return new Promise<void>((resolve, reject) => {
       let batch = this.firestore.firestore.batch();
       transactions.forEach(t => {
-        batch.update(this.userTransCollections.doc(`${t.transaction_id}`).ref, { loved: loved, flagged: true });
+        if (email == `demo@demo.com`) {
+          let tr = {} as UserTransaction;
+          tr.userId = userId;
+          tr.transactionId = t.transaction_id;
+          tr.date = new Date(t.date);
+          tr.flagged = true;
+          tr.loved = loved;
+          batch.set(this.userTransCollections.doc(tr.transactionId).ref, tr);
+          batch.set(this._demoTransactionsCollection.doc(t.transaction_id).ref, t);
+        } else {
+          batch.update(this.userTransCollections.doc(`${t.transaction_id}`).ref, { loved: loved, flagged: true });
+        }
       });
       batch.commit().then(() => resolve()).catch(err => reject(err));
     });
