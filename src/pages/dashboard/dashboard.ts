@@ -229,43 +229,43 @@ export class DashboardPage {
     //   }
     // );
 
-    const options = {
-      android: {
-        senderID: `618786705474`,
-        topics: [
-          `coincious.general`
-        ]
-      },
-      ios: {
-        alert: true,
-        badge: false,
-        sound: true,
-        fcmSandbox: true,
-        // topics: [
-        //   `coincious.general`
-        // ]
-      },
-      windows: {},
-      browser: {
-        pushServiceURL: 'http://push.api.phonegap.com/v1/push'
-      }
-    };
-
-    cordova.plugins.notification.local.getIds(ids => {
-      if (ids.length == 0) return;
-      cordova.plugins.notification.local.clearAll(ids);
-    })
-
-    cordova.plugins.notification.local.schedule({
-      title: 'Time to check your payments',
-      text: 'Click me and see details',
-      trigger: { every: { weekday: 5, hour: 20, minute: 0 } }
-      // ,actions: [
-      //   { id: 'yes', title: 'Yes' },
-      //   { id: 'no', title: 'No' },
-      //   { id: 'edit', title: 'Edit' }
-      // ]
-    });
+    // const options = {
+    //   android: {
+    //     senderID: `618786705474`,
+    //     topics: [
+    //       `coincious.general`
+    //     ]
+    //   },
+    //   ios: {
+    //     alert: true,
+    //     badge: false,
+    //     sound: true,
+    //     fcmSandbox: true,
+    //     // topics: [
+    //     //   `coincious.general`
+    //     // ]
+    //   },
+    //   windows: {},
+    //   browser: {
+    //     pushServiceURL: 'http://push.api.phonegap.com/v1/push'
+    //   }
+    // };
+    //
+    // cordova.plugins.notification.local.getIds(ids => {
+    //   if (ids.length == 0) return;
+    //   cordova.plugins.notification.local.clearAll(ids);
+    // })
+    //
+    // cordova.plugins.notification.local.schedule({
+    //   title: 'Time to check your payments',
+    //   text: 'Click me and see details',
+    //   trigger: { every: { weekday: 5, hour: 20, minute: 0 } }
+    //   // ,actions: [
+    //   //   { id: 'yes', title: 'Yes' },
+    //   //   { id: 'no', title: 'No' },
+    //   //   { id: 'edit', title: 'Edit' }
+    //   // ]
+    // });
 
     // cordova.plugins.notification.local.schedule([
     //   {
@@ -369,9 +369,9 @@ export class DashboardPage {
 
   private refreshDemoTransactions() {
     let trans = [
-      { name: "Today", data: [] },
-      { name: "Yesterday", data: [] },
-      { name: "2 Days Ago", data: [] }];
+      { name: "Today", data: [], isDemo: true },
+      { name: "Yesterday", data: [], isDemo: true },
+      { name: "2 Days Ago", data: [], isDemo: true }];
     let date = new Date();
     let dateCounter = 0;
 
@@ -615,6 +615,8 @@ export class DashboardPage {
       return;
     }
 
+    console.log(ev.group);
+
 
     if (ev.group.isDemo) {
       let sum = 0;
@@ -626,6 +628,8 @@ export class DashboardPage {
       this._exceedThisV = this._exceedThisV;
       this._transactions.splice(this._transactions.indexOf(ev.group), 1);
       this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
+      console.log(`Empty transactions? ${this.emptyTransactions}`);
+      console.log(this._transactions);
       return;
     }
 

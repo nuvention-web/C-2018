@@ -313,6 +313,7 @@ export class TransDetailPage {
   }
 
   onFlag(ev) {
+    if (ev.transaction.loved == false) return;
     console.log("test w: onFlag");
     console.log("test w: monthHappy: " + this._monthHappy.toString() + "  monthunhappy: " + this._monthUnhappy.toString() + "  amount: " + this.abs(ev.transaction.amount).toString());
     this._monthHappy = this._monthHappy - this.abs(ev.transaction.amount);
@@ -328,6 +329,7 @@ export class TransDetailPage {
   }
 
   onApprove(ev) {
+    if (ev.transaction.loved == true) return;
     console.log("test w: onApprove");
     this._monthHappy = this._monthHappy + this.abs(ev.transaction.amount);
     this._monthUnhappy = this._monthUnhappy - this.abs(ev.transaction.amount);

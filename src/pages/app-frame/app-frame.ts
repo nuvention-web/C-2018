@@ -112,24 +112,24 @@ export class AppFramePage {
       this._isLoading = false;
     });
 
-    this.events.subscribe(`app:inboxTourReady`, () => {
-      this._store.get(`inboxTour`).then(
-        data => { },
-        error => {
-          this.showInboxTour();
-          this._store.set(`inboxTour`, `true`);
-        }
-      );
-    });
-    this.events.subscribe(`app:archiveTourReady`, () => {
-      this._store.get(`archiveTour`).then(
-        data => { },
-        error => {
-          this.showArchiveTour();
-          this._store.set(`archiveTour`, `true`);
-        }
-      );
-    });
+    // this.events.subscribe(`app:inboxTourReady`, () => {
+    //   this._store.get(`inboxTour`).then(
+    //     data => { },
+    //     error => {
+    //       this.showInboxTour();
+    //       this._store.set(`inboxTour`, `true`);
+    //     }
+    //   );
+    // });
+    // this.events.subscribe(`app:archiveTourReady`, () => {
+    //   this._store.get(`archiveTour`).then(
+    //     data => { },
+    //     error => {
+    //       this.showArchiveTour();
+    //       this._store.set(`archiveTour`, `true`);
+    //     }
+    //   );
+    // });
 
     // this.events.subscribe(`app:inboxTourReady`, () => this.showInboxTour());
     // this.events.subscribe(`app:archiveTourReady`, () => this.showArchiveTour());
