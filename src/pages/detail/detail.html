@@ -6,18 +6,14 @@
 -->
 <ion-header>
 
-  <ion-navbar>
-    <ion-title>Summary</ion-title>
-  </ion-navbar>
+    <ion-navbar>
+        <ion-title>detail</ion-title>
+    </ion-navbar>
 
 </ion-header>
 
 
-
-
-
 <ion-content padding>
-
     <ion-item>
         <ion-label>Date</ion-label>
         <ion-select [(ngModel)]="month" (ionChange)="getData()">
@@ -41,31 +37,34 @@
             <ion-option value=2018>2018</ion-option>
         </ion-select>
     </ion-item>
-  <br>
-  <br>
-  <div class="chart">
-    <div class="chart-wrapper">
-      <canvas id="chart-canvas"></canvas>
+    <button ion-button (click)="hide()">Hide</button>
+    <br>
+    <br>
+    <div class="chart">
+        <div class="chart-wrapper">
+            <canvas id="chart-canvas"></canvas>
+        </div>
     </div>
-  </div>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <div class="chart">
-    <div class="chart-wrapper">
-      <canvas id="chart-canvas2"></canvas>
+
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <div class="chart">
+        <div class="chart-wrapper">
+            <canvas id="chart-canvas2"></canvas>
+        </div>
     </div>
-  </div>
-
-
+    <br>
+    <br>
+    <br>
 </ion-content>
+

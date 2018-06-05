@@ -285,6 +285,7 @@ export class AppFramePage {
 
   goToSummary(data) {
     this._isLoading = true;
+    data = {userId: this._userAccount.userId, accessToken: this._userAccount.accessToken};
     this.menuCtrl.close();
     this.appNav.setRoot(`DetailPage`, data);
     this.titleText = `Summary`;
