@@ -30,22 +30,25 @@
             <ion-option value=10>November</ion-option>
             <ion-option value=11>December</ion-option>
         </ion-select>
-        <ion-select [(ngModel)]="year">
+        <ion-select [(ngModel)]="year" (ionChange)="getData()">
             <ion-option value=2015>2015</ion-option>
             <ion-option value=2016>2016</ion-option>
             <ion-option value=2017>2017</ion-option>
             <ion-option value=2018>2018</ion-option>
         </ion-select>
     </ion-item>
+    <!--
     <button ion-button (click)="hide()">Hide</button>
+    -->
     <br>
     <br>
+
     <div class="chart">
         <div class="chart-wrapper">
             <canvas id="chart-canvas"></canvas>
         </div>
     </div>
-
+    <!--
     <br>
     <br>
     <br>
@@ -66,5 +69,6 @@
     <br>
     <br>
     <br>
+    -->
 </ion-content>
 

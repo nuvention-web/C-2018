@@ -203,6 +203,7 @@ export class DetailPage {
 
     ionViewDidLoad() {
         console.log('ionViewDidLoad DetailPage');
+        this.events.publish(`app:pageLoaded`);
         this.m.set('Food and Drink', 0);
         this.m.set('Restaurants', 1);
         this.m.set('Coffee Shop', 2);
@@ -211,7 +212,8 @@ export class DetailPage {
         this.m.set('Service', 5);
         this.m.set('Transfer', 6);
         console.log("wen test 11");
-        this.getData();
+        this.chart = new Chart(`chart-canvas`, this.chartOptions);
+        //this.getData();
     }
 
     private _access_token: string = this.navParams.get("accessToken");
@@ -223,19 +225,72 @@ export class DetailPage {
     private to;
 
     getData() {
-        let trans = {};
-        this.from = new Date(this.year, this.month, 1);
-        this.to = new Date(this.year, this.month + 1, 0);
         for(var z3 = 0; z3 <  this.chartOptions.data.datasets[0].data.length; z3++) {
             this.chartOptions.data.datasets[0].data[z3] = 0;
             this.chartOptions.data.datasets[1].data[z3] = 0;
         }
+        let trans = {};
+        this.from = new Date(this.year, this.month, 1);
+        this.to = new Date(this.year, this.month + 1, 0);
+        console.log(`wen test 105 ${this.year}       ${this.to}`);
+        /*
         for(var z4 = 0; z4 <  this.chartOptions2.data.datasets[0].data.length; z4++) {
             this.chartOptions2.data.datasets[0].data[z4] = 0;
             this.chartOptions2.data.datasets[1].data[z4] = 0;
         }
+        */
+
+        this.plaidService.getTransactionsWithTimeRange(this._access_token, this.from, this.to).then(res => {
+            res.forEach(t => {
+                trans[t["transaction_id"]] = t;
+                console.log("wen test 102");
+            });
+        }).then(() => {
+            console.log(`wen test 106 ${Object.getOwnPropertyNames(trans).length}`);
+            this.plaidService.getTransactionRecords(this._userId, this.from, this.to).then(r => {
+                this._transactions.length = 0;
+                let result = r.filter(t => t.flagged == true || t.flagged == null);
+                console.log(r);
+                console.log(`wen test 103 ${Object.getOwnPropertyNames(result).length}`);
+                result.forEach(t => {
+                        console.log("wen test 104");
+                        let target = trans[t["transactionId"]];
+                        console.log(`wen test 108 ${target}`);
+                        if (target != null) {
+                            console.log(`love the item? ${t["loved"]}`);
+                            console.log(`wen test 107 ${target["date"]}`);
+                            target["loved"] = t["loved"];
+                            console.log("wen test 109");
+                            var day = new Date(target["date"]).getDay();
+                            console.log("wen test 110");
+                            if(target["loved"] == true) {
+                                this.chartOptions.data.datasets[1].data[day] += target["amount"];
+                                console.log(`wen test 101 ${day} ${target["amount"]} ${this.chartOptions.data.datasets[1].data[day]}`);
+                            }
+                            else{
+                                this.chartOptions.data.datasets[0].data[day] += target["amount"];
+                                console.log(`wen test 101 ${day} ${target["amount"]} ${this.chartOptions.data.datasets[0].data[day]}`);
+
+                            }
+                            this._transactions.push(target);
+                        }
+                        for(var z3 = 0; z3 <  this.chartOptions.data.datasets[0].data.length; z3++) {
+                            console.log(`wen test 114 ${this.chartOptions.data.datasets[0].data[z3]} ${this.chartOptions.data.datasets[1].data[z3]}`);
+                        }
+                });
+                
+            });
+        }).then( () => {
+            for(var z3 = 0; z3 <  this.chartOptions.data.datasets[0].data.length; z3++) {
+                console.log(`wen test 113 ${this.chartOptions.data.datasets[0].data[z3]} ${this.chartOptions.data.datasets[1].data[z3]}`);
+            }
+            this.roundAll();
+            this.chart = new Chart(`chart-canvas`, this.chartOptions);
+            this.chart.update();
+        });
 
 
+    /*
         this.plaidService.getTransactionsWithTimeRange(this._access_token, this.from, this.to).then(res => {
             res.forEach(t => {
                 trans[t["transaction_id"]] = t;
@@ -287,6 +342,7 @@ export class DetailPage {
                 }
             );
         });
+        */
 
 
     }
@@ -351,7 +407,7 @@ export class DetailPage {
     }
 
     round(x) {
-        return Math.round(x * 100) / 100;
+        return Math.round(x * 100.0) / 100;
     }
 
     roundAll() {
@@ -359,10 +415,12 @@ export class DetailPage {
             this.chartOptions.data.datasets[0].data[z3] = this.round(this.chartOptions.data.datasets[0].data[z3]);
             this.chartOptions.data.datasets[1].data[z3] = this.round(this.chartOptions.data.datasets[1].data[z3]);
         }
+        /*
         for(var z4 = 0; z4 <  this.chartOptions2.data.datasets[0].data.length; z4++) {
             this.chartOptions2.data.datasets[0].data[z4] = this.round(this.chartOptions2.data.datasets[0].data[z4]);
             this.chartOptions2.data.datasets[1].data[z4] = this.round(this.chartOptions2.data.datasets[1].data[z4]);
         }
+        */
 
     }
 }

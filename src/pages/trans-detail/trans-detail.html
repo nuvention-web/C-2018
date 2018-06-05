@@ -30,6 +30,6 @@
   </div>
 
   <ion-list class="purchase_wrap" id="wrap">
-    <transaction-item-2 *ngFor="let t of _transactions" [data]=t [isFlag]=false [isInDetail]=true (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-item-2>
+    <transaction-item-2 *ngFor="let t of _transactions" [data]="t" [isFlag]="false" [isInDetail]="true" (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-item-2>
   </ion-list>
 </ion-content>

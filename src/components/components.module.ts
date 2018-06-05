@@ -10,14 +10,12 @@ import { MenuComponent } from './menu/menu';
     ProgressbarComponent,
     TransactionItem_2Component,
     TransactionGroupComponent,
-    TransactionItem_2Component,
     MenuComponent],
   imports: [IonicModule],
   exports: [TransactionItemComponent,
     ProgressbarComponent,
     TransactionItem_2Component,
     TransactionGroupComponent,
-    TransactionItem_2Component,
     MenuComponent]
 })
 export class ComponentsModule { }
