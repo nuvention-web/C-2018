@@ -321,7 +321,7 @@ export class TransDetailPage {
     this.chartOptions.data.datasets[0].data[this._tempClickElement] = this.round(this._monthUnhappy);
     this.chartOptions.data.datasets[1].data[this._tempClickElement] = this.round(this._monthHappy);
     this.chart = new Chart(`chart-canvas`, this.chartOptions);
-    ev.transaction.loved = !ev.transaction.loved;
+    ev.transaction.loved = false;
     console.log(ev.transaction.transaction_id.toString());
     this.plaidService.changeLoveToFalse(ev.transaction.transaction_id);
     this.plaidService.chagneMonthAmount(this._userId, this._tempYear, this._tempMonth, this._monthUnhappy);
@@ -334,7 +334,7 @@ export class TransDetailPage {
     this.chartOptions.data.datasets[0].data[this._tempClickElement] = this.round(this._monthUnhappy);
     this.chartOptions.data.datasets[1].data[this._tempClickElement] = this.round(this._monthHappy);
     this.chart = new Chart(`chart-canvas`, this.chartOptions);
-    ev.transaction.loved = !ev.transaction.loved;
+    ev.transaction.loved = true;
     console.log(ev.transaction.transaction_id.toString());
     this.plaidService.changeLoveToTrue(ev.transaction.transaction_id);
     this.plaidService.chagneMonthAmount(this._userId, this._tempYear, this._tempMonth, this._monthUnhappy);
