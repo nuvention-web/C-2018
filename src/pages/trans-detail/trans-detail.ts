@@ -1,5 +1,5 @@
 import { Component, NgZone } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, Events } from 'ionic-angular';
 import { Chart } from 'chart.js';
 import * as pattern from 'patternomaly';
 import { UserTransaction } from "../../models/userTransaction";
@@ -153,7 +153,9 @@ export class TransDetailPage {
     public navCtrl: NavController,
     public navParams: NavParams,
     private firestore: AngularFirestore,
-    private plaidService: PlaidService) {
+    private plaidService: PlaidService,
+    private events: Events
+  ) {
     this.userMonthlyRecord = this.firestore.collection<UserMonthlyRecord>("user-monthly-amount");
     this.userTransactionCollections = this.firestore.collection<UserTransaction>("user-transactions");
     this.userAccountCollections = this.firestore.collection<UserAccount>("user-accounts");
@@ -161,6 +163,7 @@ export class TransDetailPage {
 
   ionViewDidLoad() {
     console.log("ionViewDidLoad tran-detail 1");
+    this.events.publish(`app:pageLoaded`);
     this.updateMonthLabel();
     //得到public token
     this.userAccountCollections.ref.where(`userId`, '==', this._userId).get().then(res => {
@@ -274,6 +277,7 @@ export class TransDetailPage {
               }
             });
           });
+          this.events.publish(`app:archiveTourReady`);
         });
       });
       return;
@@ -298,6 +302,7 @@ export class TransDetailPage {
             }
           });
         });
+        this.events.publish(`app:archiveTourReady`);
       });
     });
 

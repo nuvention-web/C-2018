@@ -3,62 +3,9 @@
   See http://ionicframework.com/docs/components/#navigation for more info on
   Ionic pages and navigation.
 -->
-<ion-menu [content]="content" type="overlay" class="menu">
-  <ion-header>
-    <ion-toolbar>
-      <ion-title (click)="resetDemoData()">Coinscious</ion-title>
-    </ion-toolbar>
-  </ion-header>
-  <ion-content>
-    <ion-list>
-      <button ion-item (click)="unbindAccount()" *ngIf="_linkedCredential">
-        <ion-avatar item-start>
-          <ion-icon name="remove-circle"></ion-icon>
-        </ion-avatar>
-        Unbind Account
-      </button>
-      <button ion-item (click)="signOut()">
-        <ion-avatar item-start>
-          <ion-icon name="log-out"></ion-icon>
-        </ion-avatar>
-        Sign Out
-      </button>
-    </ion-list>
-  </ion-content>
-</ion-menu>
 
-<ion-content #content class="dashboard-content">
-  <ion-header *ngIf="!_isLoading">
-
-    <ion-navbar>
-      <ion-buttons left>
-        <button ion-button icon-only (click)="openMenu()">
-          <ion-icon name="menu"></ion-icon>
-        </button>
-      </ion-buttons>
-
-      <ion-title>Inbox</ion-title>
-      <!-- <h3>Coinscious</h3> -->
-
-      <!-- <ion-buttons right>
-        <button ion-button icon-only (click)="signOut()">
-          <ion-icon name="log-out"></ion-icon>
-        </button>
-      </ion-buttons> -->
-    </ion-navbar>
-
-  </ion-header>
-
-  <div class="loading" *ngIf="_isLoading">
-    <h4><ion-spinner></ion-spinner> Loading</h4>
-  </div>
-
-  <!-- <div *ngIf="!_linkedCredential">
-    {{_demoText}}
-  </div> -->
-
-
-  <div class="brief" *ngIf="!_isLoading && _signedIn && _linkedCredential" (click)="goToDetail()">
+<ion-content class="dashboard-content">
+  <div class="brief" (click)="goToDetail()">
     <h4>
      This Month
      <span>
@@ -94,50 +41,23 @@
     <ng-progress id="exceed-last" #exceedLast color="#FF7043" class="lastMonth" [min]="0"></ng-progress>
     <ng-progress id="total-last-below" #totalLastBelow color="#00E676" class="lastMonth" [min]="1" *ngIf="_spendingMoreLast"></ng-progress>
     <div class="button-wrapper">
-      <button ion-button clear small> View Details </button>
+      <button ion-button clear small class="view-details"> View Details </button>
     </div>
   </div>
 
-  <ion-content *ngIf="!_isLoading && _signedIn" class="inbox">
-    <div class="unlinked-wrapper" *ngIf="!_linkedCredential">
-      <div class="unlinked" *ngIf="!_linkedCredential">
-        <p *ngIf="!_linkedCredential">
-          Looks like Coinscious is not quite conscious about any of your account.
-        </p>
-        <button ion-button block color="secondary" *ngIf="!_linkedCredential" (click)="linkAccount()">Sync my account now</button>
-      </div>
-    </div>
-
-    <div class="linked" *ngIf="_linkedCredential">
-
-      <!-- <div class="points" (click)="goToDetail()">
-          Your Points: {{_point}}
-        </div> -->
-
+  <ion-content class="inbox">
+    <div class="linked">
       <div class="purchases-wrapper">
         <!-- <div>
           {{_demoText}}
         </div> -->
         <div>
           <h2>New Purchases</h2>
-          <!-- <ion-badge *ngIf="!_transactions && _transactions.length != 0">{{_transaction.length}}</ion-badge> -->
         </div>
-        <!-- <hr/> -->
         <div class="empty-msg" *ngIf="!_transactions || _transactions.length == 0 || emptyTransactions">
-          No transactions.
+          Congrats! You have reflected on all of your recent purchases -- check back later when you have new purchases to reflect on.
         </div>
         <transaction-group *ngFor="let t of _transactions" [transactions]=t (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-group>
-        <!-- <transaction-item *ngFor="let t of _transactions" [data]=t [isFlag]=false [isInDetail]=false (onApprove)="onApprove($event)" (onFlag)="onFlag($event)"></transaction-item> -->
-
-        <!--
-          <div class="trans_header">
-            <h2>Flagged Expenses</h2>
-          </div>
-          <div class="empty-msg" *ngIf="!_flaggedTransactions || _flaggedTransactions.length == 0">
-            No flagged Expenses.
-          </div>
-          <transaction-item *ngFor="let ft of _flaggedTransactions" [data]=ft [isFlag]=true [isInDetail]=false (onApproveFlag)="onApproveFlag($event)"></transaction-item>
-          -->
       </div>
     </div>
 

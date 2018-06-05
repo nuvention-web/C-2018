@@ -15,6 +15,7 @@ import { NgProgressModule } from '@ngx-progressbar/core';
 import { HTTP } from '@ionic-native/http';
 import { MyApp } from './app.component';
 import { PlaidService } from '../providers/plaid-service/plaid-service';
+import { SecureStorage } from '@ionic-native/secure-storage';
 
 @NgModule({
   declarations: [
@@ -38,11 +39,12 @@ import { PlaidService } from '../providers/plaid-service/plaid-service';
     SplashScreen,
     Push,
     LocalNotifications,
-    { provide: ErrorHandler, useClass: IonicErrorHandler },
     PlaidService,
     AngularFireAuth,
     InAppBrowser,
-    HTTP
+    HTTP,
+    SecureStorage,
+    { provide: ErrorHandler, useClass: IonicErrorHandler }
   ]
 })
 export class AppModule { }

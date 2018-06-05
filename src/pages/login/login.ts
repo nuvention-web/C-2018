@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, Events } from 'ionic-angular';
 import { AngularFireAuth } from 'angularfire2/auth';
 // import * as firebase from 'firebase/app';
 import { UserSign } from '../../models/userSign';
@@ -24,7 +24,9 @@ export class LoginPage {
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
-    private afAuth: AngularFireAuth) {
+    private afAuth: AngularFireAuth,
+    private events: Events
+  ) {
 
     if (this.navParams.get(`from_sign_up`)) {
       this.signInWithData(
@@ -32,30 +34,34 @@ export class LoginPage {
         this.navParams.get(`password`)
       );
     }
-    else {
-      this.afAuth.auth.onAuthStateChanged(user => {
-        if (user) {
-          // user logged in
-          console.log("logged in");
-          this.navCtrl.setRoot(`DashboardPage`, { signed_in: true, linked_credential: false, need_refresh: true });
-        } else {
-          // user logged out
-          console.log("logged out");
-        }
-      });
-    }
+    // else {
+    //   let unsubscribe = this.afAuth.auth.onAuthStateChanged(user => {
+    //     console.log(`on auth state changed in subscriber`);
+    //     if (user) {
+    //       // user logged in
+    //       console.log("logged in");
+    //       this.events.publish('nav:go-to-inbox');
+    //     } else {
+    //       // user logged out
+    //       console.log("logged out");
+    //     }
+    //     unsubscribe();
+    //   });
+    // }
   }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad LoginPage');
+    this.events.publish(`app:pageLoaded`);
   }
 
   private async signInWithData(email, password) {
     try {
       const result = await this.afAuth.auth.signInWithEmailAndPassword(email, password);
-      if (result) {
-        this.navCtrl.setRoot(`DashboardPage`, { signed_in: true, linked_credential: false, need_refresh: true });
-      }
+      // if (result) {
+      //   console.log(`on auth state changed in action`);
+      //   this.events.publish('nav:go-to-inbox');
+      // }
     } catch (e) {
       console.error(e);
       this.errMessage = e.message;
@@ -67,7 +73,7 @@ export class LoginPage {
   }
 
   goToSignUp() {
-    this.navCtrl.push(`SignUpPage`);
+    this.events.publish('nav:go-to-sign-up');
   }
 
 }

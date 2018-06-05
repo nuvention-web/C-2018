@@ -75,7 +75,7 @@ export class TransactionItemComponent {
 
   onDrag(item, event) {
     let shift = event.getOpenAmount();
-    // console.log(shift);
+    // console.log(item);
     if (shift > 0) {
       item.setElementClass("drag-right", false);
       item.setElementClass("drag-left", true);

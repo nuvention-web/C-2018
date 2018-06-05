@@ -1,14 +1,14 @@
 import { Component, NgZone, ViewChild } from '@angular/core';
-import { IonicPage, NavController, NavParams, Platform, ActionSheetController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, Platform, ActionSheetController, Events } from 'ionic-angular';
 import { MenuController } from 'ionic-angular';
-import { PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
-import { Push } from '@ionic-native/push';
+// import { PushObject, PushOptions, NotificationEventResponse } from '@ionic-native/push';
+// import { Push } from '@ionic-native/push';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { NgProgressComponent } from '@ngx-progressbar/core';
 // import { Observable } from "rxjs/Observable";
-import { ISubscription } from "rxjs/Subscription";
+import { ISubscription, Subscription } from "rxjs/Subscription";
 
 import { Notification } from '../../models/notification';
 import { UserAccount } from '../../models/userAccount';
@@ -42,22 +42,12 @@ export class DashboardPage {
   @ViewChild(`totalLastBelow`) totalLastBelow: NgProgressComponent;
   @ViewChild(`totalThisBelow`) totalThisBelow: NgProgressComponent;
 
-  private notificationCollections: AngularFirestoreCollection<Notification>;
-  private userAccountCollections: AngularFirestoreCollection<UserAccount>;
   private userAccount: AngularFirestoreDocument<UserAccount>;
-  private _uaSubscription: ISubscription;
   private _userAccount: UserAccount;
   public _demoText: string = `No message.`;
   private months = [`Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`, `Jul`, `Aug`, `Sep`, `Oct`, `Nov`, `Dec`];
   private _transactions: any = [];
   private _transHistory: UserTransaction[] = null;
-  private _flaggedTransactions: any = [];
-  // private public_token: string;
-  private _point: number = 100;
-  // private _platformSubscriber;
-  // private _count = 0;
-  private _linkedCredential = false;
-  private _signedIn = false;
   private _user: User;
   public emptyTransactions = true;
 
@@ -68,65 +58,10 @@ export class DashboardPage {
   private _spendingMoreThis = false;
   private _spendingMoreLast = false;
 
-  private _isLoading = true;
+  private _subscriptions = [];
 
   private linkHandler;
   private environment = `development`;
-
-  private fakeData = [
-    {
-      name: `Today`,
-      data: [
-        { name: `McDonald's`, amount: `10.74`, date: `2017-02-27`, love: false },
-        { name: `Starbucks`, amount: `7.32`, date: `2017-02-27`, love: false },
-        { name: `Uber 063015 SF**POOL**`, amount: `5.40`, date: `2017-02-25`, love: false }
-      ]
-    },
-    {
-      name: `Yesterday`,
-      data: [
-        { name: `United Airlines`, amount: `500.00`, date: `2017-02-23`, love: false },
-        { name: `AmazonPrime Membersh`, amount: `49.00`, date: `2017-02-23`, love: false }
-      ]
-    },
-    {
-      name: `2 days ago`,
-      data: [
-        { name: `TARGET.COM * 800-591-3869`, amount: `42.49`, date: `2017-02-22`, love: false },
-        { name: `AMAZON MKTPLACE`, amount: `27.57`, date: `2017-02-20`, love: false },
-        { name: `#03428 JEWEL EVANSTON IL`, amount: `56.20`, date: `2017-02-19`, love: false },
-        { name: `Nicor Gas NICPayment 1388019270`, amount: `50.00`, date: `2017-02-16`, love: false },
-        { name: `ZARA USA 3697 CHICAGO IL`, amount: `138.21`, date: `2017-02-12`, love: false },
-        { name: `B&H PHOTO`, amount: `298.00`, date: `2017-02-08`, love: false },
-        { name: `LITTLE TOKYO ROSEMONT`, amount: `11.15`, date: `2017-02-03`, love: false },
-        { name: `MICHAEL KORS`, amount: `141.41`, date: `2017-02-08`, love: false },
-        { name: `CALVIN KLEIN`, amount: `26.13`, date: `2017-02-06`, love: false },
-        { name: `USA*CANTEEN VENDING`, amount: `1.25`, date: `2017-02-03`, love: false },
-        { name: `NORRIS CENTER FOOD COUR`, amount: `8.02`, date: `2017-02-02`, love: false },
-        { name: `LIBRARY CAFE BERGSON`, amount: `3.85`, date: `2017-02-08`, love: false }
-      ]
-    }
-  ];
-
-  private fakeTrans = [
-    { name: `TARGET.COM * 800-591-3869`, amount: 42.49, date: `2017-02-22`, love: false },
-    { name: `AMAZON MKTPLACE`, amount: 27.57, date: `2017-02-20`, love: false },
-    { name: `#03428 JEWEL EVANSTON IL`, amount: 56.20, date: `2017-02-19`, love: false },
-    { name: `Nicor Gas NICPayment 1388019270`, amount: 50.00, date: `2017-02-16`, love: false },
-    { name: `ZARA USA 3697 CHICAGO IL`, amount: 138.21, date: `2017-02-12`, love: false },
-    { name: `B&H PHOTO`, amount: 298.00, date: `2017-02-08`, love: false },
-    { name: `LITTLE TOKYO ROSEMONT`, amount: 11.15, date: `2017-02-03`, love: false },
-    { name: `MICHAEL KORS`, amount: 141.41, date: `2017-02-08`, love: false },
-    { name: `CALVIN KLEIN`, amount: 26.13, date: `2017-02-06`, love: false },
-    { name: `USA*CANTEEN VENDING`, amount: 1.25, date: `2017-02-03`, love: false },
-    { name: `NORRIS CENTER FOOD COUR`, amount: 8.02, date: `2017-02-02`, love: false },
-    { name: `LIBRARY CAFE BERGSON`, amount: 3.85, date: `2017-02-08`, love: false },
-    { name: `United Airlines`, amount: 500.00, date: `2017-02-23`, love: false },
-    { name: `AmazonPrime Membersh`, amount: 49.00, date: `2017-02-23`, love: false },
-    { name: `McDonald's`, amount: 10.74, date: `2017-02-27`, love: false },
-    { name: `Starbucks`, amount: 7.32, date: `2017-02-27`, love: false },
-    { name: `Uber 063015 SF**POOL**`, amount: 5.40, date: `2017-02-25`, love: false }
-  ];
 
   private demoTrans = [
     {
@@ -171,7 +106,7 @@ export class DashboardPage {
 
 
   constructor(
-    private push: Push,
+    // private push: Push,
     private firestore: AngularFirestore,
     public navCtrl: NavController,
     public navParams: NavParams,
@@ -183,12 +118,20 @@ export class DashboardPage {
     private menuCtrl: MenuController,
     // private loadingCtrl: LoadingController,
     // private toastCtrl: ToastController,
-    private iab: InAppBrowser
+    private iab: InAppBrowser,
+    private events: Events
   ) {
-    this.notificationCollections = this.firestore.collection<Notification>('notifications');
-    this.userAccountCollections = this.firestore.collection<UserAccount>('user-accounts');
 
-    this.checkAuthState();
+    // this.checkAuthState();
+    if (this.navParams.get(`user`)) {
+      this._user = this.navParams.get(`user`);
+    }
+    if (this.navParams.get(`userAccount`)) {
+      this._userAccount = this.navParams.get(`userAccount`);
+    }
+    if (this.navParams.get(`userAccountId`)) {
+      this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${this.navParams.get(`userAccountId`)}`);
+    }
   }
 
   ionViewWillEnter() {
@@ -196,12 +139,77 @@ export class DashboardPage {
 
   ionViewWillLeave() {
     // this._platformSubscriber.unsubscribe();
+    this._subscriptions.forEach((s: Subscription) => {
+      s.unsubscribe();
+    });
   }
 
   ionViewDidEnter() {
   }
 
   ionViewDidLoad() {
+    console.log(`Dashboard loaded`);
+    this.events.publish(`app:pageLoaded`);
+    this.initPage();
+  }
+
+  private initPage() {
+    if (this._userAccount == null) return;
+    console.log(`received user account`);
+    console.log(this._userAccount);
+    // this._userAccount = ua;
+    // Demo process for demo@demo.com
+
+    this.initOthers();
+
+    if (this._user.email == `demo@demo.com`) {
+      // this._isLoading = false;
+      // this._linkedCredential = true;
+      this.emptyTransactions = false;
+      this.refreshDemoTransactions();
+      this.plaidService.getMonthlyAmount(this._user.uid);
+      this.userAccount.update({ lastSignIn: new Date() });
+
+      this.events.publish(`app:inboxTourReady`);
+
+      return;
+    }
+
+    if (this._userAccount.unflaggedCount == null) {
+      this.userAccount.update({ unflaggedCount: 0 });
+      this._userAccount.unflaggedCount = 0;
+    }
+
+    // get transaction data we have
+    let to = new Date();
+    let from = this._userAccount.lastSignIn;
+    if (from == null) from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 3);
+
+    // Get new transactions from last login
+    this.plaidService.getTransactionsWithTimeRange(this._userAccount.accessToken, from, to).then(newTransactions => {
+      // Add those new transactions into database
+      console.log(`[Unflagged Transactions] Got new Transactions`);
+      this.plaidService.addNewTransactions(this._userAccount.userId, newTransactions.filter(t => t.amount > 0)).then(() => {
+        console.log(`[Unflagged Transactions] Added new Transactions`);
+        this.plaidService.getUnflaggedTransactions(this._userAccount.userId).then(unflaggedTransactions => {
+          // Calc the oldest time & get transactions from plaid
+          console.log(`[Unflagged Transactions] Got unflagged Transactions`);
+          // console.log(unflaggedTransactions);
+          let fromTime = new Date(unflaggedTransactions[unflaggedTransactions.length - 1].date);
+          // Get old transactions unflagged (How???)
+          this.plaidService.getTransactionsWithTimeRange(this._userAccount.accessToken, fromTime, to).then(transactions => {
+            this.shapeTransactions(transactions.filter(t => unflaggedTransactions.some(ut => ut.transactionId == t.transaction_id)));
+            this.userAccount.update({ lastSignIn: to }).then(() => this.events.publish(`app:inboxTourReady`));
+          });
+        }).catch(err => console.log(`get unflagged transactions error`));
+      }).catch(err => console.log(`add new transactions error`));
+    }).catch(err => console.log(`get new transactions error`));
+
+    this.plaidService.getMonthlyAmount(this._userAccount.userId);
+  }
+
+  private initOthers() {
+
     // this.push.hasPermission().then(
     //   (res: any) => {
     //     if (res.isEnabled) {
@@ -212,27 +220,43 @@ export class DashboardPage {
     //   }
     // );
 
-    const options: PushOptions = {
-      android: {
-        senderID: `618786705474`,
-        topics: [
-          `coincious.general`
-        ]
-      },
-      ios: {
-        alert: true,
-        badge: false,
-        sound: true
-        // fcmSandbox: true,
-        // topics: [
-        //   `coincious.general`
-        // ]
-      },
-      windows: {},
-      browser: {
-        pushServiceURL: 'http://push.api.phonegap.com/v1/push'
-      }
-    };
+    // const options = {
+    //   android: {
+    //     senderID: `618786705474`,
+    //     topics: [
+    //       `coincious.general`
+    //     ]
+    //   },
+    //   ios: {
+    //     alert: true,
+    //     badge: false,
+    //     sound: true,
+    //     fcmSandbox: true,
+    //     // topics: [
+    //     //   `coincious.general`
+    //     // ]
+    //   },
+    //   windows: {},
+    //   browser: {
+    //     pushServiceURL: 'http://push.api.phonegap.com/v1/push'
+    //   }
+    // };
+    //
+    // cordova.plugins.notification.local.getIds(ids => {
+    //   if (ids.length == 0) return;
+    //   cordova.plugins.notification.local.clearAll(ids);
+    // })
+    //
+    // cordova.plugins.notification.local.schedule({
+    //   title: 'Time to check your payments',
+    //   text: 'Click me and see details',
+    //   trigger: { every: { weekday: 5, hour: 20, minute: 0 } }
+    //   // ,actions: [
+    //   //   { id: 'yes', title: 'Yes' },
+    //   //   { id: 'no', title: 'No' },
+    //   //   { id: 'edit', title: 'Edit' }
+    //   // ]
+    // });
 
     // cordova.plugins.notification.local.schedule([
     //   {
@@ -249,9 +273,9 @@ export class DashboardPage {
     // ]);
 
     // const pushObject: PushObject = this.push.init(options);
-    const pushObject = PushNotification.init(options);
+    // const pushObject = PushNotification.init(options);
 
-    pushObject.unregister(() => console.log(`[Push] unregistered`), () => console.log(`[Push] unregister error`));
+    // pushObject.unregister(() => console.log(`[Push] unregistered`), () => console.log(`[Push] unregister error`));
 
     // pushObject.on('notification', notification => {
     //   console.log(`[Push] received message, title: ${notification.title}, message: ${notification.message}`);
@@ -296,154 +320,42 @@ export class DashboardPage {
     // });
     // pushObject.on('error', error => console.error(`[Push] Error with Push plugin: ${error.message}`));
 
-    // this.plaidService.transactions$.subscribe(transactions => {
-    //   if (transactions) {
-    //     console.log(`New Transactions arrived`);
-    //     console.log(transactions);
-    //     this.reshapeTransactions(transactions);
-    //   }
-    // }, err => {
-    //   console.log(`New Transaction Error: ${err.message}`);
-    //   this._demoText = `${err.message}`
-    // });
-
-    this.plaidService.lastMonthlyAmounts$.subscribe(record => {
-      console.log(`[Monthly Record] Got last month record.`);
-      console.log(record);
-      // this.zone.run(() => {
-      // });
-      if (record != null) {
-        this._totalLastV = record.totalAmount;
-        this._exceedLastV = record.exceedAmount;
-      }
-      this.calculateBar();
-    });
-
-    this.plaidService.thisMonthlyAmounts$.subscribe(record => {
-      console.log(`[Monthly Record] Got this month record.`);
-      console.log(record);
-      // this.zone.run(() => {
-      // });
-      if (record != null) {
-        this._totalThisV = record.totalAmount;
-        this._exceedThisV = record.exceedAmount;
-      }
-      this.calculateBar();
-    });
-
-    this.plaidService.testString$.subscribe(s => {
-      this.zone.run(() => {
-        this._demoText = s;
-      });
-    });
-
-    // this._transactions = this.fakeData;
-    // this.emptyTransactions = false;
-  }
-
-  private checkAuthState() {
-    this._isLoading = true;
-    this._signedIn = false;
-    this.afAuth.auth.onAuthStateChanged(user => {
-      if (user) {
-        // user logged in
-        console.log("logged in");
-
-        this._linkedCredential = false;
-        this._signedIn = true;
-        this.checkCredentials();
-      } else {
-        // user logged out
-        console.log("logged out");
-        this.navCtrl.setRoot(`LoginPage`);
-      }
-    });
-  }
-
-  private checkCredentials() {
-    this._isLoading = true;
-    this.afAuth.authState.subscribe(data => {
-      this._linkedCredential = false;
-      this._user = new User(data);
-
-      this.userAccountCollections.ref.where(`userId`, '==', this._user.uid).get().then(res => {
-        if (!res.empty) {
-          console.log(`found credential`);
-          this._isLoading = false;
-          this._linkedCredential = true;
-          this.getUserInfo(res.docs[0].id);
-          // this._userAccount = res[0].data();
-          // this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${res[0].id}`);
-        } else {
-          this._isLoading = false;
-          this._linkedCredential = false;
+    this._subscriptions.push(
+      this.plaidService.lastMonthlyAmounts$.subscribe(record => {
+        console.log(`[Monthly Record] Got last month record.`);
+        console.log(record);
+        if (record == null) return;
+        // this.zone.run(() => {
+        // });
+        if (record != null) {
+          this._totalLastV = record.totalAmount;
+          this._exceedLastV = record.exceedAmount;
         }
-      }, err => {
-        console.log(`error`);
-        this._isLoading = false;
-        this._linkedCredential = false;
-      });
-    });
-  }
+        this.calculateBar();
+      })
+    );
+    this._subscriptions.push(
+      this.plaidService.thisMonthlyAmounts$.subscribe(record => {
+        console.log(`[Monthly Record] Got this month record.`);
+        console.log(record);
+        if (record == null) return;
+        // this.zone.run(() => {
+        // });
+        if (record != null) {
+          this._totalThisV = record.totalAmount;
+          this._exceedThisV = record.exceedAmount;
+        }
+        this.calculateBar();
+      })
+    );
 
-  private getUserInfo(userId) {
-    this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${userId}`);
-
-    this._uaSubscription = this.userAccount.valueChanges().subscribe(ua => {
-      console.log(`received user account`);
-      console.log(ua);
-      this._userAccount = ua;
-      this._uaSubscription.unsubscribe();
-
-      this._isLoading = false;
-      // this.calculateBar();
-
-      // Demo process for demo@demo.com
-
-      if (this._user.email == `demo@demo.com`) {
-        this._isLoading = false;
-        this._linkedCredential = true;
-        this.emptyTransactions = false;
-        this.refreshDemoTransactions();
-        this.plaidService.getMonthlyAmount(this._user.uid);
-        this.userAccount.update({ lastSignIn: new Date() });
-        return;
-      }
-
-      if (this._userAccount.unflaggedCount == null) {
-        this.userAccount.update({ unflaggedCount: 0 });
-        this._userAccount.unflaggedCount = 0;
-      }
-
-      // get transaction data we have
-      let to = new Date();
-      let from = this._userAccount.lastSignIn;
-      if (from == null) from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 3);
-
-      // Get new transactions from last login
-      this.plaidService.getTransactionsWithTimeRange(ua.accessToken, from, to).then(newTransactions => {
-        // Add those new transactions into database
-        console.log(`[Unflagged Transactions] Got new Transactions`);
-        this.plaidService.addNewTransactions(ua.userId, newTransactions.filter(t => t.amount > 0)).then(() => {
-          console.log(`[Unflagged Transactions] Added new Transactions`);
-          this.plaidService.getUnflaggedTransactions(ua.userId).then(unflaggedTransactions => {
-            // Calc the oldest time & get transactions from plaid
-            console.log(`[Unflagged Transactions] Got unflagged Transactions`);
-            // console.log(unflaggedTransactions);
-            let fromTime = new Date(unflaggedTransactions[unflaggedTransactions.length - 1].date);
-            // Get old transactions unflagged (How???)
-            this.plaidService.getTransactionsWithTimeRange(ua.accessToken, fromTime, to).then(transactions => {
-              this.shapeTransactions(transactions.filter(t => unflaggedTransactions.some(ut => ut.transactionId == t.transaction_id)));
-              this.userAccount.update({ lastSignIn: to });
-            });
-          }).catch(err => console.log(`get unflagged transactions error`));
-        }).catch(err => console.log(`add new transactions error`));
-      }).catch(err => console.log(`get new transactions error`));
-
-      this.plaidService.getMonthlyAmount(ua.userId);
-    });
-    // this.plaidService.refreshTransaction(this.userAccount.);
-    // this._isLoading = false;
+    this._subscriptions.push(
+      this.plaidService.testString$.subscribe(s => {
+        this.zone.run(() => {
+          this._demoText = s;
+        });
+      })
+    );
   }
 
   private refreshDemoTransactions() {
@@ -551,8 +463,6 @@ export class DashboardPage {
   }
 
   private calculateBar() {
-    if (!this._signedIn || !this._linkedCredential) return;
-
     let absTotalThis = Math.abs(this._totalThisV);
     let absTotalLast = Math.abs(this._totalLastV);
     let absExceedThis = Math.abs(this._exceedThisV);
@@ -567,8 +477,8 @@ export class DashboardPage {
     if (this.totalThis != null) this.totalThis.set(absTotalThis / total * 100);
     if (this.totalLastBelow != null) this.totalLastBelow.set(absTotalLast / total * 100);
     if (this.totalThisBelow != null) this.totalThisBelow.set(absTotalThis / total * 100);
-    this.exceedLast.set(absExceedLast / total * 100);
-    this.exceedThis.set(absExceedThis / total * 100);
+    if (this.exceedLast != null) this.exceedLast.set(absExceedLast / total * 100);
+    if (this.exceedThis != null) this.exceedThis.set(absExceedThis / total * 100);
     console.log(`${this._totalLastV}, ${this._totalThisV}`);
     console.log(`${this._exceedLastV}, ${this._exceedThisV}`);
     console.log(`${this._totalLastV / total * 100}, ${this._totalThisV / total * 100}`);
@@ -602,10 +512,10 @@ export class DashboardPage {
   onApprove(ev) {
     if (ev.transaction != null) {
       // single transaction
-      let t = ev.transaction;
+      let t: Transaction = ev.transaction;
       this.plaidService.flagTransaction(this._userAccount.userId, t, true, this._user.email)
         .then(() => {
-          this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, t.amount);
+          this.plaidService.addMonthlyAmount(this._userAccount.userId, t, t.amount);
           ev.item.setElementClass(`close`, true);
           setTimeout(() => {
             ev.group.data.splice(ev.index, 1);
@@ -617,7 +527,7 @@ export class DashboardPage {
 
       return;
     }
-    this.plaidService.flagTransaction(this._userAccount.userId, ev.group.data, true, this._user.email)
+    this.plaidService.flagTransactions(this._userAccount.userId, ev.group.data, true, this._user.email)
       .then(() => {
         let sum = 0;
         ev.group.data.forEach(t => {
@@ -625,7 +535,7 @@ export class DashboardPage {
         });
         this._transactions.splice(this._transactions.indexOf(ev.group), 1);
         this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
-        this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, sum);
+        this.plaidService.addMonthlyAmount(this._userAccount.userId, ev.group.data[0], sum);
       }).catch(err => {
         this._demoText = err.message;
       });
@@ -634,7 +544,7 @@ export class DashboardPage {
   onFlag(ev) {
     this.plaidService.flagTransaction(this._userAccount.userId, ev.transaction, false, this._user.email)
       .then(() => {
-        this.plaidService.addMonthlyAmount(this._totalThisV, this._exceedThisV, ev.transaction.amount, ev.transaction.amount)
+        this.plaidService.addMonthlyAmount(this._userAccount.userId, ev.transaction, ev.transaction.amount, ev.transaction.amount)
           .then(() => {
             ev.item.setElementClass(`close`, true);
             setTimeout(() => {
@@ -651,157 +561,8 @@ export class DashboardPage {
   }
 
   goToDetail() {
-    this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken, userEmail: this._user.email });
-  }
-
-  linkAccount() {
-    if (this._user.email == `demo@demo.com`) {
-      this.environment = `sandbox`;
-      // let newDoc = {} as UserAccount;
-      // newDoc.userId = this._user.uid;
-      // this.userAccountCollections.add(newDoc).then(() => {
-      //   this.checkCredentials();
-      // });
-      // return;
-    }
-
-    if (this.platform.is('android')) {
-      this.linkHandler = Plaid.create({
-        clientName: `Coinscious`,
-        // env: `sandbox`,
-        env: `${this.environment}`,
-        key: `28f2e54388e2f6a1aca59e789d353b`,
-        product: [`transactions`],
-        forceIframe: true,
-        selectAccount: false,
-        onSuccess: (public_token, metadata) => {
-          if (this._user.email == `demo@demo.com`) {
-            let newDoc = {} as UserAccount;
-            newDoc.userId = this._user.uid;
-            newDoc.unflaggedCount = 0;
-            this.userAccountCollections.add(newDoc).then(() => {
-              this.checkCredentials();
-            });
-            return;
-          }
-          this.plaidService.getAccessToken(public_token).then(access_token => {
-            let newDoc = {} as UserAccount;
-            newDoc.publicToken = public_token;
-            newDoc.accessToken = access_token;
-            newDoc.userId = this._user.uid;
-            newDoc.unflaggedCount = 0;
-            this.userAccountCollections.add(newDoc).then(() => {
-              this.checkCredentials();
-            });
-          });
-          // console.log("Login Succeed");
-          // this._linkedCredential = true;
-        }
-      });
-      this.linkHandler.open();
-      return;
-    }
-
-    const linkUrl =
-      `https://cdn.plaid.com/link/v2/stable/link.html?` +
-      `key=28f2e54388e2f6a1aca59e789d353b` + `&` +
-      // `env=sandbox` + `&` +
-      `env=${this.environment}` + `&` +
-      `clientName=Coinscious` + `&` +
-      `product=transactions` + `&` +
-      `isMobile=true` + `&` +
-      `isWebview=true` + `&` +
-      `apiVersion=v2` + `&` +
-      `selectAccount=false`;
-
-    const browser = this.iab.create(linkUrl, '_blank', 'location=no,toolbar=no');
-    browser.on('loadstop').subscribe(event => {
-      console.log(`[InAppBrowser] On Load Stop : ${event.url}`);
-    });
-    browser.on('loaderror').subscribe(event => {
-      console.log(`[InAppBrowser] On Load Error : ${event.url}`);
-    });
-    browser.on('loadstart').subscribe(event => {
-      console.log(`[InAppBrowser] On Load Start: ${event.url}`);
-      const redirectUrl = event.url;
-      const url = redirectUrl.split(`://`);
-      // const protocol = url[0];
-      const path = url[1].split(`?`);
-      const ev = path[0];
-
-      if (ev == `exit`) browser.close();
-      if (ev != `connected`) return;
-
-      // this._isLoading = true;
-      browser.close();
-
-      const queryArr = path[1].split(`&`);
-      let queries = {};
-      queryArr.forEach(q => {
-        if (q.indexOf(`=`) < 0) return;
-        let query = q.split(`=`);
-        queries[query[0]] = query[1];
-      });
-      console.log(`Get public token! Token: ${queries[`public_token`]}`);
-
-      if (this._user.email == `demo@demo.com`) {
-        let newDoc = {} as UserAccount;
-        newDoc.userId = this._user.uid;
-        newDoc.unflaggedCount = 0;
-        this.userAccountCollections.add(newDoc).then(() => {
-          this.checkCredentials();
-        });
-        return;
-      }
-
-      const public_token = queries[`public_token`];
-      this.plaidService.getAccessToken(public_token).then(access_token => {
-        console.log(`Get access token! Token: ${access_token}`);
-        let newDoc = {} as UserAccount;
-        newDoc.publicToken = public_token;
-        newDoc.accessToken = access_token;
-        newDoc.userId = this._user.uid;
-        newDoc.unflaggedCount = 0;
-        this.userAccountCollections.add(newDoc).then(() => {
-          this.checkCredentials();
-        });
-      });
-    });
-    // browser.on('loaderror').subscribe(event => {
-    //   console.log(`[InAppBrowser] On Load Error: What happened?, ${event.url}`);
-    // });
-  }
-
-  signOut() {
-    this.afAuth.auth.signOut().then(() => {
-      this.navCtrl.setRoot(`LoginPage`);
-    });
-  }
-
-  unbindAccount() {
-    let actionSheet = this.actionSheetCtrl.create({
-      title: 'Unbind Account?',
-      buttons: [
-        {
-          text: 'Unbind',
-          role: 'unbind',
-          handler: () => {
-            // console.log('Destructive clicked');
-            this._isLoading = true;
-            this.userAccount.delete().then(() => {
-              this.checkCredentials();
-            });
-          }
-        }, {
-          text: 'Cancel',
-          role: 'cancel',
-          handler: () => {
-            console.log('Cancel clicked');
-          }
-        }
-      ]
-    });
-    actionSheet.present();
+    // this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken, userEmail: this._user.email });
+    this.events.publish(`nav:go-to-archive`);
   }
 
   resetDemoData() {
