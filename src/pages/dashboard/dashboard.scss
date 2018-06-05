@@ -4,6 +4,10 @@ page-dashboard {
   background-color: #f3f3f3;
 
   .dashboard-content {
+    .scroll-content {
+      padding: 0 !important;
+    }
+
     ion-content {
       background-color: #f3f3f3;
     }
@@ -60,7 +64,7 @@ page-dashboard {
       padding: 0;
       border-bottom: 1px solid #cccccc;
       display: block;
-      position: fixed;
+      position: absolute;
       top: 0;
       left: 0;
       background-color: white;
