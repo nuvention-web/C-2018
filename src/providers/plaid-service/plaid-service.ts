@@ -445,6 +445,7 @@ export class PlaidService {
         t.flagged = true;
         t.loved = loved;
         batch.set(this.userTransCollections.doc(t.transactionId).ref, t);
+        batch.set(this._demoTransactionsCollection.doc(transaction.transaction_id).ref, transaction);
       } else {
         batch.update(this.userTransCollections.doc(`${transaction.transaction_id}`).ref, { loved: loved, flagged: true });
       }
@@ -463,7 +464,8 @@ export class PlaidService {
           tr.date = new Date(t.date);
           tr.flagged = true;
           tr.loved = loved;
-          batch.set(this.userTransCollections.doc(t.transactionId).ref, tr);
+          batch.set(this.userTransCollections.doc(tr.transactionId).ref, tr);
+          batch.set(this._demoTransactionsCollection.doc(t.transaction_id).ref, t);
         } else {
           batch.update(this.userTransCollections.doc(`${t.transaction_id}`).ref, { loved: loved, flagged: true });
         }
