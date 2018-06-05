@@ -39,12 +39,12 @@ import { SecureStorage } from '@ionic-native/secure-storage';
     SplashScreen,
     Push,
     LocalNotifications,
-    { provide: ErrorHandler, useClass: IonicErrorHandler },
     PlaidService,
     AngularFireAuth,
     InAppBrowser,
     HTTP,
-    SecureStorage
+    SecureStorage,
+    { provide: ErrorHandler, useClass: IonicErrorHandler }
   ]
 })
 export class AppModule { }
