@@ -275,7 +275,7 @@ export class DetailPage {
                             }
                             if(this.clickedElementindex == day) {
                                 this._transactions.push(target);
-                                console.log(`wen test 116 ${this.clickedElementindex} ${day}`);
+                                console.log(`wen test 116 ${this._transactions.length}`);
                             }
                         }
                         for(var z3 = 0; z3 <  this.chartOptions.data.datasets[0].data.length; z3++) {
