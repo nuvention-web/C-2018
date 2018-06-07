@@ -97,8 +97,8 @@ export class DetailPage {
 
                 if (activePoints.length > 0) {
                     // get the internal index of slice in pie chart
-                    var clickedElementindex = activePoints[0]["_index"];
-                    this.gotoSummaryDetail(clickedElementindex);
+                    this.clickedElementindex = activePoints[0]["_index"];
+                    //this.gotoSummaryDetail(clickedElementindex);
                     //this.generateNewTransactions(clickedElementindex);
                 }
             },
@@ -223,6 +223,7 @@ export class DetailPage {
     private _transactions: any = [];
     private from;
     private to;
+    private clickedElementindex = new Date().getDay();
 
     getData() {
         for(var z3 = 0; z3 <  this.chartOptions.data.datasets[0].data.length; z3++) {
@@ -265,14 +266,17 @@ export class DetailPage {
                             console.log("wen test 110");
                             if(target["loved"] == true) {
                                 this.chartOptions.data.datasets[1].data[day] += target["amount"];
-                                console.log(`wen test 101 ${day} ${target["amount"]} ${this.chartOptions.data.datasets[1].data[day]}`);
+                                //console.log(`wen test 101 ${day} ${target["amount"]} ${this.chartOptions.data.datasets[1].data[day]}`);
                             }
                             else{
                                 this.chartOptions.data.datasets[0].data[day] += target["amount"];
-                                console.log(`wen test 101 ${day} ${target["amount"]} ${this.chartOptions.data.datasets[0].data[day]}`);
+                                //console.log(`wen test 101 ${day} ${target["amount"]} ${this.chartOptions.data.datasets[0].data[day]}`);
 
                             }
-                            this._transactions.push(target);
+                            if(this.clickedElementindex == day) {
+                                this._transactions.push(target);
+                                console.log(`wen test 116 ${this.clickedElementindex} ${day}`);
+                            }
                         }
                         for(var z3 = 0; z3 <  this.chartOptions.data.datasets[0].data.length; z3++) {
                             console.log(`wen test 114 ${this.chartOptions.data.datasets[0].data[z3]} ${this.chartOptions.data.datasets[1].data[z3]}`);
@@ -284,6 +288,7 @@ export class DetailPage {
             for(var z3 = 0; z3 <  this.chartOptions.data.datasets[0].data.length; z3++) {
                 console.log(`wen test 113 ${this.chartOptions.data.datasets[0].data[z3]} ${this.chartOptions.data.datasets[1].data[z3]}`);
             }
+            console.log(`wen test 115 ${this._transactions.length}`);
             this.roundAll();
             this.chart = new Chart(`chart-canvas`, this.chartOptions);
             this.chart.update();
