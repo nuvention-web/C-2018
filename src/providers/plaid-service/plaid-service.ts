@@ -447,7 +447,7 @@ export class PlaidService {
         batch.set(this.userTransCollections.doc(t.transactionId).ref, t);
         batch.set(this._demoTransactionsCollection.doc(transaction.transaction_id).ref, transaction);
       } else {
-        batch.update(this.userTransCollections.doc(`${transaction.transaction_id}`).ref, { loved: loved, flagged: true });
+        batch.update(this.userTransCollections.doc(transaction.transaction_id).ref, { loved: loved, flagged: true });
       }
       batch.commit().then(() => resolve()).catch(err => reject(err));
     });

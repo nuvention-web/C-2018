@@ -682,7 +682,7 @@ export class DashboardPage {
 
   goToDetail() {
     // this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken, userEmail: this._user.email });
-      //this.navCtrl.push(`DetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken, userEmail: this._user.email });
+    //this.navCtrl.push(`DetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken, userEmail: this._user.email });
     this.events.publish(`nav:go-to-archive`);
     //  this.gotoSummaryDetail(0);
   }
@@ -697,28 +697,28 @@ export class DashboardPage {
 
 
 
-/*
-    private _transactions2: any = [];
-    gotoSummaryDetail(clickedElementindex) {
-        let trans = {};
-        this.plaidService.getTransactionsWithTimeRange(this._userAccount.accessToken, new Date(2018, 4), new Date(2018, 5)).then(res => {
-            res.forEach(t => {
-                trans[t["transaction_id"]] = t;
-            });
-        }).then(() => {
-            this.plaidService.getTransactionRecords(this._userAccount.accessToken, new Date(2018, 4), new Date(2018, 5)).then(r => {
-                this._transactions2.length = 0;
-                let result = r.filter(t => t.flagged == true || t.flagged == null);
-                console.log(r);
-                result.forEach(t => {
-                    let target = trans[t["transactionId"]];
-                    if (target != null && t["date"].getDay() == clickedElementindex) {
-                        target["loved"] = t["loved"];
-                        this._transactions2.push(target);
-                    }
-                });
-            });
-        });
-    }
-    */
+  /*
+      private _transactions2: any = [];
+      gotoSummaryDetail(clickedElementindex) {
+          let trans = {};
+          this.plaidService.getTransactionsWithTimeRange(this._userAccount.accessToken, new Date(2018, 4), new Date(2018, 5)).then(res => {
+              res.forEach(t => {
+                  trans[t["transaction_id"]] = t;
+              });
+          }).then(() => {
+              this.plaidService.getTransactionRecords(this._userAccount.accessToken, new Date(2018, 4), new Date(2018, 5)).then(r => {
+                  this._transactions2.length = 0;
+                  let result = r.filter(t => t.flagged == true || t.flagged == null);
+                  console.log(r);
+                  result.forEach(t => {
+                      let target = trans[t["transactionId"]];
+                      if (target != null && t["date"].getDay() == clickedElementindex) {
+                          target["loved"] = t["loved"];
+                          this._transactions2.push(target);
+                      }
+                  });
+              });
+          });
+      }
+      */
 }
