@@ -4,6 +4,7 @@
   See http://ionicframework.com/docs/components/#navigation for more info on
   Ionic pages and navigation.
 -->
+<!--
 <ion-header>
 
     <ion-navbar>
@@ -11,12 +12,15 @@
     </ion-navbar>
 
 </ion-header>
+-->
 
 
 <ion-content padding>
+    <br>
+    <br>
     <ion-item>
         <ion-label>Date</ion-label>
-        <ion-select [(ngModel)]="month" (ionChange)="getData()">
+        <ion-select [(ngModel)]="month" (ionChange)="getData2()">
             <ion-option value=0>January</ion-option>
             <ion-option value=1>February</ion-option>
             <ion-option value=2>March</ion-option>
@@ -30,16 +34,13 @@
             <ion-option value=10>November</ion-option>
             <ion-option value=11>December</ion-option>
         </ion-select>
-        <ion-select [(ngModel)]="year" (ionChange)="getData()">
+        <ion-select [(ngModel)]="year" (ionChange)="getData2()">
             <ion-option value=2015>2015</ion-option>
             <ion-option value=2016>2016</ion-option>
             <ion-option value=2017>2017</ion-option>
             <ion-option value=2018>2018</ion-option>
         </ion-select>
     </ion-item>
-    <!--
-    <button ion-button (click)="hide()">Hide</button>
-    -->
     <br>
     <br>
 
@@ -48,27 +49,10 @@
             <canvas id="chart-canvas"></canvas>
         </div>
     </div>
-    <!--
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <div class="chart">
-        <div class="chart-wrapper">
-            <canvas id="chart-canvas2"></canvas>
-        </div>
-    </div>
-    <br>
-    <br>
-    <br>
-    -->
+
+    <ion-list class="purchase_wrap">
+        <transaction-item-2 *ngFor="let t of _transactions" [data]="t" [isFlag]="false" [isInDetail]="true"></transaction-item-2>
+    </ion-list>
+
 </ion-content>
 
