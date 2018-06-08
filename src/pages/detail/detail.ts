@@ -147,17 +147,15 @@ export class DetailPage {
         let trans = {};
         this.from = new Date(this.year, this.month, 1);
         this.to = new Date(this.year, this.month + 1, 0);
-        console.log(`wen test 1: this.to: ${this.to} this.year: ${this.year} this.month: ${this.month}`)
+        console.log(`wen test 1: this.to: ${this.to} this.year: ${this.year} this.month: ${this.month}`);
         var i = 0;
         this.plaidService.getTransactionsWithTimeRange(this._access_token, this.from, this.to).then(res => {
             res.forEach(t => {
                 trans[t["transaction_id"]] = t;
             });
-            console.log(`wen test 2: ${i}`);
             i++;
             this.clearData();
             this.plaidService.getTransactionRecords(this._userId, this.from, this.to).then(r => {
-                console.log(`wen test 3: ${i}`);
                 i++;
                 this._transactions.length = 0;
                 let result = r.filter(t => t.flagged == true || t.flagged == null);
@@ -179,10 +177,8 @@ export class DetailPage {
                             if(clickedElementindex == day) {
                                 this._transactions.push(target);
                             }
-                            console.log('wen test 1000');
                         }
                 });
-                console.log("wen test 1001");
                 this.roundAll();
                 this.chart = new Chart(`chart-canvas`, this.chartOptions);
                 this.chart.update();
