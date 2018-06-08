@@ -107,7 +107,7 @@ export class DetailPage {
   };
 
   demoItem = { name: `Domino's Pizza`, amount: 37.87, loved: false };
-  showDetail = true;
+  showDetail = false;
 
   constructor(
     private zone: NgZone,
