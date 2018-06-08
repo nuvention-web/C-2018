@@ -198,7 +198,7 @@ export class DashboardPage {
     this.plaidService.getTransactionsWithTimeRange(this._userAccount.accessToken, from, to).then(newTransactions => {
       // Add those new transactions into database
       console.log(`[Unflagged Transactions] Got new Transactions`);
-      this.plaidService.addNewTransactions(this._userAccount.userId, newTransactions.filter(t => t.amount > 0)).then(() => {
+      this.plaidService.addNewTransactions(this._userAccount.userId, newTransactions.filter(t => t.amount > 0 && !t.pending)).then(() => {
         console.log(`[Unflagged Transactions] Added new Transactions`);
         this.plaidService.getUnflaggedTransactions(this._userAccount.userId).then(unflaggedTransactions => {
           // Calc the oldest time & get transactions from plaid
