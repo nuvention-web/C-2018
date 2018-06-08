@@ -3,6 +3,7 @@ import { IonicPage, NavController, NavParams, Platform, ActionSheetController, E
 import { Chart } from 'chart.js';
 import * as pattern from 'patternomaly';
 import { UserTransaction } from "../../models/userTransaction";
+import { Transaction } from "../../models/Transaction";
 import { UserAccount } from "../../models/userAccount";
 import { PlaidService } from '../../providers/plaid-service/plaid-service';
 import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
@@ -90,12 +91,13 @@ export class DetailPage {
         }],
       },
       onClick: (evt) => {
-        var activePoints = this.chart.getElementsAtEvent(evt);
+        var activePoints = this.chart.getElementAtEvent(evt);
 
         if (activePoints.length > 0) {
           var clickedElementindex = activePoints[0]["_index"];
           //this.clearData();
-          this.getData(clickedElementindex);
+          // this.getData(clickedElementindex);
+          this.applyFilter(0, clickedElementindex, activePoints[0]["_datasetIndex"] != 0);
           this.showDetail = true;
         }
       },
@@ -173,7 +175,8 @@ export class DetailPage {
 
         if (activePoints.length > 0) {
           var clickedElementindex = activePoints[0]["_index"];
-          this.getData(clickedElementindex);
+          // this.getData(clickedElementindex);
+          this.applyFilter(1, clickedElementindex, activePoints[0]["_datasetIndex"] != 0);
           this.showDetail2 = true;
         }
       },
@@ -208,7 +211,7 @@ export class DetailPage {
     // this.chart.update();
     // this.chart2 = new Chart(`chart-canvas-2`, this.chartOptions2);
     // this.chart2.update();
-    this.getData(new Date().getDay());
+    this.getData();
   }
 
   private _access_token: string = this.navParams.get("accessToken");
@@ -217,6 +220,8 @@ export class DetailPage {
   private year = new Date().getFullYear();
   private _transactions: any = [];
   private _transactions2: any = [];
+  private trans: Transaction[] = [];
+  private records: UserTransaction[] = [];
   private from;
   private to;
   clearData() {
@@ -231,7 +236,7 @@ export class DetailPage {
     this._transactions2 = [];
   }
 
-  getData(clickedElementindex) {
+  getData() {
     let trans = {};
     this.from = new Date(this.year, this.month, 1);
     this.to = new Date(this.year, this.month + 1, 0);
@@ -240,11 +245,17 @@ export class DetailPage {
       res.forEach(t => {
         trans[t["transaction_id"]] = t;
       });
+      this.trans = res;
+      console.log(`[Summary] Got transactions`);
+      console.log(this.trans);
       this.clearData();
       this.plaidService.getTransactionRecords(this._userId, this.from, this.to).then(r => {
         this._transactions.length = 0;
         this._transactions2.length = 0;
-        let result = r.filter(t => t.flagged == true || t.flagged == null);
+        let result = r.filter(t => t.flagged == true);
+        this.records = result;
+        console.log(`[Summary] Got records`);
+        console.log(this.records);
         this.clearData();
         result.forEach(t => {
           let target = trans[t["transactionId"]];
@@ -258,8 +269,8 @@ export class DetailPage {
                 if (this.m.has(target["category"][z6]))
                   temp = this.m.get(target["category"][z6]);
                 this.chartOptions2.data.datasets[1].data[temp] += target["amount"];
-                if (temp == clickedElementindex)
-                  this._transactions2.push(target);
+                // if (temp == clickedElementindex)
+                //   this._transactions2.push(target);
               }
             }
             else {
@@ -269,13 +280,13 @@ export class DetailPage {
                 if (this.m.has(target["category"][z6]))
                   temp = this.m.get(target["category"][z6]);
                 this.chartOptions2.data.datasets[0].data[temp] += target["amount"];
-                if (temp == clickedElementindex)
-                  this._transactions2.push(target);
+                // if (temp == clickedElementindex)
+                //   this._transactions2.push(target);
               }
             }
-            if (clickedElementindex == day) {
-              this._transactions.push(target);
-            }
+            // if (clickedElementindex == day) {
+            // this._transactions.push(target);
+            // }
           }
         });
         this.roundAll();
@@ -291,7 +302,38 @@ export class DetailPage {
 
   getData2() {
     var clickedElementindex = new Date().getDay();
-    this.getData(clickedElementindex);
+    this.getData();
+  }
+
+  applyFilter(chartIndex, index, isGoodPurchase) {
+    let result = [];
+
+    console.log(`[Summary Filter] applying filter, ${chartIndex}, ${index}, ${isGoodPurchase}`)
+
+    switch (chartIndex) {
+      case 0:
+        result = this.trans.filter((t: Transaction) => {
+          let day = new Date(t.date).getDay();
+          let tr = this.records.find((r: UserTransaction) => r.transactionId == t.transaction_id);
+          let loved = tr == null ? false : tr.loved;
+          return tr != null && day == index && loved == isGoodPurchase;
+        });
+        break;
+      case 1:
+        result = this.trans.filter((t: Transaction) => {
+          let tr = this.records.find((r: UserTransaction) => r.transactionId == t.transaction_id);
+          let loved = tr == null ? false : tr.loved;
+          let haveTargetCat = t.category.some(c => this.m.has(c) && this.m.get(c) == index);
+          if (!haveTargetCat) haveTargetCat = index == 6;
+          return tr != null && loved == isGoodPurchase && haveTargetCat;
+        });
+        break;
+    }
+    console.log(`[Summary Filter]`, result);
+    console.log(`[Summary Filter] End`);
+
+    this._transactions = result;
+    this._transactions2 = result;
   }
 
   round(x) {

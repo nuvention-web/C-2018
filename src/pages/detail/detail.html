@@ -38,33 +38,33 @@
     </ion-card>
   </div>
 
-    <div class="float-window-wrapper" [hidden]="!showDetail2">
-        <ion-card class="float-window">
-            <ion-header>
-                <ion-toolbar>
-                    <ion-buttons right>
-                        <button ion-button icon-only (click)="closeWindow()">
-                            <ion-icon name="close"></ion-icon>
-                        </button>
-                    </ion-buttons>
-                    <ion-title>Details</ion-title>
-                </ion-toolbar>
-            </ion-header>
-            <ion-content>
-                <ion-list class="purchase_wrap">
-                    <!-- <transaction-item-2 [data]="demoItem" [isFlag]="false" [isInDetail]="true"></transaction-item-2> -->
-                    <transaction-item-2 *ngFor="let t of _transactions2" [data]="t" [isFlag]="false" [isInDetail]="true"></transaction-item-2>
-                </ion-list>
-            </ion-content>
-        </ion-card>
-    </div>
+  <div class="float-window-wrapper" [hidden]="!showDetail2">
+    <ion-card class="float-window">
+      <ion-header>
+        <ion-toolbar>
+          <ion-buttons right>
+            <button ion-button icon-only (click)="closeWindow()">
+                <ion-icon name="close"></ion-icon>
+            </button>
+          </ion-buttons>
+          <ion-title>Details</ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-list class="purchase_wrap">
+          <!-- <transaction-item-2 [data]="demoItem" [isFlag]="false" [isInDetail]="true"></transaction-item-2> -->
+          <transaction-item-2 *ngFor="let t of _transactions2" [data]="t" [isFlag]="false" [isInDetail]="true"></transaction-item-2>
+        </ion-list>
+      </ion-content>
+    </ion-card>
+  </div>
 
   <div class="chart">
     <ion-item class="selector">
       <ion-select [(ngModel)]="year" (ionChange)="getData2()">
-        <ion-option value=2015>2015</ion-option>
+        <!-- <ion-option value=2015>2015</ion-option>
         <ion-option value=2016>2016</ion-option>
-        <ion-option value=2017>2017</ion-option>
+        <ion-option value=2017>2017</ion-option> -->
         <ion-option value=2018>2018</ion-option>
       </ion-select>
       <ion-select [(ngModel)]="month" (ionChange)="getData2()">
