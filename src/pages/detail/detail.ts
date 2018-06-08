@@ -148,22 +148,17 @@ export class DetailPage {
         this.from = new Date(this.year, this.month, 1);
         this.to = new Date(this.year, this.month + 1, 0);
         console.log(`wen test 1: this.to: ${this.to} this.year: ${this.year} this.month: ${this.month}`);
-        var i = 0;
         this.plaidService.getTransactionsWithTimeRange(this._access_token, this.from, this.to).then(res => {
             res.forEach(t => {
                 trans[t["transaction_id"]] = t;
             });
-            i++;
             this.clearData();
             this.plaidService.getTransactionRecords(this._userId, this.from, this.to).then(r => {
-                i++;
                 this._transactions.length = 0;
                 let result = r.filter(t => t.flagged == true || t.flagged == null);
                 this.clearData();
                 result.forEach(t => {
                         let target = trans[t["transactionId"]];
-                        console.log(`wen test 4: ${i}`);
-                        i++;
                         if (target != null) {
                             target["loved"] = t["loved"];
                             var day = new Date(target["date"]).getDay();
@@ -182,19 +177,16 @@ export class DetailPage {
                 this.roundAll();
                 this.chart = new Chart(`chart-canvas`, this.chartOptions);
                 this.chart.update();
-
             })
         });
 
     }
-
 
     getData2() {
         var clickedElementindex = new Date().getDay();
         this.clearData();
         this.getData(clickedElementindex);
     }
-
 
     round(x) {
         return Math.round(x * 100.0) / 100;
