@@ -15,44 +15,64 @@
 -->
 
 
+
 <ion-content padding>
-    <br>
-    <br>
-    <ion-item>
-        <ion-label>Date</ion-label>
-        <ion-select [(ngModel)]="month" (ionChange)="getData2()">
-            <ion-option value=0>January</ion-option>
-            <ion-option value=1>February</ion-option>
-            <ion-option value=2>March</ion-option>
-            <ion-option value=3>April</ion-option>
-            <ion-option value=4>May</ion-option>
-            <ion-option value=5>June</ion-option>
-            <ion-option value=6>July</ion-option>
-            <ion-option value=7>August</ion-option>
-            <ion-option value=8>September</ion-option>
-            <ion-option value=9>October</ion-option>
-            <ion-option value=10>November</ion-option>
-            <ion-option value=11>December</ion-option>
-        </ion-select>
-        <ion-select [(ngModel)]="year" (ionChange)="getData2()">
-            <ion-option value=2015>2015</ion-option>
-            <ion-option value=2016>2016</ion-option>
-            <ion-option value=2017>2017</ion-option>
-            <ion-option value=2018>2018</ion-option>
-        </ion-select>
+  <div class="float-window-wrapper" [hidden]="!showDetail">
+    <ion-card class="float-window">
+      <ion-header>
+        <ion-toolbar>
+          <ion-buttons right>
+            <button ion-button icon-only (click)="closeWindow()">
+              <ion-icon name="close"></ion-icon>
+            </button>
+          </ion-buttons>
+          <ion-title>Details</ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-list class="purchase_wrap">
+          <!-- <transaction-item-2 [data]="demoItem" [isFlag]="false" [isInDetail]="true"></transaction-item-2> -->
+          <transaction-item-2 *ngFor="let t of _transactions" [data]="t" [isFlag]="false" [isInDetail]="true"></transaction-item-2>
+        </ion-list>
+      </ion-content>
+    </ion-card>
+  </div>
+
+  <div class="chart">
+    <ion-item class="selector">
+      <ion-select [(ngModel)]="year" (ionChange)="getData2()">
+        <ion-option value=2015>2015</ion-option>
+        <ion-option value=2016>2016</ion-option>
+        <ion-option value=2017>2017</ion-option>
+        <ion-option value=2018>2018</ion-option>
+      </ion-select>
+      <ion-select [(ngModel)]="month" (ionChange)="getData2()">
+        <ion-option value=0>January</ion-option>
+        <ion-option value=1>February</ion-option>
+        <ion-option value=2>March</ion-option>
+        <ion-option value=3>April</ion-option>
+        <ion-option value=4>May</ion-option>
+        <ion-option value=5>June</ion-option>
+        <ion-option value=6>July</ion-option>
+        <ion-option value=7>August</ion-option>
+        <ion-option value=8>September</ion-option>
+        <ion-option value=9>October</ion-option>
+        <ion-option value=10>November</ion-option>
+        <ion-option value=11>December</ion-option>
+      </ion-select>
     </ion-item>
-    <br>
-    <br>
-
-    <div class="chart">
-        <div class="chart-wrapper">
-            <canvas id="chart-canvas"></canvas>
-        </div>
+    <ion-label>
+      <h2>Day of Week</h2>
+    </ion-label>
+    <div class="chart-wrapper">
+      <canvas id="chart-canvas"></canvas>
     </div>
-
-    <ion-list class="purchase_wrap">
-        <transaction-item-2 *ngFor="let t of _transactions" [data]="t" [isFlag]="false" [isInDetail]="true"></transaction-item-2>
-    </ion-list>
+    <ion-label>
+      <h2>By Category</h2>
+    </ion-label>
+    <div class="chart-wrapper">
+      <canvas id="chart-canvas-2"></canvas>
+    </div>
+  </div>
 
 </ion-content>
-
