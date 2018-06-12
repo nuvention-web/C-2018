@@ -43,43 +43,45 @@ export class AppFramePage {
 
   private _store;
 
+  public fontWeights = [500, 300, 300, 300, 300];
+
   private demoTrans = [
     {
       dateOffset: 1, // yesterday
       transactions: [
-        { name: `AMAZON MKTPLACE`, amount: 75, love: false },
-        { name: `TKNAMEBAR & RESTAURANT`, amount: 42.63, love: false },
-        { name: `THE SECOND CITY THEATER`, amount: 62, love: false },
-        { name: `Uber 063015 SF**POOL**`, amount: 15, love: false },
-        { name: `LYFT *RIDE LYFT.COM`, amount: 18, love: false }
+        { name: `AMAZON MKTPLACE`, amount: 75, love: false, category: [`Others`] },
+        { name: `TKNAMEBAR & RESTAURANT`, amount: 42.63, love: false, category: [`Restaurants`] },
+        { name: `THE SECOND CITY THEATER`, amount: 62, love: false, category: [`Others`] },
+        { name: `Uber 063015 SF**POOL**`, amount: 15, love: false, category: [`Service`] },
+        { name: `LYFT *RIDE LYFT.COM`, amount: 18, love: false, category: [`Service`] }
       ]
     },
     {
       dateOffset: 24,
       transactions: [
-        { name: `AMAZON MKTPLACE`, amount: 216, love: true },
-        { name: `Trader Joe's`, amount: 37.57, love: false },
-        { name: `T.K. Foodservice`, amount: 12.84, love: false }
+        { name: `AMAZON MKTPLACE`, amount: 216, love: true, category: [`Others`] },
+        { name: `Trader Joe's`, amount: 37.57, love: false, category: [`Others`] },
+        { name: `T.K. Foodservice`, amount: 12.84, love: false, category: [`Restaurants`] }
       ]
     },
     {
       dateOffset: 32,
       transactions: [
-        { name: `Airbnb`, amount: 100, love: true },
-        { name: `Men's Warehouse`, amount: 40, love: true },
-        { name: `DSW, Inc.`, amount: 20, love: true }
+        { name: `Airbnb`, amount: 100, love: true, category: [`Others`] },
+        { name: `Men's Warehouse`, amount: 40, love: true, category: [`Others`] },
+        { name: `DSW, Inc.`, amount: 20, love: true, category: [`Service`] }
       ]
     },
     {
       dateOffset: 0,
       transactions: [
-        { name: `VENTRA WEBSITE 877-669-8368`, amount: 105, love: false },
-        { name: `AMAZON MKTPLACE`, amount: 25, love: false },
-        { name: `Domino's Pizza`, amount: 37.87, love: false },
-        { name: `Sluggers World Class Sports Bar`, amount: 24, love: false },
-        { name: `LYFT *RIDE LYFT.COM`, amount: 18, love: false },
-        { name: `AMAZON MKTPLACE`, amount: 258, love: false },
-        { name: `United Airlines`, amount: 315, love: false }
+        { name: `VENTRA WEBSITE 877-669-8368`, amount: 105, love: false, category: [`Service`] },
+        { name: `AMAZON MKTPLACE`, amount: 25, love: false, category: [`Others`] },
+        { name: `Domino's Pizza`, amount: 37.87, love: false, category: [`Restaurants`] },
+        { name: `Sluggers World Class Sports Bar`, amount: 24, love: false, category: [`Food and Drink`] },
+        { name: `LYFT *RIDE LYFT.COM`, amount: 18, love: false, category: [`Service`] },
+        { name: `AMAZON MKTPLACE`, amount: 258, love: false, category: [`Others`] },
+        { name: `United Airlines`, amount: 315, love: false, category: [`Others`] }
       ]
     }
   ];
@@ -112,24 +114,24 @@ export class AppFramePage {
       this._isLoading = false;
     });
 
-    // this.events.subscribe(`app:inboxTourReady`, () => {
-    //   this._store.get(`inboxTour`).then(
-    //     data => { },
-    //     error => {
-    //       this.showInboxTour();
-    //       this._store.set(`inboxTour`, `true`);
-    //     }
-    //   );
-    // });
-    // this.events.subscribe(`app:archiveTourReady`, () => {
-    //   this._store.get(`archiveTour`).then(
-    //     data => { },
-    //     error => {
-    //       this.showArchiveTour();
-    //       this._store.set(`archiveTour`, `true`);
-    //     }
-    //   );
-    // });
+    this.events.subscribe(`app:inboxTourReady`, () => {
+      this._store.get(`inboxTour`).then(
+        data => { },
+        error => {
+          this.showInboxTour();
+          this._store.set(`inboxTour`, `true`);
+        }
+      );
+    });
+    this.events.subscribe(`app:archiveTourReady`, () => {
+      this._store.get(`archiveTour`).then(
+        data => { },
+        error => {
+          this.showArchiveTour();
+          this._store.set(`archiveTour`, `true`);
+        }
+      );
+    });
 
     // this.events.subscribe(`app:inboxTourReady`, () => this.showInboxTour());
     // this.events.subscribe(`app:archiveTourReady`, () => this.showArchiveTour());
@@ -338,14 +340,24 @@ export class AppFramePage {
     this.menuCtrl.close();
     this.appNav.setRoot(`DashboardPage`, data);
     this.titleText = `Inbox`;
+
+    for (let i = 0; i < 5; i++) {
+      this.fontWeights[i] = 300;
+    }
+    this.fontWeights[0] = 500;
   }
 
   goToSummary(data) {
     this._isLoading = true;
-    data = { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken };
+    data = { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken, email: this._user.email };
     this.menuCtrl.close();
     this.appNav.setRoot(`DetailPage`, data);
     this.titleText = `Summary`;
+
+    for (let i = 0; i < 5; i++) {
+      this.fontWeights[i] = 300;
+    }
+    this.fontWeights[1] = 500;
   }
 
   goToArchive(data) {
@@ -354,6 +366,11 @@ export class AppFramePage {
     this.menuCtrl.close();
     this.appNav.setRoot(`TransDetailPage`, data);
     this.titleText = `Archive`;
+
+    for (let i = 0; i < 5; i++) {
+      this.fontWeights[i] = 300;
+    }
+    this.fontWeights[2] = 500;
   }
 
   goToSignUp(data) {

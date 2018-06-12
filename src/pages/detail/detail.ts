@@ -171,7 +171,7 @@ export class DetailPage {
         }],
       },
       onClick: (evt) => {
-        var activePoints = this.chart2.getElementsAtEvent(evt);
+        var activePoints = this.chart2.getElementAtEvent(evt);
 
         if (activePoints.length > 0) {
           var clickedElementindex = activePoints[0]["_index"];
@@ -216,6 +216,7 @@ export class DetailPage {
 
   private _access_token: string = this.navParams.get("accessToken");
   private _userId: string = this.navParams.get("userId");
+  private _email: string = this.navParams.get("email");
   private month = new Date().getMonth();
   private year = new Date().getFullYear();
   private _transactions: any = [];
@@ -237,67 +238,77 @@ export class DetailPage {
   }
 
   getData() {
-    let trans = {};
     this.from = new Date(this.year, this.month, 1);
     this.to = new Date(this.year, this.month + 1, 0);
     console.log(`wen test 1: this.to: ${this.to} this.year: ${this.year} this.month: ${this.month}`);
-    this.plaidService.getTransactionsWithTimeRange(this._access_token, this.from, this.to).then(res => {
-      res.forEach(t => {
-        trans[t["transaction_id"]] = t;
-      });
-      this.trans = res;
-      console.log(`[Summary] Got transactions`);
-      console.log(this.trans);
-      this.clearData();
-      this.plaidService.getTransactionRecords(this._userId, this.from, this.to).then(r => {
-        this._transactions.length = 0;
-        this._transactions2.length = 0;
-        let result = r.filter(t => t.flagged == true);
-        this.records = result;
-        console.log(`[Summary] Got records`);
-        console.log(this.records);
-        this.clearData();
-        result.forEach(t => {
-          let target = trans[t["transactionId"]];
-          if (target != null) {
-            target["loved"] = t["loved"];
-            var day = new Date(target["date"]).getDay();
-            if (target["loved"] == true) {
-              this.chartOptions.data.datasets[1].data[day] += target["amount"];
-              for (let z6 = 0; z6 < target["category"].length; z6++) {
-                let temp = 6;
-                if (this.m.has(target["category"][z6]))
-                  temp = this.m.get(target["category"][z6]);
-                this.chartOptions2.data.datasets[1].data[temp] += target["amount"];
-                // if (temp == clickedElementindex)
-                //   this._transactions2.push(target);
-              }
-            }
-            else {
-              this.chartOptions.data.datasets[0].data[day] += target["amount"];
-              for (let z6 = 0; z6 < target["category"].length; z6++) {
-                let temp = 6;
-                if (this.m.has(target["category"][z6]))
-                  temp = this.m.get(target["category"][z6]);
-                this.chartOptions2.data.datasets[0].data[temp] += target["amount"];
-                // if (temp == clickedElementindex)
-                //   this._transactions2.push(target);
-              }
-            }
-            // if (clickedElementindex == day) {
-            // this._transactions.push(target);
-            // }
-          }
-        });
-        this.roundAll();
+    if (this._email = `demo@demo.com`) {
+      this.plaidService.getDemoTransactions().then(res => this.processData(res));
+      return;
+    }
 
-        if (this.chart == null) this.chart = new Chart(`chart-canvas`, this.chartOptions);
-        if (this.chart2 == null) this.chart2 = new Chart(`chart-canvas-2`, this.chartOptions2);
-        this.chart.update();
-        this.chart2.update();
-      })
+    this.plaidService.getTransactionsWithTimeRange(this._access_token, this.from, this.to).then(
+      res => this.processData(res)
+    );
+
+  }
+
+  processData(res) {
+    let trans = {};
+
+    res.forEach(t => {
+      trans[t["transaction_id"]] = t;
     });
+    this.trans = res;
+    console.log(`[Summary] Got transactions`);
+    console.log(this.trans);
+    this.clearData();
+    this.plaidService.getTransactionRecords(this._userId, this.from, this.to).then(r => {
+      this._transactions.length = 0;
+      this._transactions2.length = 0;
+      let result = r.filter(t => t.flagged == true);
+      this.records = result;
+      console.log(`[Summary] Got records`);
+      console.log(this.records);
+      this.clearData();
+      result.forEach(t => {
+        let target = trans[t["transactionId"]];
+        if (target != null) {
+          target["loved"] = t["loved"];
+          var day = new Date(target["date"]).getDay();
+          if (target["loved"] == true) {
+            this.chartOptions.data.datasets[1].data[day] += target["amount"];
+            for (let z6 = 0; z6 < target["category"].length; z6++) {
+              let temp = 6;
+              if (this.m.has(target["category"][z6]))
+                temp = this.m.get(target["category"][z6]);
+              this.chartOptions2.data.datasets[1].data[temp] += target["amount"];
+              // if (temp == clickedElementindex)
+              //   this._transactions2.push(target);
+            }
+          }
+          else {
+            this.chartOptions.data.datasets[0].data[day] += target["amount"];
+            for (let z6 = 0; z6 < target["category"].length; z6++) {
+              let temp = 6;
+              if (this.m.has(target["category"][z6]))
+                temp = this.m.get(target["category"][z6]);
+              this.chartOptions2.data.datasets[0].data[temp] += target["amount"];
+              // if (temp == clickedElementindex)
+              //   this._transactions2.push(target);
+            }
+          }
+          // if (clickedElementindex == day) {
+          // this._transactions.push(target);
+          // }
+        }
+      });
+      this.roundAll();
 
+      if (this.chart == null) this.chart = new Chart(`chart-canvas`, this.chartOptions);
+      if (this.chart2 == null) this.chart2 = new Chart(`chart-canvas-2`, this.chartOptions2);
+      this.chart.update();
+      this.chart2.update();
+    })
   }
 
   getData2() {

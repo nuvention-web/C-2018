@@ -69,39 +69,39 @@ export class DashboardPage {
     {
       dateOffset: 1, // yesterday
       transactions: [
-        { name: `AMAZON MKTPLACE`, amount: 75, love: false },
-        { name: `TKNAMEBAR & RESTAURANT`, amount: 42.63, love: false },
-        { name: `THE SECOND CITY THEATER`, amount: 62, love: false },
-        { name: `Uber 063015 SF**POOL**`, amount: 15, love: false },
-        { name: `LYFT *RIDE LYFT.COM`, amount: 18, love: false }
+        { name: `AMAZON MKTPLACE`, amount: 75, love: false, category: [`Others`] },
+        { name: `TKNAMEBAR & RESTAURANT`, amount: 42.63, love: false, category: [`Restaurants`] },
+        { name: `THE SECOND CITY THEATER`, amount: 62, love: false, category: [`Others`] },
+        { name: `Uber 063015 SF**POOL**`, amount: 15, love: false, category: [`Service`] },
+        { name: `LYFT *RIDE LYFT.COM`, amount: 18, love: false, category: [`Service`] }
       ]
     },
     {
       dateOffset: 24,
       transactions: [
-        { name: `AMAZON MKTPLACE`, amount: 216, love: true },
-        { name: `Trader Joe's`, amount: 37.57, love: false },
-        { name: `T.K. Foodservice`, amount: 12.84, love: false }
+        { name: `AMAZON MKTPLACE`, amount: 216, love: true, category: [`Others`] },
+        { name: `Trader Joe's`, amount: 37.57, love: false, category: [`Others`] },
+        { name: `T.K. Foodservice`, amount: 12.84, love: false, category: [`Restaurants`] }
       ]
     },
     {
       dateOffset: 32,
       transactions: [
-        { name: `Airbnb`, amount: 100, love: true },
-        { name: `Men's Warehouse`, amount: 40, love: true },
-        { name: `DSW, Inc.`, amount: 20, love: true }
+        { name: `Airbnb`, amount: 100, love: true, category: [`Others`] },
+        { name: `Men's Warehouse`, amount: 40, love: true, category: [`Others`] },
+        { name: `DSW, Inc.`, amount: 20, love: true, category: [`Service`] }
       ]
     },
     {
       dateOffset: 0,
       transactions: [
-        { name: `VENTRA WEBSITE 877-669-8368`, amount: 105, love: false },
-        { name: `AMAZON MKTPLACE`, amount: 25, love: false },
-        { name: `Domino's Pizza`, amount: 37.87, love: false },
-        { name: `Sluggers World Class Sports Bar`, amount: 24, love: false },
-        { name: `LYFT *RIDE LYFT.COM`, amount: 18, love: false },
-        { name: `AMAZON MKTPLACE`, amount: 258, love: false },
-        { name: `United Airlines`, amount: 315, love: false }
+        { name: `VENTRA WEBSITE 877-669-8368`, amount: 105, love: false, category: [`Service`] },
+        { name: `AMAZON MKTPLACE`, amount: 25, love: false, category: [`Others`] },
+        { name: `Domino's Pizza`, amount: 37.87, love: false, category: [`Restaurants`] },
+        { name: `Sluggers World Class Sports Bar`, amount: 24, love: false, category: [`Food and Drink`] },
+        { name: `LYFT *RIDE LYFT.COM`, amount: 18, love: false, category: [`Service`] },
+        { name: `AMAZON MKTPLACE`, amount: 258, love: false, category: [`Others`] },
+        { name: `United Airlines`, amount: 315, love: false, category: [`Others`] }
       ]
     }
   ];
@@ -229,43 +229,43 @@ export class DashboardPage {
     //   }
     // );
 
-    // const options = {
-    //   android: {
-    //     senderID: `618786705474`,
-    //     topics: [
-    //       `coincious.general`
-    //     ]
-    //   },
-    //   ios: {
-    //     alert: true,
-    //     badge: false,
-    //     sound: true,
-    //     fcmSandbox: true,
-    //     // topics: [
-    //     //   `coincious.general`
-    //     // ]
-    //   },
-    //   windows: {},
-    //   browser: {
-    //     pushServiceURL: 'http://push.api.phonegap.com/v1/push'
-    //   }
-    // };
-    //
-    // cordova.plugins.notification.local.getIds(ids => {
-    //   if (ids.length == 0) return;
-    //   cordova.plugins.notification.local.clearAll(ids);
-    // })
-    //
-    // cordova.plugins.notification.local.schedule({
-    //   title: 'Time to check your payments',
-    //   text: 'Click me and see details',
-    //   trigger: { every: { weekday: 5, hour: 20, minute: 0 } }
-    //   // ,actions: [
-    //   //   { id: 'yes', title: 'Yes' },
-    //   //   { id: 'no', title: 'No' },
-    //   //   { id: 'edit', title: 'Edit' }
-    //   // ]
-    // });
+    const options = {
+      android: {
+        senderID: `618786705474`,
+        topics: [
+          `coincious.general`
+        ]
+      },
+      ios: {
+        alert: true,
+        badge: false,
+        sound: true,
+        fcmSandbox: true,
+        // topics: [
+        //   `coincious.general`
+        // ]
+      },
+      windows: {},
+      browser: {
+        pushServiceURL: 'http://push.api.phonegap.com/v1/push'
+      }
+    };
+
+    cordova.plugins.notification.local.getIds(ids => {
+      if (ids.length == 0) return;
+      cordova.plugins.notification.local.clearAll(ids);
+    })
+
+    cordova.plugins.notification.local.schedule({
+      title: 'Time to check your payments',
+      text: 'Click me and see details',
+      trigger: { every: { weekday: 5, hour: 20, minute: 0 } }
+      // ,actions: [
+      //   { id: 'yes', title: 'Yes' },
+      //   { id: 'no', title: 'No' },
+      //   { id: 'edit', title: 'Edit' }
+      // ]
+    });
 
     // cordova.plugins.notification.local.schedule([
     //   {
@@ -369,9 +369,9 @@ export class DashboardPage {
 
   private refreshDemoTransactions() {
     let trans = [
-      { name: "Today", data: [], isDemo: true },
-      { name: "Yesterday", data: [], isDemo: true },
-      { name: "2 Days Ago", data: [], isDemo: true }];
+      { name: "Today", data: [], isDemo: false },
+      { name: "Yesterday", data: [], isDemo: false },
+      { name: "2 Days Ago", data: [], isDemo: false }];
     let date = new Date();
     let dateCounter = 0;
 
