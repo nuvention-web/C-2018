@@ -241,7 +241,7 @@ export class DetailPage {
     this.from = new Date(this.year, this.month, 1);
     this.to = new Date(this.year, this.month + 1, 0);
     console.log(`wen test 1: this.to: ${this.to} this.year: ${this.year} this.month: ${this.month}`);
-    if (this._email = `demo@demo.com`) {
+    if (this._email == `demo@demo.com`) {
       this.plaidService.getDemoTransactions().then(res => this.processData(res));
       return;
     }
@@ -261,6 +261,7 @@ export class DetailPage {
     this.trans = res;
     console.log(`[Summary] Got transactions`);
     console.log(this.trans);
+    console.log(trans);
     this.clearData();
     this.plaidService.getTransactionRecords(this._userId, this.from, this.to).then(r => {
       this._transactions.length = 0;
@@ -308,6 +309,7 @@ export class DetailPage {
       if (this.chart2 == null) this.chart2 = new Chart(`chart-canvas-2`, this.chartOptions2);
       this.chart.update();
       this.chart2.update();
+      console.log(`[Summary] Refreshed`);
     })
   }
 
