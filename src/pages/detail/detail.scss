@@ -1,7 +1,7 @@
 page-detail {
-  // .scroll-content {
-  //   margin-top: 290px !important;
-  // }
+  .scroll-content {
+    padding-top: 0 !important;
+  }
 
   ion-navbar {
     height: 60px !important;
@@ -24,16 +24,29 @@ page-detail {
     border-bottom: 1px solid #cccccc;
 
     // margin: -16px -16px;
-    margin-top: 60px;
-    position: fixed;
+    // margin-top: 60px;
+    // position: fixed;
     background-color: white;
-    width: 100%;
+    width: calc(32px + 100%);
     z-index: 5;
     box-shadow: 0 0 3px 3px rgba(0, 0, 0, 0.1);
     border-radius: 0 0 6px 6px;
-    height: 230px;
-    min-height: 230px;
-    margin: -16px;
+
+    // height: 230px;
+    // min-height: 230px;
+    margin: 0 -16px;
+
+    .selector {
+      padding-left: 0;
+
+      .item-inner {
+        border: 0 !important;
+
+        .input-wrapper {
+          flex-direction: row-reverse;
+        }
+      }
+    }
   }
 
   .month {
@@ -76,10 +89,51 @@ page-detail {
 
   .purchase_wrap {
     background-color: #f3f3f3;
-    margin: -16px;
-    margin-top: 214px;
+
+    // margin: -16px;
+
+    // margin-top: 214px;
 
     // padding: 16px;
+ 
+  }
 
+  .float-window-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    margin: 0 -16px !important;
+    z-index: 9999;
+
+    .float-window {
+      width: calc(100% - 32px);
+      height: calc(100% - 32px);
+
+      ion-header {
+        position: relative;
+
+        ion-toolbar {
+          height: 40px !important;
+          min-height: 40px !important;
+        }
+      }
+
+      ion-content {
+        background-color: #ffffff !important;
+        height: calc(100% - 40px);
+
+        .fixed-content {
+          margin: 0 !important;
+        }
+
+        .scroll-content {
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+      }
+    }
   }
 }

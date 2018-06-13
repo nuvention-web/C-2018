@@ -51,6 +51,8 @@ export class DashboardPage {
   private _user: User;
   public emptyTransactions = true;
 
+  private _totalThisSave = 0;
+  private _exceedThisSave = 0;
   private _totalLastV = 0.00;
   private _exceedLastV = 0.00;
   private _totalThisV = 0.00;
@@ -67,39 +69,39 @@ export class DashboardPage {
     {
       dateOffset: 1, // yesterday
       transactions: [
-        { name: `AMAZON MKTPLACE`, amount: 75, love: false },
-        { name: `TKNAMEBAR & RESTAURANT`, amount: 42.63, love: false },
-        { name: `THE SECOND CITY THEATER`, amount: 62, love: false },
-        { name: `Uber 063015 SF**POOL**`, amount: 15, love: false },
-        { name: `LYFT *RIDE LYFT.COM`, amount: 18, love: false }
+        { name: `AMAZON MKTPLACE`, amount: 75, love: false, category: [`Others`] },
+        { name: `TKNAMEBAR & RESTAURANT`, amount: 42.63, love: false, category: [`Restaurants`] },
+        { name: `THE SECOND CITY THEATER`, amount: 62, love: false, category: [`Others`] },
+        { name: `Uber 063015 SF**POOL**`, amount: 15, love: false, category: [`Service`] },
+        { name: `LYFT *RIDE LYFT.COM`, amount: 18, love: false, category: [`Service`] }
       ]
     },
     {
       dateOffset: 24,
       transactions: [
-        { name: `AMAZON MKTPLACE`, amount: 216, love: true },
-        { name: `Trader Joe's`, amount: 37.57, love: false },
-        { name: `T.K. Foodservice`, amount: 12.84, love: false }
+        { name: `AMAZON MKTPLACE`, amount: 216, love: true, category: [`Others`] },
+        { name: `Trader Joe's`, amount: 37.57, love: false, category: [`Others`] },
+        { name: `T.K. Foodservice`, amount: 12.84, love: false, category: [`Restaurants`] }
       ]
     },
     {
       dateOffset: 32,
       transactions: [
-        { name: `Airbnb`, amount: 100, love: true },
-        { name: `Men's Warehouse`, amount: 40, love: true },
-        { name: `DSW, Inc.`, amount: 20, love: true }
+        { name: `Airbnb`, amount: 100, love: true, category: [`Others`] },
+        { name: `Men's Warehouse`, amount: 40, love: true, category: [`Others`] },
+        { name: `DSW, Inc.`, amount: 20, love: true, category: [`Service`] }
       ]
     },
     {
       dateOffset: 0,
       transactions: [
-        { name: `VENTRA WEBSITE 877-669-8368`, amount: 105, love: false },
-        { name: `AMAZON MKTPLACE`, amount: 25, love: false },
-        { name: `Domino's Pizza`, amount: 37.87, love: false },
-        { name: `Sluggers World Class Sports Bar`, amount: 24, love: false },
-        { name: `LYFT *RIDE LYFT.COM`, amount: 18, love: false },
-        { name: `AMAZON MKTPLACE`, amount: 258, love: false },
-        { name: `United Airlines`, amount: 315, love: false }
+        { name: `VENTRA WEBSITE 877-669-8368`, amount: 105, love: false, category: [`Service`] },
+        { name: `AMAZON MKTPLACE`, amount: 25, love: false, category: [`Others`] },
+        { name: `Domino's Pizza`, amount: 37.87, love: false, category: [`Restaurants`] },
+        { name: `Sluggers World Class Sports Bar`, amount: 24, love: false, category: [`Food and Drink`] },
+        { name: `LYFT *RIDE LYFT.COM`, amount: 18, love: false, category: [`Service`] },
+        { name: `AMAZON MKTPLACE`, amount: 258, love: false, category: [`Others`] },
+        { name: `United Airlines`, amount: 315, love: false, category: [`Others`] }
       ]
     }
   ];
@@ -132,6 +134,13 @@ export class DashboardPage {
     if (this.navParams.get(`userAccountId`)) {
       this.userAccount = this.firestore.doc<UserAccount>(`user-accounts/${this.navParams.get(`userAccountId`)}`);
     }
+
+    this.events.subscribe(`demo:addDemoTrans`, () => { this.addDemoTrans() });
+    this.events.subscribe(`demo:removeDemoTrans`, () => { this.removeDemoTrans() });
+    this.events.subscribe(`demo:saveMonthValues`, () => { this.saveMonthValues() });
+    this.events.subscribe(`demo:restoreMonthValues`, () => { this.restoreMonthValues() });
+    this.events.subscribe(`demo:playBarAnim`, () => { this.playBarAnim() });
+    this.events.subscribe(`demo:stopBarAnim`, () => { this.stopBarAnim() });
   }
 
   ionViewWillEnter() {
@@ -189,7 +198,7 @@ export class DashboardPage {
     this.plaidService.getTransactionsWithTimeRange(this._userAccount.accessToken, from, to).then(newTransactions => {
       // Add those new transactions into database
       console.log(`[Unflagged Transactions] Got new Transactions`);
-      this.plaidService.addNewTransactions(this._userAccount.userId, newTransactions.filter(t => t.amount > 0)).then(() => {
+      this.plaidService.addNewTransactions(this._userAccount.userId, newTransactions.filter(t => t.amount > 0 && !t.pending)).then(() => {
         console.log(`[Unflagged Transactions] Added new Transactions`);
         this.plaidService.getUnflaggedTransactions(this._userAccount.userId).then(unflaggedTransactions => {
           // Calc the oldest time & get transactions from plaid
@@ -220,43 +229,43 @@ export class DashboardPage {
     //   }
     // );
 
-    // const options = {
-    //   android: {
-    //     senderID: `618786705474`,
-    //     topics: [
-    //       `coincious.general`
-    //     ]
-    //   },
-    //   ios: {
-    //     alert: true,
-    //     badge: false,
-    //     sound: true,
-    //     fcmSandbox: true,
-    //     // topics: [
-    //     //   `coincious.general`
-    //     // ]
-    //   },
-    //   windows: {},
-    //   browser: {
-    //     pushServiceURL: 'http://push.api.phonegap.com/v1/push'
-    //   }
-    // };
-    //
-    // cordova.plugins.notification.local.getIds(ids => {
-    //   if (ids.length == 0) return;
-    //   cordova.plugins.notification.local.clearAll(ids);
-    // })
-    //
-    // cordova.plugins.notification.local.schedule({
-    //   title: 'Time to check your payments',
-    //   text: 'Click me and see details',
-    //   trigger: { every: { weekday: 5, hour: 20, minute: 0 } }
-    //   // ,actions: [
-    //   //   { id: 'yes', title: 'Yes' },
-    //   //   { id: 'no', title: 'No' },
-    //   //   { id: 'edit', title: 'Edit' }
-    //   // ]
-    // });
+    const options = {
+      android: {
+        senderID: `618786705474`,
+        topics: [
+          `coincious.general`
+        ]
+      },
+      ios: {
+        alert: true,
+        badge: false,
+        sound: true,
+        fcmSandbox: true,
+        // topics: [
+        //   `coincious.general`
+        // ]
+      },
+      windows: {},
+      browser: {
+        pushServiceURL: 'http://push.api.phonegap.com/v1/push'
+      }
+    };
+
+    cordova.plugins.notification.local.getIds(ids => {
+      if (ids.length == 0) return;
+      cordova.plugins.notification.local.clearAll(ids);
+    })
+
+    cordova.plugins.notification.local.schedule({
+      title: 'Time to check your payments',
+      text: 'Click me and see details',
+      trigger: { every: { weekday: 5, hour: 20, minute: 0 } }
+      // ,actions: [
+      //   { id: 'yes', title: 'Yes' },
+      //   { id: 'no', title: 'No' },
+      //   { id: 'edit', title: 'Edit' }
+      // ]
+    });
 
     // cordova.plugins.notification.local.schedule([
     //   {
@@ -360,9 +369,9 @@ export class DashboardPage {
 
   private refreshDemoTransactions() {
     let trans = [
-      { name: "Today", data: [] },
-      { name: "Yesterday", data: [] },
-      { name: "2 Days Ago", data: [] }];
+      { name: "Today", data: [], isDemo: false },
+      { name: "Yesterday", data: [], isDemo: false },
+      { name: "2 Days Ago", data: [], isDemo: false }];
     let date = new Date();
     let dateCounter = 0;
 
@@ -387,6 +396,68 @@ export class DashboardPage {
     });
 
     this._transactions = trans;
+  }
+
+  private addDemoTrans() {
+    this._transactions.unshift(
+      {
+        name: `Date that you know`,
+        isDemo: true,
+        data: [
+          {
+            name: `Thing you have bought`,
+            amount: 10,
+            isDemo: true
+          }
+        ]
+      }
+    );
+    this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
+  }
+
+  private removeDemoTrans() {
+    this._transactions = this._transactions.filter(t => t.isDemo != true);
+  }
+
+  private saveMonthValues() {
+    this._exceedThisSave = this._exceedThisV;
+    this._totalThisSave = this._totalThisV;
+  }
+
+  private restoreMonthValues() {
+    this._exceedThisV = this._exceedThisSave;
+    this._totalThisV = this._totalThisSave;
+  }
+
+  private animTimer;
+  private animCounter = 0;
+
+  private playBarAnim() {
+    this.saveMonthValues();
+    let f = () => {
+      let add = Math.random() * 100;
+      this._totalThisV += add;
+      this._exceedThisV += Math.random() * add;
+      this.animCounter++;
+      if (this.animCounter > 4) {
+        this.animCounter = 0;
+        this.restoreMonthValues();
+      }
+      this.calculateBar();
+      this.animTimer = setTimeout(
+        f, 1200
+      );
+    };
+    this.animTimer = setTimeout(
+      () => {
+        f();
+      }, 1200
+    );
+  }
+
+  private stopBarAnim() {
+    this.restoreMonthValues();
+    clearTimeout(this.animTimer);
   }
 
   private shapeTransactions(transactions) {
@@ -462,11 +533,13 @@ export class DashboardPage {
     this._transactions = trans;
   }
 
-  private calculateBar() {
+  private calculateBar(demoTotal = null, demoExceed = null) {
     let absTotalThis = Math.abs(this._totalThisV);
     let absTotalLast = Math.abs(this._totalLastV);
+    absTotalThis = demoTotal ? demoTotal : absTotalThis;
     let absExceedThis = Math.abs(this._exceedThisV);
     let absExceedLast = Math.abs(this._exceedLastV);
+    absExceedThis = demoExceed ? demoExceed : absExceedThis;
 
     let total = absTotalThis > absTotalLast ? absTotalThis : absTotalLast;
     total = absExceedThis > total ? absExceedThis : total;
@@ -513,6 +586,19 @@ export class DashboardPage {
     if (ev.transaction != null) {
       // single transaction
       let t: Transaction = ev.transaction;
+
+      if (t.isDemo) {
+        ev.item.setElementClass(`close`, true);
+        this.calculateBar(this._totalThisV + t.amount, this._exceedThisV);
+        this._totalThisV = this._totalThisV + t.amount;
+        this._exceedThisV = this._exceedThisV;
+        setTimeout(() => {
+          ev.group.data.splice(ev.index, 1);
+          this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
+        }, 300);
+        return;
+      }
+
       this.plaidService.flagTransaction(this._userAccount.userId, t, true, this._user.email)
         .then(() => {
           this.plaidService.addMonthlyAmount(this._userAccount.userId, t, t.amount);
@@ -523,10 +609,30 @@ export class DashboardPage {
           }, 300);
         }).catch(err => {
           this._demoText = err.message;
+          console.log(err.message);
         });
 
       return;
     }
+
+    console.log(ev.group);
+
+
+    if (ev.group.isDemo) {
+      let sum = 0;
+      ev.group.data.forEach(t => {
+        sum += t.amount;
+      });
+      this.calculateBar(this._totalThisV + sum, this._exceedThisV);
+      this._totalThisV = this._totalThisV + sum;
+      this._exceedThisV = this._exceedThisV;
+      this._transactions.splice(this._transactions.indexOf(ev.group), 1);
+      this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
+      console.log(`Empty transactions? ${this.emptyTransactions}`);
+      console.log(this._transactions);
+      return;
+    }
+
     this.plaidService.flagTransactions(this._userAccount.userId, ev.group.data, true, this._user.email)
       .then(() => {
         let sum = 0;
@@ -538,10 +644,23 @@ export class DashboardPage {
         this.plaidService.addMonthlyAmount(this._userAccount.userId, ev.group.data[0], sum);
       }).catch(err => {
         this._demoText = err.message;
+        console.log(err.message);
       });
   }
 
   onFlag(ev) {
+    if (ev.transaction.isDemo) {
+      ev.item.setElementClass(`close`, true);
+      this.calculateBar(this._totalThisV + ev.transaction.amount, this._exceedThisV + ev.transaction.amount);
+      this._totalThisV = this._totalThisV + ev.transaction.amount;
+      this._exceedThisV = this._exceedThisV + ev.transaction.amount;
+      setTimeout(() => {
+        ev.group.data.splice(ev.index, 1);
+        this.emptyTransactions = !this._transactions.some(tr => tr.data.length > 0);
+      }, 300);
+      return;
+    }
+
     this.plaidService.flagTransaction(this._userAccount.userId, ev.transaction, false, this._user.email)
       .then(() => {
         this.plaidService.addMonthlyAmount(this._userAccount.userId, ev.transaction, ev.transaction.amount, ev.transaction.amount)
@@ -557,61 +676,15 @@ export class DashboardPage {
           });
       }).catch(err => {
         this._demoText = err.message;
+        console.log(err.message);
       });
   }
 
   goToDetail() {
     // this.navCtrl.push(`TransDetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken, userEmail: this._user.email });
+    //this.navCtrl.push(`DetailPage`, { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken, userEmail: this._user.email });
     this.events.publish(`nav:go-to-archive`);
-  }
-
-  resetDemoData() {
-    if (this._user.email != `demo@demo.com`) return;
-    this.plaidService.resetDemoData().then(() => {
-      let transactions = [];
-      let date = new Date();
-      let dateCounter = 0;
-
-      this.demoTrans.forEach(dayTran => {
-        let dateOffset = dayTran.dateOffset;
-        if (dateOffset < 3) return;
-
-        const target = new Date(date.getTime() - 1000 * 60 * 60 * 24 * dateOffset);
-
-        let thisMonthNum = target.getMonth() + 1;
-        const thisDateNum = target.getDate();
-        const thisMonthStr = thisMonthNum >= 10 ? `${thisMonthNum}` : `0${thisMonthNum}`;
-        const thisDateStr = thisDateNum >= 10 ? `${thisDateNum}` : `0${thisDateNum}`;
-        const dateStr = `${target.getFullYear()}-${thisMonthStr}-${thisDateStr}`;
-
-        dayTran.transactions.forEach(t => {
-          let newTran = JSON.parse(JSON.stringify(t));
-          newTran.date = dateStr;
-          newTran.transaction_id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 10);
-          transactions.push(newTran);
-        })
-      });
-
-      console.log(`adding records`);
-      console.log(transactions);
-
-      this.plaidService.addDemoTransactionRecords(this._userAccount.userId, transactions)
-        .then(() => {
-          console.log(`added records`);
-          let sum = 0;
-          let sumExceed = 0;
-          transactions.forEach(t => {
-            sum += t.amount;
-            if (!t.love) {
-              sumExceed += t.amount;
-            }
-          });
-          this.plaidService.addLastMonthlyAmount(this._totalThisV, this._exceedThisV, sum, sumExceed)
-            .then(() => { console.log(`added last monthly amount`) });
-        }).catch(err => {
-          console.log(err.message);
-        });
-    });
+    //  this.gotoSummaryDetail(0);
   }
 
   abs(x) {
@@ -622,4 +695,30 @@ export class DashboardPage {
     this.menuCtrl.open();
   }
 
+
+
+  /*
+      private _transactions2: any = [];
+      gotoSummaryDetail(clickedElementindex) {
+          let trans = {};
+          this.plaidService.getTransactionsWithTimeRange(this._userAccount.accessToken, new Date(2018, 4), new Date(2018, 5)).then(res => {
+              res.forEach(t => {
+                  trans[t["transaction_id"]] = t;
+              });
+          }).then(() => {
+              this.plaidService.getTransactionRecords(this._userAccount.accessToken, new Date(2018, 4), new Date(2018, 5)).then(r => {
+                  this._transactions2.length = 0;
+                  let result = r.filter(t => t.flagged == true || t.flagged == null);
+                  console.log(r);
+                  result.forEach(t => {
+                      let target = trans[t["transactionId"]];
+                      if (target != null && t["date"].getDay() == clickedElementindex) {
+                          target["loved"] = t["loved"];
+                          this._transactions2.push(target);
+                      }
+                  });
+              });
+          });
+      }
+      */
 }

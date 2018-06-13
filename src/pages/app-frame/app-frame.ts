@@ -43,6 +43,49 @@ export class AppFramePage {
 
   private _store;
 
+  public fontWeights = [500, 300, 300, 300, 300];
+
+  private demoTrans = [
+    {
+      dateOffset: 1, // yesterday
+      transactions: [
+        { name: `AMAZON MKTPLACE`, amount: 75, love: false, category: [`Others`] },
+        { name: `TKNAMEBAR & RESTAURANT`, amount: 42.63, love: false, category: [`Restaurants`] },
+        { name: `THE SECOND CITY THEATER`, amount: 62, love: false, category: [`Others`] },
+        { name: `Uber 063015 SF**POOL**`, amount: 15, love: false, category: [`Service`] },
+        { name: `LYFT *RIDE LYFT.COM`, amount: 18, love: false, category: [`Service`] }
+      ]
+    },
+    {
+      dateOffset: 24,
+      transactions: [
+        { name: `AMAZON MKTPLACE`, amount: 216, love: true, category: [`Others`] },
+        { name: `Trader Joe's`, amount: 37.57, love: false, category: [`Others`] },
+        { name: `T.K. Foodservice`, amount: 12.84, love: false, category: [`Restaurants`] }
+      ]
+    },
+    {
+      dateOffset: 32,
+      transactions: [
+        { name: `Airbnb`, amount: 100, love: true, category: [`Others`] },
+        { name: `Men's Warehouse`, amount: 40, love: true, category: [`Others`] },
+        { name: `DSW, Inc.`, amount: 20, love: true, category: [`Service`] }
+      ]
+    },
+    {
+      dateOffset: 0,
+      transactions: [
+        { name: `VENTRA WEBSITE 877-669-8368`, amount: 105, love: false, category: [`Service`] },
+        { name: `AMAZON MKTPLACE`, amount: 25, love: false, category: [`Others`] },
+        { name: `Domino's Pizza`, amount: 37.87, love: false, category: [`Restaurants`] },
+        { name: `Sluggers World Class Sports Bar`, amount: 24, love: false, category: [`Food and Drink`] },
+        { name: `LYFT *RIDE LYFT.COM`, amount: 18, love: false, category: [`Service`] },
+        { name: `AMAZON MKTPLACE`, amount: 258, love: false, category: [`Others`] },
+        { name: `United Airlines`, amount: 315, love: false, category: [`Others`] }
+      ]
+    }
+  ];
+
   constructor(
     private firestore: AngularFirestore,
     private app: App,
@@ -116,7 +159,13 @@ export class AppFramePage {
       title: 'Tutorial',
       text: 'Welcome to Coinscious!',
       // attachTo: '.purchases-wrapper h2 right',
-      // advanceOn: '.docs-link click'
+      // advanceOn: '.docs-link click',
+      when: {
+        hide: () => {
+          this.events.publish(`demo:addDemoTrans`);
+          this.events.publish(`demo:saveMonthValues`);
+        }
+      }
     });
 
     tour.addStep('01', {
@@ -140,7 +189,16 @@ export class AppFramePage {
     tour.addStep('02', {
       title: 'Tutorial',
       text: `Orange bar depicts bad purchases. Green bar depicts good purchases.`,
-      attachTo: '#total-this .ng-bar-placeholder bottom'
+      attachTo: '#total-this .ng-bar-placeholder bottom',
+      when: {
+        show: () => {
+          this.events.publish(`demo:restoreMonthValues`);
+          this.events.publish(`demo:playBarAnim`);
+        },
+        hide: () => {
+          this.events.publish(`demo:stopBarAnim`);
+        }
+      }
     });
 
     tour.addStep('03', {
@@ -155,6 +213,7 @@ export class AppFramePage {
       attachTo: '.view-details .button-inner left',
       when: {
         hide: () => {
+          this.events.publish(`demo:removeDemoTrans`);
           this.goToArchive(null);
         }
       }
@@ -281,13 +340,24 @@ export class AppFramePage {
     this.menuCtrl.close();
     this.appNav.setRoot(`DashboardPage`, data);
     this.titleText = `Inbox`;
+
+    for (let i = 0; i < 5; i++) {
+      this.fontWeights[i] = 300;
+    }
+    this.fontWeights[0] = 500;
   }
 
   goToSummary(data) {
     this._isLoading = true;
+    data = { userId: this._userAccount.userId, accessToken: this._userAccount.accessToken, email: this._user.email };
     this.menuCtrl.close();
     this.appNav.setRoot(`DetailPage`, data);
     this.titleText = `Summary`;
+
+    for (let i = 0; i < 5; i++) {
+      this.fontWeights[i] = 300;
+    }
+    this.fontWeights[1] = 500;
   }
 
   goToArchive(data) {
@@ -296,6 +366,11 @@ export class AppFramePage {
     this.menuCtrl.close();
     this.appNav.setRoot(`TransDetailPage`, data);
     this.titleText = `Archive`;
+
+    for (let i = 0; i < 5; i++) {
+      this.fontWeights[i] = 300;
+    }
+    this.fontWeights[2] = 500;
   }
 
   goToSignUp(data) {
@@ -343,6 +418,58 @@ export class AppFramePage {
       ]
     });
     actionSheet.present();
+  }
+
+  resetDemoData() {
+    if (this._user.email != `demo@demo.com`) return;
+    this.plaidService.resetDemoData().then(() => {
+      let transactions = [];
+      let date = new Date();
+      let dateCounter = 0;
+
+      this.demoTrans.forEach(dayTran => {
+        let dateOffset = dayTran.dateOffset;
+        if (dateOffset < 3) return;
+
+        const target = new Date(date.getTime() - 1000 * 60 * 60 * 24 * dateOffset);
+
+        let thisMonthNum = new Date().getMonth();
+        thisMonthNum = thisMonthNum == 0 ? 12 : thisMonthNum;
+        const thisDateNum = target.getDate();
+        const thisMonthStr = thisMonthNum >= 10 ? `${thisMonthNum}` : `0${thisMonthNum}`;
+        const thisDateStr = thisDateNum >= 10 ? `${thisDateNum}` : `0${thisDateNum}`;
+        const thisYearStr = thisMonthNum == 12 ? target.getFullYear() - 1 : target.getFullYear();
+        const dateStr = `${thisYearStr}-${thisMonthStr}-${thisDateStr}`;
+
+        dayTran.transactions.forEach(t => {
+          let newTran = JSON.parse(JSON.stringify(t));
+          newTran.date = dateStr;
+          newTran.transaction_id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 10);
+          transactions.push(newTran);
+        })
+      });
+
+      console.log(`adding records`);
+      console.log(transactions);
+
+      this.plaidService.addDemoTransactionRecords(this._userAccount.userId, transactions)
+        .then(() => {
+          console.log(`added records`);
+          let sum = 0;
+          let sumExceed = 0;
+          transactions.forEach(t => {
+            sum += t.amount;
+            if (!t.love) {
+              sumExceed += t.amount;
+            }
+          });
+          // this.plaidService.addLastMonthlyAmount(this._totalThisV, this._exceedThisV, sum, sumExceed)
+          this.plaidService.addMonthlyAmount(this._userAccount.userId, transactions[0], sum, sumExceed)
+            .then(() => { console.log(`added last monthly amount`) });
+        }).catch(err => {
+          console.log(err.message);
+        });
+    });
   }
 
   signOut() {

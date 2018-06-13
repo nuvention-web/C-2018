@@ -24,8 +24,24 @@ page-app-frame {
       font-size: 16pt;
     }
 
+    .toolbar-background {
+      // background: #F4511E !important;
+      background: #fdc02e !important;
+    }
+
     .toolbar-title {
+      // color: #FFFFFF !important;
+
+      // color: #000000 !important;
+
+      color: #BF360C !important;
       overflow: visible;
+    }
+
+    .bar-button {
+      // color: #FFFFFF !important;
+      // color: #000000 !important;
+      color: #BF360C !important;
     }
 
     ion-icon {
@@ -34,7 +50,7 @@ page-app-frame {
   }
 
   .app-content {
-    ion-navbar {
+    .app-bar {
       min-height: 60px !important;
 
       ion-title {
@@ -59,6 +75,25 @@ page-app-frame {
         right: 0;
         text-align: center;
         line-height: 40px;
+      }
+
+      .toolbar-background {
+        // background: #F4511E !important;
+        background: #fdc02e !important;
+      }
+
+      .toolbar-title {
+        // color: #FFFFFF !important;
+
+        // color: #000000 !important;
+
+        color: #BF360C !important;
+      }
+
+      .bar-button {
+        // color: #FFFFFF !important;
+        // color: #000000 !important;
+        color: #BF360C !important;
       }
     }
 

@@ -7,7 +7,7 @@
 <ion-menu [content]="content" type="overlay" class="menu">
   <ion-header>
     <ion-toolbar>
-      <ion-title class="toolbar-title">Coinscious</ion-title>
+      <ion-title class="toolbar-title" (click)="resetDemoData()">Coinscious</ion-title>
     </ion-toolbar>
   </ion-header>
   <ion-content>
@@ -17,35 +17,35 @@
           <ion-avatar item-start>
               <ion-icon name="md-list"></ion-icon>
           </ion-avatar>
-          Inbox
+          <span [ngStyle]="{'font-weight': fontWeights[0]}">Inbox</span>
       </button>
 
-      <!-- <button ion-item (click)="goToSummary()" *ngIf="_linkedCredential">
+      <button ion-item (click)="goToSummary()" *ngIf="_linkedCredential">
           <ion-avatar item-start>
               <ion-icon name="paper"></ion-icon>
           </ion-avatar>
-          Summary
-      </button> -->
+          <span [ngStyle]="{'font-weight': fontWeights[1]}">Summary</span>
+      </button>
 
       <button ion-item (click)="goToArchive()" *ngIf="_linkedCredential">
           <ion-avatar item-start>
               <ion-icon name="archive"></ion-icon>
           </ion-avatar>
-          Archive
+          <span [ngStyle]="{'font-weight': fontWeights[2]}">Archive</span>
       </button>
 
       <button ion-item (click)="unbindAccount()" *ngIf="_linkedCredential">
         <ion-avatar item-start>
           <ion-icon name="remove-circle"></ion-icon>
         </ion-avatar>
-        Unbind Account
+        <span [ngStyle]="{'font-weight': fontWeights[3]}">Unbind Account</span>
       </button>
 
       <button ion-item (click)="signOut()">
         <ion-avatar item-start>
           <ion-icon name="log-out"></ion-icon>
         </ion-avatar>
-        Sign Out
+        <span [ngStyle]="{'font-weight': fontWeights[4]}">Sign Out</span>
       </button>
     </ion-list>
   </ion-content>
@@ -53,7 +53,7 @@
 <ion-content #content class="app-content">
   <ion-header *ngIf="!_isLoading">
 
-    <ion-navbar>
+    <ion-navbar class="app-bar">
       <ion-buttons left *ngIf="_signedIn">
         <button ion-button icon-only (click)="openMenu()">
           <ion-icon name="menu"></ion-icon>
